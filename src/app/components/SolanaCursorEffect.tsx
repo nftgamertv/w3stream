@@ -12,13 +12,30 @@ import React, { useEffect, useRef, useState } from 'react';
  * 3. It will overlay on top of all content with pointer-events: none
  */
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  size: number;
+  hue: number;
+}
+
+interface TrailPoint {
+  x: number;
+  y: number;
+  life: number;
+  size: number;
+}
+
 export default function SolanaCursorEffect() {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);
-  const particlesRef = useRef([]);
-  const trailRef = useRef([]);
-  const animationRef = useRef(null);
+  const particlesRef = useRef<Particle[]>([]);
+  const trailRef = useRef<TrailPoint[]>([]);
+  const animationRef = useRef<number | null>(null);
 
   // Handle mounting to avoid SSR issues
   useEffect(() => {
@@ -46,7 +63,7 @@ export default function SolanaCursorEffect() {
     window.addEventListener('resize', resizeCanvas);
 
     // Track mouse movement
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const newPos = { x: e.clientX, y: e.clientY };
       setMousePos(newPos);
       
