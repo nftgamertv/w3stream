@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import '@livekit/components-styles';
 import "./globals.css";
+import { LoginModalWrapper } from "./components/LoginModalWrapper";
+import { LoginModalTestButton } from "./components/LoginModalTestButton";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +27,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <LoginModalWrapper />
+        <LoginModalTestButton />
       </body>
     </html>
   );
