@@ -1,0 +1,111 @@
+/* Override react-together Chat component white backgrounds */
+/* This file overrides the default white/light backgrounds from react-together's Chat.css */
+
+/* Override CSS variables at root level */
+:root {
+  --rt-color-blue-50: transparent;
+  --rt-color-gray-50: transparent;
+  --rt-color-gray-200: rgba(255, 255, 255, 0.1);
+  --rt-color-gray-300: rgba(255, 255, 255, 0.2);
+}
+
+/* Outer chat wrapper - ensure it fills parent */
+.rt-chat {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Main chat container - override the light blue background and fix layout */
+.rt-chatContainer {
+  background-color: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: static !important;
+  bottom: auto !important;
+  right: auto !important;
+}
+
+/* Chat header - override the gray background */
+.rt-chatHeader {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rt-chatHeader:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Message bubbles - override the gray background */
+.rt-message-border {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Minimized chat container */
+.rt-minChatContainer {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 0 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.rt-minChatContainer:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Input container */
+.rt-input-container {
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: transparent !important;
+}
+
+/* Message text - ensure it's visible on dark background */
+.rt-message-text {
+  color: #ffffff !important;
+}
+
+/* Avatar border */
+.rt-avatar {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Message labels */
+.rt-messageLabel {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Input styling for dark theme */
+.rt-input-text {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rt-input-text::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Input button */
+.rt-input-button {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.rt-input-button:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Prompt content for dark theme */
+.rt-message-prompt-content {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.rt-message-prompt-button {
+  background-color: rgba(59, 130, 246, 0.8) !important;
+}
+
+.rt-message-prompt-button:hover {
+  background-color: rgba(37, 99, 235, 0.9) !important;
+}

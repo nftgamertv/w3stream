@@ -1,13 +1,71 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+"use client"
+
+import { SidebarProvider, SidebarInset  } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
-import { CreateSection } from "@/components/create-section"
+import { useState, useEffect } from "react"
+import { Navbar } from "@/components/Navbar"
+import { HydrationBoundary, dehydrate } from '@tanstack/react-query'
+import { getQueryClient } from '@/get-query-client'
+import { generateRoomId } from "@/lib/livekit-config"
 import { ReusableStudios } from "@/components/reusable-studios"
 import { StreamsRecordings } from "@/components/streams-recordings"
 import { ThreeBackground } from "@/components/three-background"
 import { HorizontalCardSection } from "@/components/horizontal-card-section"
 import { Gamepad, Puzzle, Headphones, Rocket, Zap, Award } from "lucide-react"
-
+import { useRouter } from "next/navigation"
+import { createClient } from "@/utils/supabaseClients/client"
+import { userOptions } from "@/queries/users"
+import CreateRoomModal   from "@/components/CreateRoomModal"  
 export default function DashboardPage() {
+  const router = useRouter()
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [name, setName] = useState("")
+  const [roomId, setRoomId] = useState("")
+  const [isCreating, setIsCreating] = useState(false)
+  const [isJoining, setIsJoining] = useState(false)
+  const queryClient = getQueryClient()
+  void queryClient.prefetchQuery(userOptions)
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient()
+
+      // Check if user is logged in
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      console.log("user", user, userError)
+      if (!user || userError) {
+        router.push("/no-access")
+        return
+      }
+
+      // Check if user ID is in w3s_testers table
+      const { data: testerData, error: testerError } = await supabase
+        .from("w3s_testers")
+        .select("*")
+        .eq("user_id", user.id)
+
+
+      if (testerError || !testerData) {
+        router.push("/no-access")
+        return
+      }
+
+      // User is authorized
+      setIsCheckingAuth(false)
+    }
+
+    checkAuth()
+  }, [router])
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
+          <p className="text-slate-400">Checking access...</p>
+        </div>
+      </div>
+    )
+  }
   const addOns = [
     {
       icon: Puzzle,
@@ -50,7 +108,6 @@ export default function DashboardPage() {
       imageUrl: "/placeholder.svg?height=400&width=600",
     },
   ]
-
   const games = [
     {
       icon: Gamepad,
@@ -94,6 +151,29 @@ export default function DashboardPage() {
     },
   ]
 
+  const handleCreateRoom = () => {
+    if (!name.trim()) {
+      alert("Please enter your name")
+      return
+    }
+    setIsCreating(true)
+    const newRoomId = generateRoomId()
+    router.push(`/room/${newRoomId}?name=${encodeURIComponent(name.trim())}`)
+  }
+
+  const handleJoinRoom = () => {
+    if (!name.trim()) {
+      alert("Please enter your name")
+      return
+    }
+    if (!roomId.trim()) {
+      alert("Please enter a room ID")
+      return
+    }
+    setIsJoining(true)
+    router.push(`/room/${roomId.trim()}?name=${encodeURIComponent(name.trim())}`)
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden relative">
       {/* Toggle between 3D streaming background or animated gradient */}
@@ -104,26 +184,9 @@ export default function DashboardPage() {
           <SidebarInset className="w-full">
             <div className="p-8">
               <div className="space-y-8">
-                <header className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <SidebarTrigger className="md:hidden" />
-                    <div>
-                      <h1 className="text-4xl font-bold bg-linear-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                        Dashboard
-                      </h1>
-                      <p className="text-slate-400 mt-2">Next-generation streaming platform</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-linear-to-r from-cyan-500/20 to-purple-500/20 rounded-full blur-xl"></div>
-                      <button className="relative px-6 py-2 bg-linear-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-full hover:from-cyan-500/20 hover:to-purple-500/20 transition-all duration-300">
-                        My Account
-                      </button>
-                    </div>
-                  </div>
-                </header>
-            
+                
+               <Navbar />
+               <CreateRoomModal />
                 <ReusableStudios />
                 <StreamsRecordings />
                 <HorizontalCardSection title="Add Ons" items={addOns} />

@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import type React from "react";
+
 import { Geist, Geist_Mono } from "next/font/google";
-import '@livekit/components-styles';
+import "@livekit/components-styles";
 import "./globals.css";
 import { LoginModalWrapper } from "./components/LoginModalWrapper";
 import { LoginModalTestButton } from "./components/LoginModalTestButton";
-
+ 
+import { Suspense } from "react";
+import ReactQueryProvider from "./providers/ReactQueryProvider";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +36,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Suspense fallback={null}>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </Suspense>
+    
         <LoginModalWrapper />
-        {/* <LoginModalTestButton /> */}
+        <LoginModalTestButton />
       </body>
     </html>
   );
