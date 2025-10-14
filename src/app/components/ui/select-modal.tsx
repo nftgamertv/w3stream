@@ -75,20 +75,21 @@ export function SelectModal({
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          "inline-flex items-center justify-between rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "inline-flex items-center justify-between rounded-lg border border-border bg-background px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
           className,
         )}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
-        {trigger || (
+        {trigger
+}  
           <>
             <span className="text-foreground">{selectedOption?.label || placeholder}</span>
             <svg className="ml-2 h-4 w-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </>
-        )}
+     
       </button>
 
       {/* Modal Overlay */}

@@ -203,7 +203,7 @@ export function ThreeBackground() {
           powerPreference: "high-performance"
         }}
         dpr={[1, 1.5]} // Limit pixel ratio for better performance
-        frameloop="demand" // Only render when needed instead of continuously
+        frameloop="always" // Continuously render for animations
       >
         <StreamingBackground />
       </Canvas>

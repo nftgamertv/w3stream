@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  webpack: (config) => {
+    // Ensure only one instance of Three.js is loaded
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      three: require.resolve('three'),
+    };
+    return config;
+  },
   images: {
     remotePatterns: [
       {
