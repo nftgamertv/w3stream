@@ -195,7 +195,16 @@ function StreamingBackground() {
 export function ThreeBackground() {
   return (
     <div className="fixed inset-0 z-0">
-      <Canvas camera={{ position: [0, 0, 1], fov: 75 }} gl={{ alpha: true, antialias: true }}>
+      <Canvas
+        camera={{ position: [0, 0, 1], fov: 75 }}
+        gl={{
+          alpha: true,
+          antialias: false, // Disable antialiasing for better performance
+          powerPreference: "high-performance"
+        }}
+        dpr={[1, 1.5]} // Limit pixel ratio for better performance
+        frameloop="demand" // Only render when needed instead of continuously
+      >
         <StreamingBackground />
       </Canvas>
     </div>

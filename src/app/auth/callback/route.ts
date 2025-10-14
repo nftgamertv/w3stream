@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     supabase.auth.setSession({ access_token, refresh_token });
   }
 
-  // Redirect to the specified URL or home page
-  const redirectTo = searchParams.get("redirectTo") || "/";
+  // Redirect to the specified URL or dashboard
+  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
   return NextResponse.redirect(new URL(redirectTo, request.url));
 }
