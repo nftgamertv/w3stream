@@ -1,157 +1,150 @@
 "use client"
 
 import type React from "react"
-import { Cursors } from 'react-together'
-import { useState, useRef, useEffect } from "react"
-import { useStateTogether } from "react-together"
+
+import { useState, useEffect, useRef } from "react"
+import { useRoomContext } from "@livekit/components-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageCircle, Send, X } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { MessageCircle, Send } from "lucide-react"
+import { RoomEvent } from "livekit-client"
 
 interface ChatMessage {
   id: string
   sender: string
-  text: string
+  message: string
   timestamp: number
+  isHost: boolean
 }
 
 interface ChatPanelProps {
   participantName: string
-  isHost?: boolean
+  isHost: boolean
 }
 
-export function ChatPanel({ participantName, isHost = false }: ChatPanelProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useStateTogether<ChatMessage[]>("chatMessages", [])
+export function ChatPanel({ participantName, isHost }: ChatPanelProps) {
+  const room = useRoomContext()
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const prevMessagesLength = useRef(messages.length)
 
-  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    const handleDataReceived = (payload: Uint8Array) => {
+      const decoder = new TextDecoder()
+      const data = JSON.parse(decoder.decode(payload))
+
+      if (data.type === "chat") {
+        const newMessage: ChatMessage = {
+          id: `${Date.now()}-${Math.random()}`,
+          sender: data.sender,
+          message: data.message,
+          timestamp: Date.now(),
+          isHost: data.isHost || false,
+        }
+        setMessages((prev) => [...prev, newMessage])
+
+        if (!isOpen) {
+          setUnreadCount((prev) => prev + 1)
+        }
+      }
+    }
+
+    room.on(RoomEvent.DataReceived, handleDataReceived)
+
+    return () => {
+      room.off(RoomEvent.DataReceived, handleDataReceived)
+    }
+  }, [room, isOpen])
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages])
 
-  // Track unread messages
-  useEffect(() => {
-    if (!isOpen && messages.length > prevMessagesLength.current) {
-      setUnreadCount((prev) => prev + (messages.length - prevMessagesLength.current))
-    }
-    prevMessagesLength.current = messages.length
-  }, [messages.length, isOpen])
-
-  // Clear unread count when opening chat
   useEffect(() => {
     if (isOpen) {
       setUnreadCount(0)
     }
   }, [isOpen])
 
-  useEffect(() => {
-    console.log("[v0] Chat messages updated:", messages.length, messages)
-  }, [messages])
-
-  const handleSendMessage = () => {
+  const sendMessage = () => {
     if (!inputValue.trim()) return
+
+    const encoder = new TextEncoder()
+    const data = {
+      type: "chat",
+      sender: participantName,
+      message: inputValue,
+      isHost,
+    }
+
+    room.localParticipant.publishData(encoder.encode(JSON.stringify(data)), {
+      reliable: true,
+      destinationIdentities: [],
+      topic: "chat",
+    })
 
     const newMessage: ChatMessage = {
       id: `${Date.now()}-${Math.random()}`,
       sender: participantName,
-      text: inputValue.trim(),
+      message: inputValue,
       timestamp: Date.now(),
+      isHost,
     }
-
-    console.log("[v0] Sending message:", newMessage)
-    setMessages([...messages, newMessage])
+    setMessages((prev) => [...prev, newMessage])
     setInputValue("")
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSendMessage()
+      sendMessage()
     }
   }
 
   return (
-    <>
-      {/* Chat Toggle Button */}
-      
-      <div className={cn("fixed bottom-24 z-[110]", isHost ? "right-[22rem]" : "right-6")}>
-        <Button onClick={() => setIsOpen(!isOpen)} size="lg" className="h-14 w-14 rounded-full shadow-lg relative">
-          <MessageCircle className="h-6 w-6" />
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="fixed bottom-20 right-4 h-12 w-12 rounded-full shadow-lg z-50">
+          <MessageCircle className="w-5 h-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              {unreadCount > 9 ? "9+" : unreadCount}
+            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
+              {unreadCount}
             </span>
           )}
         </Button>
-      </div>
-
-      {/* Chat Panel */}
-      <div
-        className={cn(
-          "fixed bottom-24 z-[110] w-96 h-[500px] bg-card border border-border rounded-lg shadow-2xl flex flex-col transition-all duration-300",
-          isHost ? "right-[22rem]" : "right-6",
-          isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none",
-        )}
-      > 
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Chat</h3>
-            <span className="text-xs text-muted-foreground">({messages.length})</span>
-          </div>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-          <div className="space-y-3">
+      </SheetTrigger>
+      <SheetContent side="right" className="w-80 flex flex-col p-0">
+        <SheetHeader className="px-4 py-3 border-b">
+          <SheetTitle>Chat</SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="flex-1 px-4" ref={scrollRef}>
+          <div className="space-y-3 py-4">
             {messages.length === 0 ? (
               <div className="text-center text-muted-foreground text-sm py-8">
                 No messages yet. Start the conversation!
               </div>
             ) : (
-              messages.map((message) => {
-                const isOwnMessage = message.sender === participantName
-                return (
-                  <div
-                    key={message.id}
-                    className={cn("flex flex-col gap-1", isOwnMessage ? "items-end" : "items-start")}
-                  >
-                    <div className="text-xs text-muted-foreground px-1">{message.sender}</div>
-                    <div
-                      className={cn(
-                        "max-w-[80%] rounded-lg px-3 py-2 break-words",
-                        isOwnMessage ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                      )}
-                    >
-                      {message.text}
-                    </div>
-                    <div className="text-xs text-muted-foreground/60 px-1">
-                      {new Date(message.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
+              messages.map((msg) => (
+                <div key={msg.id} className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold">{msg.sender}</span>
+                    {msg.isHost && (
+                      <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Host</span>
+                    )}
                   </div>
-                )
-              })
+                  <p className="text-sm bg-muted rounded-lg px-3 py-2 break-words">{msg.message}</p>
+                </div>
+              ))
             )}
           </div>
         </ScrollArea>
-
-        {/* Input */}
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t">
           <div className="flex gap-2">
             <Input
               value={inputValue}
@@ -160,12 +153,12 @@ export function ChatPanel({ participantName, isHost = false }: ChatPanelProps) {
               placeholder="Type a message..."
               className="flex-1"
             />
-            <Button onClick={handleSendMessage} size="icon" disabled={!inputValue.trim()}>
-              <Send className="h-4 w-4" />
+            <Button onClick={sendMessage} size="icon" disabled={!inputValue.trim()}>
+              <Send className="w-4 h-4" />
             </Button>
           </div>
         </div>
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   )
 }

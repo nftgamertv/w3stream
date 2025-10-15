@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, createContext, useContext } from "react"
 import { useRouter } from "next/navigation"
 import {
   LiveKitRoom,
@@ -9,17 +9,27 @@ import {
   useTracks,
   useLocalParticipant,
   useRoomContext,
+  useParticipants,
   AudioTrack,
 } from "@livekit/components-react"
-import { Track, type LocalParticipant, type RemoteParticipant, RoomEvent, ParticipantEvent } from "livekit-client"
+import {
+  Track,
+  type LocalParticipant,
+  type RemoteParticipant,
+  RoomEvent,
+  ParticipantEvent,
+  type RemoteTrackPublication,
+} from "livekit-client"
+import type { TrackReference } from "@livekit/components-react"
 import "@livekit/components-styles"
 import { LIVEKIT_CONFIG } from "@/lib/livekit-config"
-import { RoomHeader } from "./room-header"
-import { BackroomPanel } from "./backroom-panel"
-import { ChatPanel } from "./chat-panel"
+import { RoomHeader } from "@/components/room-header"
+import { BackroomPanel } from "@/components/backroom-panel"
+import { ChatPanel } from "@/components/chat-panel"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Users, UserMinus } from "lucide-react"
+import StageSubscriptionManager from "@/components/StageSubscriptionManager"
 
 interface MeetingRoomProps {
   roomId: string
@@ -39,24 +49,93 @@ function isHost(participant: LocalParticipant | RemoteParticipant): boolean {
   return metadata.isHost === true
 }
 
-function ConstrainedGridLayout() {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: true },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: false },
-  )
+interface HostControlsContextType {
+  isHost: boolean
+  removeFromStage: (participant: RemoteParticipant) => Promise<void>
+}
 
-  const stageTracks = tracks.filter((trackRef) => isOnStage(trackRef.participant as LocalParticipant | RemoteParticipant))
+const HostControlsContext = createContext<HostControlsContextType | null>(null)
+
+function useHostControls() {
+  const context = useContext(HostControlsContext)
+  return context
+}
+
+function hasScreenShare(p: LocalParticipant | RemoteParticipant) {
+  const pub = p.getTrackPublication(Track.Source.ScreenShare) as RemoteTrackPublication | undefined
+  return !!pub && pub.isEnabled && pub.isSubscribed
+}
+
+function hasCamera(p: LocalParticipant | RemoteParticipant) {
+  const pub = p.getTrackPublication(Track.Source.Camera) as RemoteTrackPublication | undefined
+  return !!pub && pub.isEnabled && pub.isSubscribed
+}
+
+function getPreferredTrackRef(p: LocalParticipant | RemoteParticipant): TrackReference {
+  const scr = p.getTrackPublication(Track.Source.ScreenShare) as RemoteTrackPublication | undefined
+  if (scr?.isSubscribed && scr?.track) {
+    return { participant: p, source: Track.Source.ScreenShare, publication: scr }
+  }
+  const cam = p.getTrackPublication(Track.Source.Camera) as RemoteTrackPublication | undefined
+  return { participant: p, source: Track.Source.Camera, publication: cam }
+}
+
+interface TileWithControlsProps {
+  participant: LocalParticipant | RemoteParticipant
+}
+
+function TileWithControls({ participant }: TileWithControlsProps) {
+  const hostControls = useHostControls()
+  const room = useRoomContext()
+  const [isRemoving, setIsRemoving] = useState(false)
+
+  const handleRemove = async () => {
+    if (!hostControls || participant.identity === room.localParticipant.identity) return
+    setIsRemoving(true)
+    try {
+      await hostControls.removeFromStage(participant as RemoteParticipant)
+    } finally {
+      setIsRemoving(false)
+    }
+  }
+
+  const isLocal = participant.identity === room.localParticipant.identity
+  const showRemoveButton = hostControls?.isHost && !isLocal
+
+  const trackRef = getPreferredTrackRef(participant)
+
+  return (
+    <div className="relative w-full h-full group">
+      <ParticipantTile trackRef={trackRef} />
+      {showRemoveButton && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleRemove}
+            disabled={isRemoving}
+            className="h-8 px-3 gap-1.5 text-xs shadow-lg"
+          >
+            <UserMinus className="w-3.5 h-3.5" />
+            {isRemoving ? "..." : "Remove"}
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ConstrainedGridLayout() {
+  const participants = useParticipants()
+  const stagePeople = participants.filter((p) => isOnStage(p))
 
   return (
     <div className="flex items-center justify-center h-full p-6">
       <div className="w-full max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-          {stageTracks.map((trackRef) => (
-            <div key={trackRef.participant.identity} className="aspect-video max-h-[400px]">
-              <ParticipantTile trackRef={trackRef} />
+          {stagePeople.map((p) => (
+            <div key={p.identity} className="aspect-video max-h-[400px]">
+              <TileWithControls participant={p} />
             </div>
           ))}
         </div>
@@ -66,63 +145,50 @@ function ConstrainedGridLayout() {
 }
 
 function SidebarLayoutView() {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: true },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: false },
-  )
+  const participants = useParticipants()
+  const stagePeople = participants.filter((p) => isOnStage(p))
+  const screenSharer = stagePeople.find((p) => hasScreenShare(p))
+  const cameraPeople = stagePeople.filter((p) => hasCamera(p))
 
-  const stageTracks = tracks.filter((trackRef) => isOnStage(trackRef.participant as LocalParticipant | RemoteParticipant))
-
-  // Separate screen share tracks from camera tracks
-  const screenShareTracks = stageTracks.filter((track) => track.source === Track.Source.ScreenShare)
-  const cameraTracks = stageTracks.filter((track) => track.source === Track.Source.Camera)
-
-  // If there's a screen share, show it as the main view with cameras in left sidebar
-  if (screenShareTracks.length > 0) {
+  if (screenSharer) {
     return (
       <div className="flex h-full gap-4 p-4">
-        {/* Left sidebar with participant cameras */}
         <div className="w-64 flex flex-col gap-3 overflow-y-auto">
-          {cameraTracks.map((trackRef) => (
-            <div key={trackRef.participant.identity} className="aspect-video flex-shrink-0">
-              <ParticipantTile trackRef={trackRef} />
-            </div>
-          ))}
+          {cameraPeople
+            .filter((p) => p.identity !== screenSharer.identity)
+            .map((p) => (
+              <div key={p.identity} className="aspect-video flex-shrink-0">
+                <TileWithControls participant={p} />
+              </div>
+            ))}
         </div>
-        {/* Main view with screen share */}
         <div className="flex-1 flex items-center justify-center bg-black/20 rounded-lg overflow-hidden">
           <div className="w-full h-full">
-            <ParticipantTile trackRef={screenShareTracks[0]} />
+            <TileWithControls participant={screenSharer} />
           </div>
         </div>
       </div>
     )
   }
 
-  // No screen share - show first camera as main view with others in left sidebar
-  const mainTrack = cameraTracks[0]
-  const sidebarTracks = cameraTracks.slice(1)
+  const main = cameraPeople[0]
+  const sidebar = cameraPeople.slice(1)
 
   return (
     <div className="flex h-full gap-4 p-4">
-      {/* Left sidebar with other participants */}
-      {sidebarTracks.length > 0 && (
+      {sidebar.length > 0 && (
         <div className="w-64 flex flex-col gap-3 overflow-y-auto">
-          {sidebarTracks.map((trackRef) => (
-            <div key={trackRef.participant.identity} className="aspect-video flex-shrink-0">
-              <ParticipantTile trackRef={trackRef} />
+          {sidebar.map((p) => (
+            <div key={p.identity} className="aspect-video flex-shrink-0">
+              <TileWithControls participant={p} />
             </div>
           ))}
         </div>
       )}
-      {/* Main view */}
       <div className="flex-1 flex items-center justify-center">
-        {mainTrack && (
+        {main && (
           <div className="w-full h-full max-w-5xl max-h-[800px]">
-            <ParticipantTile trackRef={mainTrack} />
+            <TileWithControls participant={main} />
           </div>
         )}
       </div>
@@ -131,38 +197,29 @@ function SidebarLayoutView() {
 }
 
 function SpotlightLayoutView() {
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: true },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: false },
-  )
+  const participants = useParticipants()
+  const stagePeople = participants.filter((p) => isOnStage(p))
 
-  const stageTracks = tracks.filter((trackRef) => isOnStage(trackRef.participant as LocalParticipant | RemoteParticipant))
+  const screenSharer = stagePeople.find((p) => hasScreenShare(p))
+  const cameraPeople = stagePeople.filter((p) => hasCamera(p))
 
-  // Separate screen share tracks from camera tracks
-  const screenShareTracks = stageTracks.filter((track) => track.source === Track.Source.ScreenShare)
-  const cameraTracks = stageTracks.filter((track) => track.source === Track.Source.Camera)
-
-  // Prioritize screen share as main view if available
-  const mainTrack = screenShareTracks.length > 0 ? screenShareTracks[0] : cameraTracks[0]
-  const carouselTracks = screenShareTracks.length > 0 ? cameraTracks : cameraTracks.slice(1)
+  const main = screenSharer ?? cameraPeople[0]
+  const carousel = screenSharer ? cameraPeople : cameraPeople.slice(1)
 
   return (
     <div className="flex flex-col h-full p-4 gap-4">
       <div className="flex-1 flex items-center justify-center bg-black/20 rounded-lg overflow-hidden">
-        {mainTrack && (
+        {main && (
           <div className="w-full h-full">
-            <ParticipantTile trackRef={mainTrack} />
+            <TileWithControls participant={main} />
           </div>
         )}
       </div>
-      {carouselTracks.length > 0 && (
+      {carousel.length > 0 && (
         <div className="h-32 flex gap-4 overflow-x-auto pb-2">
-          {carouselTracks.map((trackRef) => (
-            <div key={trackRef.participant.identity} className="w-48 flex-shrink-0">
-              <ParticipantTile trackRef={trackRef} />
+          {carousel.map((p) => (
+            <div key={p.identity} className="w-48 flex-shrink-0">
+              <TileWithControls participant={p} />
             </div>
           ))}
         </div>
@@ -182,13 +239,10 @@ function VideoConferenceLayout({
     ],
     { onlySubscribed: false },
   )
+  const hasScreenShare = tracks.some((t) => t.source === Track.Source.ScreenShare)
 
-  const hasScreenShare = tracks.some((track) => track.source === Track.Source.ScreenShare)
-
-  // Automatically switch to sidebar layout when screen share is detected
   useEffect(() => {
     if (hasScreenShare && layout === "grid") {
-      console.log("[v0] Screen share detected, switching to sidebar layout")
       onLayoutChange("sidebar")
     }
   }, [hasScreenShare, layout, onLayoutChange])
@@ -209,39 +263,20 @@ function SelectiveAudioRenderer() {
   const tracks = useTracks([{ source: Track.Source.Microphone, withPlaceholder: false }], { onlySubscribed: false })
   const { localParticipant } = useLocalParticipant()
 
-  console.log("[v0] Audio tracks:", tracks.length)
-
   return (
     <>
-      {tracks.map((trackRef) => {
-        const participant = trackRef.participant
-        const isLocalParticipant = participant.identity === localParticipant.identity
-        const participantOnStage = isOnStage(participant as LocalParticipant | RemoteParticipant)
-
-        const shouldPlayAudio = participantOnStage
-
-        console.log("[v0] Participant audio:", {
-          name: participant.name,
-          identity: participant.identity,
-          isLocal: isLocalParticipant,
-          onStage: participantOnStage,
-          shouldPlay: shouldPlayAudio,
-        })
-
-        if (!trackRef.publication || !shouldPlayAudio) {
-          return null
-        }
-
-        // Only render AudioTrack if trackRef is a TrackReference (not a placeholder)
-        return (
-          <AudioTrack
-            key={trackRef.participant.identity}
-            trackRef={trackRef as typeof trackRef & { publication: NonNullable<typeof trackRef.publication> }}
-            muted={!shouldPlayAudio}
-            volume={1.0}
-          />
-        )
-      })}
+      {tracks
+        .filter((trackRef): trackRef is TrackReference => "publication" in trackRef && !!trackRef.publication)
+        .map((trackRef) => {
+          const participant = trackRef.participant
+          const isLocalParticipant = participant.identity === localParticipant.identity
+          const participantOnStage = isOnStage(participant as LocalParticipant | RemoteParticipant)
+          const shouldPlayAudio = participantOnStage
+          if (!shouldPlayAudio) return null
+          return (
+            <AudioTrack key={trackRef.participant.identity} trackRef={trackRef} muted={!shouldPlayAudio} volume={1.0} />
+          )
+        })}
     </>
   )
 }
@@ -253,33 +288,25 @@ function MetadataListener() {
   useEffect(() => {
     const handleMetadataChanged = (metadata: string | undefined, participant: RemoteParticipant | LocalParticipant) => {
       if (participant.identity === localParticipant.identity) {
-        console.log("[v0] Local participant metadata changed:", metadata)
         const parsedMetadata = metadata ? JSON.parse(metadata) : {}
-
         if (parsedMetadata.onStage) {
-          console.log("[v0] You have been added to the stage!")
-          // Force a re-render by triggering a state update in the parent
           window.dispatchEvent(new CustomEvent("stage-status-changed", { detail: { onStage: true } }))
         } else if (parsedMetadata.onStage === false) {
-          console.log("[v0] You have been moved to backstage")
           window.dispatchEvent(new CustomEvent("stage-status-changed", { detail: { onStage: false } }))
         }
       }
     }
 
-    // Listen for metadata changes on all participants
     room.remoteParticipants.forEach((participant) => {
       participant.on(ParticipantEvent.ParticipantMetadataChanged, (metadata) => {
         handleMetadataChanged(metadata, participant)
       })
     })
 
-    // Listen for local participant metadata changes
     localParticipant.on(ParticipantEvent.ParticipantMetadataChanged, (metadata) => {
       handleMetadataChanged(metadata, localParticipant)
     })
 
-    // Listen for new participants joining
     room.on(RoomEvent.ParticipantConnected, (participant) => {
       participant.on(ParticipantEvent.ParticipantMetadataChanged, (metadata) => {
         handleMetadataChanged(metadata, participant)
@@ -298,6 +325,116 @@ function MetadataListener() {
   return null
 }
 
+interface RoomContentProps {
+  roomId: string
+  participantName: string
+  layout: LayoutType
+  onLayoutChange: (layout: LayoutType) => void
+  isUserHost: boolean
+}
+
+function RoomContent({ roomId, participantName, layout, onLayoutChange, isUserHost }: RoomContentProps) {
+  const room = useRoomContext()
+
+  const removeFromStage = async (participant: RemoteParticipant) => {
+    try {
+      const currentMetadata = participant.metadata ? JSON.parse(participant.metadata) : {}
+      const newMetadata = { ...currentMetadata, onStage: false }
+
+      const response = await fetch("/api/participant/update-metadata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomName: room.name,
+          participantIdentity: participant.identity,
+          metadata: newMetadata,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to update participant metadata")
+      }
+    } catch (error) {
+      console.error("[v0] Error removing participant from stage:", error)
+    }
+  }
+
+  const hostControlsValue: HostControlsContextType = {
+    isHost: isUserHost,
+    removeFromStage,
+  }
+
+  return (
+    <HostControlsContext.Provider value={hostControlsValue}>
+      <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
+      <div className="flex-1 overflow-hidden flex relative">
+        <div className="flex-1 relative z-0 pointer-events-auto">
+          <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
+          {!isUserHost && <WaitingRoomOverlay />}
+        </div>
+      </div>
+      <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-40 pointer-events-auto flex items-stretch">
+        {isUserHost && <BackroomPanel />}
+        <div className="flex-1 flex items-center justify-center">
+          <ControlBar variation="verbose" />
+        </div>
+      </div>
+      <StageSubscriptionManager />
+      <SelectiveAudioRenderer />
+      <MetadataListener />
+      <ChatPanel participantName={participantName} isHost={isUserHost} />
+    </HostControlsContext.Provider>
+  )
+}
+
+function WaitingRoomOverlay() {
+  const { localParticipant } = useLocalParticipant()
+  const [isWaiting, setIsWaiting] = useState(false)
+
+  useEffect(() => {
+    const checkStageStatus = () => {
+      const metadata = localParticipant.metadata ? JSON.parse(localParticipant.metadata) : {}
+      const onStage = metadata.onStage === true
+      setIsWaiting(!onStage)
+    }
+
+    checkStageStatus()
+
+    const handleMetadataChanged = () => {
+      checkStageStatus()
+    }
+
+    localParticipant.on(ParticipantEvent.ParticipantMetadataChanged, handleMetadataChanged)
+
+    return () => {
+      localParticipant.off(ParticipantEvent.ParticipantMetadataChanged, handleMetadataChanged)
+    }
+  }, [localParticipant])
+
+  if (!isWaiting) {
+    return null
+  }
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50 pointer-events-none">
+      <div className="bg-background border-2 border-primary/50 rounded-lg p-8 max-w-md text-center shadow-2xl">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
+          <Users className="w-8 h-8 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">Waiting to Join</h3>
+        <p className="text-muted-foreground mb-4">
+          You're in the backstage area. The host will add you to the stage shortly.
+        </p>
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+          <span>Waiting for host...</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function MeetingRoom({ roomId, participantName, initialSettings }: MeetingRoomProps) {
   const router = useRouter()
   const [token, setToken] = useState<string>("")
@@ -313,26 +450,30 @@ export function MeetingRoom({ roomId, participantName, initialSettings }: Meetin
         setIsLoading(true)
         setError("")
 
-        const checkHostResponse = await fetch(
-          `${LIVEKIT_CONFIG.tokenEndpoint}?roomName=${encodeURIComponent(
-            roomId,
-          )}&participantName=${encodeURIComponent(participantName)}&checkHost=true`,
-        )
-        const hostData = await checkHostResponse.json()
-        const isHost = hostData.isHost || false
-        setIsUserHost(isHost)
+        const sp = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams()
+        const claimHost = sp.get("role") === "host" || sp.get("creator") === "1" || sp.get("host") === "1"
 
-        const response = await fetch(
-          `${LIVEKIT_CONFIG.tokenEndpoint}?roomName=${encodeURIComponent(
-            roomId,
-          )}&participantName=${encodeURIComponent(participantName)}&isHost=${isHost}&onStage=${isHost}`,
-        )
+        if (!claimHost) {
+          const checkHostResponse = await fetch(
+            `${LIVEKIT_CONFIG.tokenEndpoint}?roomName=${encodeURIComponent(
+              roomId,
+            )}&participantName=${encodeURIComponent(participantName)}&checkHost=true`,
+          )
+          const hostData = await checkHostResponse.json()
+          setIsUserHost(hostData.isHost || false)
+        } else {
+          setIsUserHost(true)
+        }
+
+        const tokenUrl = `${LIVEKIT_CONFIG.tokenEndpoint}?roomName=${encodeURIComponent(
+          roomId,
+        )}&participantName=${encodeURIComponent(participantName)}${claimHost ? "&creator=1" : ""}`
+
+        const response = await fetch(tokenUrl)
 
         if (!response.ok) {
-          const errorData = await response.json()
-          if (errorData.missing) {
-            setMissingVars(errorData.missing)
-          }
+          const errorData = await response.json().catch(() => ({}))
+          if (errorData.missing) setMissingVars(errorData.missing)
           throw new Error(errorData.error || "Failed to get access token")
         }
 
@@ -346,9 +487,7 @@ export function MeetingRoom({ roomId, participantName, initialSettings }: Meetin
       }
     }
 
-    if (roomId && participantName) {
-      fetchToken()
-    }
+    if (roomId && participantName) fetchToken()
   }, [roomId, participantName])
 
   const handleDisconnect = () => {
@@ -418,19 +557,13 @@ export function MeetingRoom({ roomId, participantName, initialSettings }: Meetin
         onDisconnected={handleDisconnect}
         className="flex-1 flex flex-col"
       >
-        <RoomHeader roomId={roomId} layout={layout} onLayoutChange={setLayout} />
-        <div className="flex-1 overflow-hidden flex relative">
-          <div className="flex-1 relative z-0 pointer-events-auto">
-            <VideoConferenceLayout layout={layout} onLayoutChange={setLayout} />
-          </div>
-          {isUserHost && <BackroomPanel />}
-        </div>
-        <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-40 pointer-events-auto">
-          <ControlBar variation="verbose" />
-        </div>
-        <SelectiveAudioRenderer />
-        <MetadataListener />
-        <ChatPanel participantName={participantName} isHost={isUserHost} />
+        <RoomContent
+          roomId={roomId}
+          participantName={participantName}
+          layout={layout}
+          onLayoutChange={setLayout}
+          isUserHost={isUserHost}
+        />
       </LiveKitRoom>
     </div>
   )

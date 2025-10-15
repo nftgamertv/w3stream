@@ -5,7 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@livekit/components-styles";
 import "./globals.css";
 import { LoginModalWrapper } from "./components/LoginModalWrapper";
-import { LoginModalTestButton } from "./components/LoginModalTestButton";
+
  
 import { Suspense } from "react";
 import ReactQueryProvider from "./providers/ReactQueryProvider";
@@ -41,7 +41,7 @@ export default function RootLayout({
         </Suspense>
     
         <LoginModalWrapper />
-        <LoginModalTestButton />
+  
       </body>
     </html>
   );

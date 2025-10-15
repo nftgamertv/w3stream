@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react"
   import { openLoginModal } from "@/store"
 import KeystrokeListener from "@/components/KeystrokeListener"
 import SolanaCursorEffect from "@/components/SolanaCursorEffect"
- 
+ import { LoginModalTestButton } from "@/components/LoginModalTestButton";
 export default function SplashPage() {
   return (
     <div className="min-h-screen absolute bg-transparent left-1/2 top-0 transform -translate-x-1/2 flex flex-col items-center justify-center overflow-hidden">
@@ -53,7 +53,7 @@ export default function SplashPage() {
               <span>Join 2,847+ people already on the waitlist</span> */}
             </div>
           </div>
- 
+ <LoginModalTestButton/>
         </main>
 
         {/* Footer */}

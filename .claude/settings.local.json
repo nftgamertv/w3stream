@@ -5,7 +5,10 @@
       "Bash(pnpm run build)",
       "Bash(mkdir:*)",
       "Bash(Remove-Item -Path \".next\" -Recurse -Force -ErrorAction SilentlyContinue)",
-      "Bash(pnpm tsc:*)"
+      "Bash(pnpm tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npm init -y)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
