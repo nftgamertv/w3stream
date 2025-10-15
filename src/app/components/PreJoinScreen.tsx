@@ -35,14 +35,17 @@ interface PreJoinProps {
 
 interface AudioLevelProps {
   audioTrack: MediaStreamTrack | null;
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: "horizontal" | "vertical";
 }
 
 // ============================================================================
 // AUDIO LEVEL INDICATOR COMPONENT
 // ============================================================================
 
-function AudioLevelIndicator({ audioTrack, orientation = 'horizontal' }: AudioLevelProps) {
+function AudioLevelIndicator({
+  audioTrack,
+  orientation = "horizontal",
+}: AudioLevelProps) {
   const [level, setLevel] = useState(0);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -94,7 +97,7 @@ function AudioLevelIndicator({ audioTrack, orientation = 'horizontal' }: AudioLe
     }
   }, [audioTrack]);
 
-  if (orientation === 'vertical') {
+  if (orientation === "vertical") {
     return (
       <div className="flex flex-col-reverse items-center gap-1 h-full py-4">
         {[...Array(20)].map((_, i) => {
@@ -115,7 +118,7 @@ function AudioLevelIndicator({ audioTrack, orientation = 'horizontal' }: AudioLe
               }`}
               style={{
                 width: `${Math.min(100, 30 + i * 3.5)}%`,
-                minWidth: '8px',
+                minWidth: "8px",
               }}
             />
           );
@@ -540,7 +543,6 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
 
           {/* Video Preview with Audio Level */}
           <div className="space-y-3">
- 
             <div className="flex gap-4">
               {/* Video Preview */}
               <div className="relative flex-1 aspect-video bg-gray-950 rounded-2xl overflow-hidden border border-gray-700/50">
@@ -585,7 +587,10 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
               {/* Audio Level Indicator - Vertical */}
               {audioEnabled && audioTrack && (
                 <div className="flex items-center justify-center px-4 bg-gray-950 border border-gray-700 rounded-2xl">
-                  <AudioLevelIndicator audioTrack={audioTrack} orientation="vertical" />
+                  <AudioLevelIndicator
+                    audioTrack={audioTrack}
+                    orientation="vertical"
+                  />
                 </div>
               )}
             </div>
@@ -670,9 +675,12 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
                     width={44}
                     height={44}
                     viewBox="0 0 24 24"
+                         fill="none"
+                    stroke="cyan"
+                    strokeWidth={2}
                   >
                     <path
-                      fill="currentColor"
+                
                       d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3m5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72z"
                     />
                   </svg>
@@ -711,8 +719,11 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
                     width={44}
                     height={44}
                     viewBox="0 0 24 24"
+                                        
                   >
-                    <g fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <g   fill="none"
+                    stroke="cyan"
+                    strokeWidth={2} >
                       <path d="M1 13.857v-3.714a2 2 0 012-2h2.9a1 1 0 00.55-.165l6-3.956a1 1 0 011.55.835v14.286a1 1 0 01-1.55.835l-6-3.956a1 1 0 00-.55-.165H3a2 2 0 01-2-2z" />
                       <path
                         strokeLinecap="round"
@@ -729,7 +740,7 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
                     height={44}
                     viewBox="0 0 24 24"
                   >
-                    <g fill="none" stroke="red" strokeWidth={1.5}>
+                    <g fill="none" stroke="red" strokeWidth={2}>
                       <path d="M1 13.857v-3.714a2 2 0 012-2h2.9a1 1 0 00.55-.165l6-3.956a1 1 0 011.55.835v14.286a1 1 0 01-1.55.835l-6-3.956a1 1 0 00-.55-.165H3a2 2 0 01-2-2z" />
                       <path
                         strokeLinecap="round"
@@ -750,14 +761,34 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
                 placeholder="Select speakers"
               />
             </div>
-             <div className="flex-1"></div>
+            <div
+              className="flex items-center w-32 h-20 rounded-lg overflow-hidden shadow-lg bg-gray-950"
+              
+            >
+              <button className="flex-1 h-full flex items-center justify-center transition-all opacity-20">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={44}
+                  height={44}
+                  viewBox="0 0 24 24"
+                        fill="cyan"
+                    stroke="none"
+                
+                >
+                  <path
+          
+                    d="M9.25 22l-.4-3.2q-.325-.125-.612-.3t-.563-.375L4.7 19.375l-2.75-4.75 2.575-1.95Q4.5 12.5 4.5 12.338v-.675q0-.163.025-.338L1.95 9.375l2.75-4.75 2.975 1.25q.275-.2.575-.375t.6-.3l.4-3.2h5.5l.4 3.2q.325.125.613.3t.562.375l2.975-1.25 2.75 4.75-2.575 1.95q.025.175.025.338v.674q0 .163-.05.338l2.575 1.95-2.75 4.75-2.95-1.25q-.275.2-.575.375t-.6.3l-.4 3.2zm2.8-6.5q1.45 0 2.475-1.025T15.55 12t-1.025-2.475T12.05 8.5q-1.475 0-2.488 1.025T8.55 12t1.013 2.475T12.05 15.5"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Join Button */}
           <button
             onClick={handleJoin}
             disabled={!localNickname.trim() || isLoading}
-            className="w-full mt-4 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 disabled:shadow-none"
+            className="w-full mt-4 btn-brand text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg  disabled:shadow-none"
           >
             Join Room
           </button>

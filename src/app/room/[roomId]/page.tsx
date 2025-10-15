@@ -5,7 +5,7 @@ import { MeetingRoom } from "@/components/meeting-room"
 import  { PreJoin } from "@/components/PreJoinScreen"
 import { Suspense, useState, type ComponentType } from "react"
 import type { PreJoinSettings } from "@/components/PreJoinScreen"
-
+import { Cursors } from "react-together"
  
 function RoomContent() {
   const params = useParams()
@@ -51,7 +51,7 @@ export default function RoomPage() {
           </div>
         </div>
       }
-    >
+    > 
       <RoomContent />
     </Suspense>
   )

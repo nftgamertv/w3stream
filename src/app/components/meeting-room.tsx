@@ -20,7 +20,7 @@ import { BackroomPanel } from "./backroom-panel"
 import { ChatPanel } from "./chat-panel"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Users } from "lucide-react"
 
 interface MeetingRoomProps {
   roomId: string
@@ -298,6 +298,55 @@ function MetadataListener() {
   return null
 }
 
+function WaitingRoomOverlay() {
+  const { localParticipant } = useLocalParticipant()
+  const [isWaiting, setIsWaiting] = useState(false)
+
+  useEffect(() => {
+    const checkStageStatus = () => {
+      const metadata = localParticipant.metadata ? JSON.parse(localParticipant.metadata) : {}
+      const onStage = metadata.onStage === true
+      setIsWaiting(!onStage)
+    }
+
+    // Check initial status
+    checkStageStatus()
+
+    // Listen for metadata changes
+    const handleMetadataChanged = () => {
+      checkStageStatus()
+    }
+
+    localParticipant.on(ParticipantEvent.ParticipantMetadataChanged, handleMetadataChanged)
+
+    return () => {
+      localParticipant.off(ParticipantEvent.ParticipantMetadataChanged, handleMetadataChanged)
+    }
+  }, [localParticipant])
+
+  if (!isWaiting) {
+    return null
+  }
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50 pointer-events-none">
+      <div className="bg-background border-2 border-primary/50 rounded-lg p-8 max-w-md text-center shadow-2xl">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
+          <Users className="w-8 h-8 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">Waiting to Join</h3>
+        <p className="text-muted-foreground mb-4">
+          You're in the backstage area. The host will add you to the stage shortly.
+        </p>
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+          <span>Waiting for host...</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function MeetingRoom({ roomId, participantName, initialSettings }: MeetingRoomProps) {
   const router = useRouter()
   const [token, setToken] = useState<string>("")
@@ -422,6 +471,7 @@ export function MeetingRoom({ roomId, participantName, initialSettings }: Meetin
         <div className="flex-1 overflow-hidden flex relative">
           <div className="flex-1 relative z-0 pointer-events-auto">
             <VideoConferenceLayout layout={layout} onLayoutChange={setLayout} />
+            {!isUserHost && <WaitingRoomOverlay />}
           </div>
           {isUserHost && <BackroomPanel />}
         </div>

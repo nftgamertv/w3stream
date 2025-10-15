@@ -1,4 +1,4 @@
-import { AccessToken } from "livekit-server-sdk"
+import { AccessToken, RoomServiceClient } from "livekit-server-sdk"
 import { type NextRequest, NextResponse } from "next/server"
 
 const roomHosts = new Map<string, string>()
@@ -73,11 +73,39 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Missing roomName parameter" }, { status: 400 })
       }
 
-      const existingHost = roomHosts.get(roomName)
-      const isHost = !existingHost
+      const apiKey = process.env.LIVEKIT_API_KEY
+      const apiSecret = process.env.LIVEKIT_API_SECRET
+      const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL
 
-      if (isHost && participantName) {
-        roomHosts.set(roomName, participantName)
+      if (!apiKey || !apiSecret || !wsUrl) {
+        return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
+      }
+
+      // Check if room exists and has any participants with isHost metadata
+      let isHost = false
+
+      try {
+        const roomService = new RoomServiceClient(wsUrl, apiKey, apiSecret)
+        const participants = await roomService.listParticipants(roomName)
+
+        // Check if any existing participant is already a host
+        const hasExistingHost = participants.some((p) => {
+          try {
+            const metadata = p.metadata ? JSON.parse(p.metadata) : {}
+            return metadata.isHost === true
+          } catch {
+            return false
+          }
+        })
+
+        // If no existing host, this participant becomes the host
+        isHost = !hasExistingHost
+
+        console.log("[v0] Host check - Room:", roomName, "Existing participants:", participants.length, "Has host:", hasExistingHost, "Is host:", isHost)
+      } catch (error) {
+        // Room doesn't exist yet, so this is the first participant and thus the host
+        console.log("[v0] Room doesn't exist yet, making participant host:", participantName)
+        isHost = true
       }
 
       return NextResponse.json({ isHost })

@@ -75,8 +75,8 @@ const DualButtonSelect = ({
     <>
       {/* Dual Button */}
       <div 
-        className={`flex items-center ${width} ${height} rounded-lg overflow-hidden shadow-lg ${className}`}
-        style={{ backgroundColor }}
+        className={`flex items-center ${width} ${height} rounded-lg overflow-hidden shadow-lg bg-gray-950 ${className}`}
+         
       >
         {/* Left Button */}
         <button
@@ -91,8 +91,8 @@ const DualButtonSelect = ({
 
         {/* Vertical Divider */}
         <div 
-          className="w-0.5 h-full"
-          style={{ backgroundColor: dividerColor }}
+          className="w-0.5 h-full bg-gray-800"
+       
         />
 
         {/* Right Button - Opens Modal */}
@@ -109,8 +109,9 @@ const DualButtonSelect = ({
             <path d="M 8 12 L 16 20 L 24 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
+        
       </div>
-
+      <div className="text-xs px-1 py-0.5 mt-1 bg-gray-950 text-cyan-300 max-w-[128px] truncate" >{selectedOption?.label || "No selection"}</div>
       {/* Modal */}
       {isOpen && (
         <div 
@@ -181,6 +182,7 @@ const DualButtonSelect = ({
               </div>
             </div>
           </div>
+         
         </div>
       )}
     </>

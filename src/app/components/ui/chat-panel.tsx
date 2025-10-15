@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import { Cursors } from 'react-together'
 import { useState, useRef, useEffect } from "react"
 import { useStateTogether } from "react-together"
 import { Button } from "@/components/ui/button"
@@ -81,6 +81,7 @@ export function ChatPanel({ participantName, isHost = false }: ChatPanelProps) {
   return (
     <>
       {/* Chat Toggle Button */}
+      
       <div className={cn("fixed bottom-24 z-[110]", isHost ? "right-[22rem]" : "right-6")}>
         <Button onClick={() => setIsOpen(!isOpen)} size="lg" className="h-14 w-14 rounded-full shadow-lg relative">
           <MessageCircle className="h-6 w-6" />
@@ -99,7 +100,7 @@ export function ChatPanel({ participantName, isHost = false }: ChatPanelProps) {
           isHost ? "right-[22rem]" : "right-6",
           isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none",
         )}
-      >
+      > 
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-2">

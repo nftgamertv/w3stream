@@ -3,7 +3,9 @@
     "allow": [
       "Bash(pnpm install:*)",
       "Bash(pnpm run build)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(Remove-Item -Path \".next\" -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(pnpm tsc:*)"
     ],
     "deny": [],
     "ask": []
