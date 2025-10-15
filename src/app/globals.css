@@ -573,3 +573,31 @@
     min-width: 196px;
   }
 }
+
+.btn-brand {
+ padding: 10px 20px;
+ background-color: #161A20;
+ border: none;
+ color: #f0f0f0;
+ border-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-brand::after {
+   content: '';
+  background: linear-gradient(149deg,rgb(124, 83, 237) 0%, rgba(64, 114, 145, 1) 51%, rgba(87, 199, 133, 1) 89%, rgba(0, 255, 64, 1) 100%);
+  position: absolute;
+  height: 108%;
+  width: 101%;
+  border-radius: 12px;
+  z-index: -1;
+  transition: all 0.3s ease;
+
+}
+
+.btn-brand:hover {
+  z-index: 0;
+}
