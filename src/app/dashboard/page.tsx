@@ -7,10 +7,10 @@ import { Navbar } from "@/components/Navbar"
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query'
 import { getQueryClient } from '@/get-query-client'
 import { generateRoomId } from "@/lib/livekit-config"
-import { ReusableStudios } from "@/components/reusable-studios"
-import { StreamsRecordings } from "@/components/streams-recordings"
-import { ThreeBackground } from "@/components/three-background"
-import { HorizontalCardSection } from "@/components/horizontal-card-section"
+import { ReusableStudios } from "@/components/ReusableStudios"
+import { StreamsRecordings } from "@/components/StreamsRocordings"
+import { ThreeBackground } from "@/components/ThreeBackground"
+import { HorizontalCardSection } from "@/components/HorizontalCardSection"
 import { Gamepad, Puzzle, Headphones, Rocket, Zap, Award } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabaseClients/client"
@@ -158,7 +158,8 @@ export default function DashboardPage() {
     }
     setIsCreating(true)
     const newRoomId = generateRoomId()
-    router.push(`/room/${newRoomId}?name=${encodeURIComponent(name.trim())}`)
+    // Redirect to prejoin with host role for room creator
+    router.push(`/prejoin/${newRoomId}?role=host`)
   }
 
   const handleJoinRoom = () => {
@@ -171,7 +172,8 @@ export default function DashboardPage() {
       return
     }
     setIsJoining(true)
-    router.push(`/room/${roomId.trim()}?name=${encodeURIComponent(name.trim())}`)
+    // Redirect to prejoin for participants
+    router.push(`/prejoin/${roomId.trim()}`)
   }
 
   return (
@@ -186,9 +188,9 @@ export default function DashboardPage() {
               <div className="space-y-8">
                 
                <Navbar />
-               <CreateRoomModal />
+             
                 <ReusableStudios />
-                <StreamsRecordings />
+      
                 <HorizontalCardSection title="Add Ons" items={addOns} />
                 <HorizontalCardSection title="Games" items={games} />
               </div>

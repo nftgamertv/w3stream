@@ -32,6 +32,11 @@ const DualButtonSelect = ({
   const [selectedValue, setSelectedValue] = useState(value);
   const modalRef = useRef(null);
 
+  // Sync internal state with value prop changes
+  useEffect(() => {
+    setSelectedValue(value);
+  }, [value]);
+
   // Handle selection
   const handleSelect = (optionValue) => {
     setSelectedValue(optionValue);

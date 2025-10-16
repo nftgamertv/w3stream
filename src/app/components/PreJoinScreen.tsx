@@ -742,7 +742,7 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
             <div className="flex-1">
               <DualButtonSelect
                 isToggled={!videoEnabled}
-                   leftIcon={
+                leftIcon={
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width={44}
@@ -781,20 +781,33 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
             <div className="flex-1">
               <DualButtonSelect
                 isToggled={!audioEnabled}
-                        leftIcon={
-                   <svg width={44}
-                    height={44}  xmlns="http://www.w3.org/2000/svg" fill="cyan" viewBox="0 0 16 16" >
-      <path d="M8 10.11c-.7 0-1.3-.25-1.79-.74s-.74-1.09-.74-1.79V2.53c0-.7.25-1.3.74-1.79S7.3 0 8 0s1.3.25 1.79.74.74 1.09.74 1.79v5.05c0 .7-.25 1.3-.74 1.79s-1.09.74-1.79.74M7.16 16v-2.59c-1.46-.2-2.67-.85-3.62-1.96a5.776 5.776 0 01-1.43-3.87h1.68c0 1.16.41 2.16 1.23 2.98.82.82 1.81 1.23 2.98 1.23 1.16 0 2.16-.41 2.98-1.23.82-.82 1.23-1.81 1.23-2.98h1.68c0 1.47-.48 2.76-1.43 3.87-.95 1.11-2.16 1.76-3.62 1.96V16H7.16z" />
-    </svg>
+                leftIcon={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={44}
+                    height={44}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="cyan"
+                    strokeWidth={2}
+                  >
+                    <path
+                      d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3m5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72z"
+                    />
+                  </svg>
                 }
                 leftIconToggled={
-               <svg       width={44}
-                    height={44} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" >
-      <path
-        d="M10.73 10.56c-.82.82-1.82 1.23-2.98 1.23-.95 0-1.78-.29-2.51-.84l1.28-1.17c.37.2.77.32 1.22.32.7 0 1.3-.25 1.79-.74s.74-1.09.74-1.79v-1.2l4.03-3.66-.67-.74-3.36 3.05v-2.5c0-.7-.25-1.3-.74-1.79S8.44-.01 7.74-.01s-1.3.25-1.79.74-.74 1.09-.74 1.79v5.05c0 .59.19 1.11.54 1.55l-1.24 1.13c-.64-.76-.98-1.65-.98-2.68H1.85c0 1.45.47 2.73 1.4 3.83l-2.06 1.87.67.74 2.1-1.91c.83.71 1.81 1.14 2.94 1.3v2.59h1.68V13.4c1.46-.2 2.67-.85 3.62-1.96.95-1.11 1.43-2.4 1.43-3.87h-1.68c0 1.16-.41 2.16-1.23 2.98z"
-        fill="#cc003f"
-      />
-    </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={44}
+                    height={44}
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="red"
+                      d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3m5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72z"
+                    />
+                  </svg>
                 }
                 leftContent="Microphone"
                 options={audioInputDevices.map((device, index) => ({
@@ -830,12 +843,21 @@ export function PreJoin({ onJoin, initialName = "" }: PreJoinProps) {
                   </svg>
                 }
                 leftIconToggled={
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={44} height={44}>
-      <path
-        d="M23.22 5.9l-1.09-1.68L17 7.56V5.04c0-.84-.5-1.59-1.27-1.9-.75-.3-1.6-.12-2.19.5L10.58 7H6.99c-1.1 0-2 .92-2 2.04v5.92c0 .13.01.25.04.37L.77 18.1l1.09 1.68 4.47-2.9c.21.08.43.13.67.13l3.55-.02 3.01 3.39c.39.41.91.63 1.44.63.24 0 .49-.04.72-.14.78-.31 1.28-1.05 1.28-1.9V9.96l6.22-4.04zM7 9h3.59c.54 0 1.06-.23 1.45-.64L15 5.05v3.81l-8 5.2V9zm8.03 10.02l-3-3.38c-.37-.4-.9-.63-1.45-.64H9.22l5.8-3.77.02 7.78z"
-        fill="#cc003f"
-      />
-    </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={44}
+                    height={44}
+                    viewBox="0 0 24 24"
+                  >
+                    <g fill="none" stroke="red" strokeWidth={2}>
+                      <path d="M1 13.857v-3.714a2 2 0 012-2h2.9a1 1 0 00.55-.165l6-3.956a1 1 0 011.55.835v14.286a1 1 0 01-1.55.835l-6-3.956a1 1 0 00-.55-.165H3a2 2 0 01-2-2z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17.5 7.5S19 9 19 11.5s-1.5 4-1.5 4m3-11S23 7 23 11.5s-2.5 7-2.5 7"
+                      />
+                    </g>
+                  </svg>
                 }
                 leftContent="Speakers"
                 options={audioOutputDevices.map((device, index) => ({

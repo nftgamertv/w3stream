@@ -23,7 +23,8 @@ export default function HomePage() {
     }
     setIsCreating(true)
     const newRoomId = generateRoomId()
-    router.push(`/room/${newRoomId}?name=${encodeURIComponent(name.trim())}`)
+    // Redirect to prejoin with host role for room creator
+    router.push(`/prejoin/${newRoomId}?role=host`)
   }
 
   const handleJoinRoom = () => {
@@ -36,7 +37,8 @@ export default function HomePage() {
       return
     }
     setIsJoining(true)
-    router.push(`/room/${roomId.trim()}?name=${encodeURIComponent(name.trim())}`)
+    // Redirect to prejoin for participants
+    router.push(`/prejoin/${roomId.trim()}`)
   }
 
   return (

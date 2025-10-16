@@ -5,7 +5,7 @@ import type { LocalParticipant, RemoteParticipant } from "livekit-client"
 import { ParticipantEvent, RoomEvent } from "livekit-client"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, UserMinus } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 
 function isOnStage(participant: LocalParticipant | RemoteParticipant): boolean {
   const metadata = participant.metadata ? JSON.parse(participant.metadata) : {}
@@ -45,9 +45,15 @@ export function BackroomPanel() {
     }
   }, [room])
 
-  // Filter participants in backroom (not on stage)
-  const backroomParticipants = participants.filter((p) => !isOnStage(p))
-  const stageParticipants = participants.filter((p) => isOnStage(p))
+  // Filter participants in backroom (not on stage) - memoized to prevent infinite loops
+  const backroomParticipants = useMemo(
+    () => participants.filter((p) => !isOnStage(p)),
+    [participants]
+  )
+  const stageParticipants = useMemo(
+    () => participants.filter((p) => isOnStage(p)),
+    [participants]
+  )
 
   useEffect(() => {
     console.log(
@@ -61,7 +67,7 @@ export function BackroomPanel() {
     )
     console.log("[v0] Stage participants:", stageParticipants.length)
     console.log("[v0] Backstage participants:", backroomParticipants.length)
-  }, [participants, metadataUpdateCounter, stageParticipants.length, backroomParticipants.length])
+  }, [participants, metadataUpdateCounter, stageParticipants, backroomParticipants])
 
   const moveToStage = async (participant: RemoteParticipant) => {
     try {

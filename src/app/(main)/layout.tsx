@@ -1,6 +1,6 @@
     import React from 'react'
     import SolanaCursorEffect from '@/components/SolanaCursorEffect'
-import { ThreeBackground } from '@/components/three-background'
+import { ThreeBackground } from '@/components/ThreeBackground'
     
     export default function MainLayout({children}:{children:React.ReactNode}) {
       return (<>

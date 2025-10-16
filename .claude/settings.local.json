@@ -8,7 +8,9 @@
       "Bash(pnpm tsc:*)",
       "Bash(npm install:*)",
       "Bash(npm init -y)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
