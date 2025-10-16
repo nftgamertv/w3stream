@@ -2,11 +2,11 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Chat } from "react-together"
+import { Chat, useNicknames } from "react-together"
 import "@/styles/chat-overrides.css"
 
 interface ChatPanelProps {

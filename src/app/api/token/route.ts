@@ -1,168 +1,110 @@
-import { AccessToken, RoomServiceClient } from "livekit-server-sdk"
-import { type NextRequest, NextResponse } from "next/server"
+// /app/api/token/route.ts
+import { NextResponse } from "next/server"
+import {
+  createParticipantToken,
+  getRoomHostIdentity,
+  setRoomHostIfEmpty,
+  ensureRoomHostMetadata,
+} from "@/lib/livekit-server"
 
-const roomHosts = new Map<string, string>()
-
-export async function POST(req: NextRequest) {
+/**
+ * Host gating rules:
+ * - We NEVER auto-assign host to the first caller.
+ * - Host is assigned only when the request includes either:
+ *     A) creator=1   (simple flag you add only on the creator’s flow)
+ *     B) hostSecret=<env value> (optional stronger check)
+ * - If no host has been assigned yet and caller doesn't claim host, they join as guest backstage.
+ *
+ * Endpoints:
+ *  GET /api/token?roomName=R&participantName=N&checkHost=true
+ *      -> { isHost: boolean }
+ *
+ *  GET /api/token?roomName=R&participantName=N[&creator=1|&hostSecret=...]
+ *      -> { token }
+ */
+export async function GET(req: Request) {
   try {
-    const body = await req.json()
-    const roomName = body.room
-    const participantName = body.name
+    const { searchParams } = new URL(req.url)
+    const roomName = searchParams.get("roomName") ?? ""
+    const participantName = searchParams.get("participantName") ?? ""
+    const checkHost = searchParams.get("checkHost") === "true"
+    const creatorFlag = searchParams.get("creator") === "1"
+    const hostSecretParam = searchParams.get("hostSecret") || ""
+    const hostSecretEnv = process.env.ROOM_HOST_SECRET || "" // optional, set if you want a secret
 
-    if (!roomName) {
-      return NextResponse.json({ error: "Missing room parameter" }, { status: 400 })
-    }
+    const missing: string[] = []
+    if (!roomName) missing.push("roomName")
+    if (!participantName) missing.push("participantName")
 
-    if (!participantName) {
-      return NextResponse.json({ error: "Missing name parameter" }, { status: 400 })
-    }
+    const envMissing =
+      !process.env.LIVEKIT_API_KEY ||
+      !process.env.LIVEKIT_API_SECRET ||
+      (!process.env.LIVEKIT_HOST && !process.env.NEXT_PUBLIC_LIVEKIT_URL)
 
-    const apiKey = process.env.LIVEKIT_API_KEY
-    const apiSecret = process.env.LIVEKIT_API_SECRET
-    const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL
-
-    if (!apiKey || !apiSecret || !wsUrl) {
-      const missing = []
-      if (!apiKey) missing.push("LIVEKIT_API_KEY")
-      if (!apiSecret) missing.push("LIVEKIT_API_SECRET")
-      if (!wsUrl) missing.push("NEXT_PUBLIC_LIVEKIT_URL")
-
-      console.error("[v0] Missing environment variables:", missing.join(", "))
+    if (missing.length > 0 || envMissing) {
       return NextResponse.json(
         {
-          error: "Server misconfigured. Missing Livekit credentials.",
-          missing,
+          error: "Bad request / missing configuration",
+          missing: [
+            ...missing,
+            ...(envMissing ? ["LIVEKIT_API_KEY", "LIVEKIT_API_SECRET", "LIVEKIT_HOST or NEXT_PUBLIC_LIVEKIT_URL"] : []),
+          ],
         },
-        { status: 500 },
+        { status: 400 },
       )
     }
 
-    const at = new AccessToken(apiKey, apiSecret, {
-      identity: participantName,
-      name: participantName,
-    })
+    const identity = participantName
 
-    at.addGrant({
-      room: roomName,
-      roomJoin: true,
-      canPublish: true,
-      canPublishData: true,
-      canSubscribe: true,
-    })
+    // Current persisted host, if any
+    const persistedHost = await getRoomHostIdentity(roomName)
 
-    const token = await at.toJwt()
-    console.log("[v0] Token generated successfully for room:", roomName)
-
-    return NextResponse.json({ token })
-  } catch (error) {
-    console.error("[v0] Error generating token:", error)
-    return NextResponse.json({ error: "Failed to generate token" }, { status: 500 })
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const roomName = req.nextUrl.searchParams.get("roomName")
-    const participantName = req.nextUrl.searchParams.get("participantName")
-    const checkHost = req.nextUrl.searchParams.get("checkHost")
-    const isHostParam = req.nextUrl.searchParams.get("isHost")
-    const onStageParam = req.nextUrl.searchParams.get("onStage")
-
-    if (checkHost === "true") {
-      if (!roomName) {
-        return NextResponse.json({ error: "Missing roomName parameter" }, { status: 400 })
-      }
-
-      const apiKey = process.env.LIVEKIT_API_KEY
-      const apiSecret = process.env.LIVEKIT_API_SECRET
-      const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL
-
-      if (!apiKey || !apiSecret || !wsUrl) {
-        return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
-      }
-
-      // Check if room exists and has any participants with isHost metadata
-      let isHost = false
-
-      try {
-        const roomService = new RoomServiceClient(wsUrl, apiKey, apiSecret)
-        const participants = await roomService.listParticipants(roomName)
-
-        // Check if any existing participant is already a host
-        const hasExistingHost = participants.some((p) => {
-          try {
-            const metadata = p.metadata ? JSON.parse(p.metadata) : {}
-            return metadata.isHost === true
-          } catch {
-            return false
-          }
-        })
-
-        // If no existing host, this participant becomes the host
-        isHost = !hasExistingHost
-
-        console.log("[v0] Host check - Room:", roomName, "Existing participants:", participants.length, "Has host:", hasExistingHost, "Is host:", isHost)
-      } catch (error) {
-        // Room doesn't exist yet, so this is the first participant and thus the host
-        console.log("[v0] Room doesn't exist yet, making participant host:", participantName)
-        isHost = true
-      }
-
+    if (checkHost) {
+      // Only true if the room already has a host and it's THIS identity.
+      const isHost = !!persistedHost && persistedHost === identity
       return NextResponse.json({ isHost })
     }
 
-    if (!roomName) {
-      return NextResponse.json({ error: "Missing roomName parameter" }, { status: 400 })
+    // Determine if this caller is allowed to (claim or already is) host.
+    const callerHasSecret = hostSecretEnv && hostSecretParam && hostSecretParam === hostSecretEnv
+    const callerClaimsHost = creatorFlag || callerHasSecret
+
+    let isHost = false
+    let hostIdentity = persistedHost || null
+
+    if (!persistedHost) {
+      // No host yet. Only assign host if caller explicitly claims it.
+      if (callerClaimsHost) {
+        hostIdentity = await setRoomHostIfEmpty(roomName, identity)
+        isHost = hostIdentity === identity
+      } else {
+        // No host assigned yet AND caller is not creator → they are guest backstage.
+        isHost = false
+      }
+    } else {
+      // Host already assigned; only that identity is host.
+      isHost = persistedHost === identity
     }
 
-    if (!participantName) {
-      return NextResponse.json({ error: "Missing participantName parameter" }, { status: 400 })
-    }
+    // onStage rule: host → true, everyone else → false
+    const onStage = isHost
 
-    const apiKey = process.env.LIVEKIT_API_KEY
-    const apiSecret = process.env.LIVEKIT_API_SECRET
-    const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL
-
-    if (!apiKey || !apiSecret || !wsUrl) {
-      const missing = []
-      if (!apiKey) missing.push("LIVEKIT_API_KEY")
-      if (!apiSecret) missing.push("LIVEKIT_API_SECRET")
-      if (!wsUrl) missing.push("NEXT_PUBLIC_LIVEKIT_URL")
-
-      console.error("[v0] Missing environment variables:", missing.join(", "))
-      return NextResponse.json(
-        {
-          error: "Server misconfigured. Missing Livekit credentials.",
-          missing,
-        },
-        { status: 500 },
-      )
-    }
-
-    const isHost = isHostParam === "true"
-    const onStage = onStageParam === "true"
-    const metadata = JSON.stringify({ isHost, onStage })
-
-    const at = new AccessToken(apiKey, apiSecret, {
-      identity: participantName,
+    const token = await createParticipantToken({
+      roomName,
+      identity,
       name: participantName,
-      metadata,
-    })
-
-    at.addGrant({
-      room: roomName,
-      roomJoin: true,
+      metadata: { isHost, onStage },
       canPublish: true,
-      canPublishData: true,
       canSubscribe: true,
     })
 
-    const token = await at.toJwt()
-    console.log("[v0] Token generated successfully for room:", roomName, "isHost:", isHost, "onStage:", onStage)
+    // If we just set a host, persist it in room metadata (best-effort).
+    if (hostIdentity) {
+      await ensureRoomHostMetadata(roomName, hostIdentity)
+    }
 
     return NextResponse.json({ token })
-  } catch (error) {
-    console.error("[v0] Error generating token:", error)
-    return NextResponse.json({ error: "Failed to generate token" }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message ?? "Internal Server Error" }, { status: 500 })
   }
 }

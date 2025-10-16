@@ -5,7 +5,7 @@ import type { LocalParticipant, RemoteParticipant } from "livekit-client"
 import { ParticipantEvent, RoomEvent } from "livekit-client"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, UserMinus } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 
 function isOnStage(participant: LocalParticipant | RemoteParticipant): boolean {
   const metadata = participant.metadata ? JSON.parse(participant.metadata) : {}
@@ -45,9 +45,15 @@ export function BackroomPanel() {
     }
   }, [room])
 
-  // Filter participants in backroom (not on stage)
-  const backroomParticipants = participants.filter((p) => !isOnStage(p))
-  const stageParticipants = participants.filter((p) => isOnStage(p))
+  // Filter participants in backroom (not on stage) - memoized to prevent infinite loops
+  const backroomParticipants = useMemo(
+    () => participants.filter((p) => !isOnStage(p)),
+    [participants]
+  )
+  const stageParticipants = useMemo(
+    () => participants.filter((p) => isOnStage(p)),
+    [participants]
+  )
 
   useEffect(() => {
     console.log(
@@ -61,7 +67,7 @@ export function BackroomPanel() {
     )
     console.log("[v0] Stage participants:", stageParticipants.length)
     console.log("[v0] Backstage participants:", backroomParticipants.length)
-  }, [participants, metadataUpdateCounter, stageParticipants.length, backroomParticipants.length])
+  }, [participants, metadataUpdateCounter, stageParticipants, backroomParticipants])
 
   const moveToStage = async (participant: RemoteParticipant) => {
     try {
@@ -170,20 +176,17 @@ export function BackroomPanel() {
   }
 
   return (
-    <div className="w-80 border-l border-border/30 bg-background/95 backdrop-blur-sm flex flex-col fixed right-0 top-0 bottom-0 z-[100] pointer-events-auto">
-      <div className="p-4 border-b border-border/30 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-muted-foreground" />
-          <h3 className="font-semibold">Backstage</h3>
-          <span className="text-xs bg-secondary px-2 py-1 rounded-full">{backroomParticipants.length}</span>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)}>
-          {isExpanded ? "−" : "+"}
+    <div className="border-r border-border/30 bg-background/95 backdrop-blur-sm flex flex-col relative z-[100] pointer-events-auto h-full">
+      <div className="px-4 py-2 flex items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="gap-2">
+          <Users className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-semibold">Backstage</span>
+          <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">{backroomParticipants.length}</span>
         </Button>
       </div>
 
       {isExpanded && (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="absolute left-0 bottom-full mb-2 w-80 max-h-96 overflow-y-auto p-4 space-y-4 bg-background border border-border rounded-lg shadow-xl z-[100]">
           {stageParticipants.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase">On Stage</h4>

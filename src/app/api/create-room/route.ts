@@ -53,19 +53,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate request body
-    if (!validateCreateRoomRequest(body)) {
-      return NextResponse.json(
-        {
-          error: 'Invalid request body',
-          details: 'Request must include hostName (non-empty string) and environment or environmentTemplate (non-empty string)',
-        },
-        { status: 400 }
-      );
-    }
+    // if (!validateCreateRoomRequest(body)) {
+    //   return NextResponse.json(
+    //     {
+    //       error: 'Invalid request body',
+    //       details: 'Request must include hostName (non-empty string) and environment or environmentTemplate (non-empty string)',
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
-    // Accept either 'environment' or 'environmentTemplate'
-    const environmentTemplate = body.environmentTemplate || body.environment || 'cyber-office';
-    const { hostName } = body;
+    // // Accept either 'environment' or 'environmentTemplate'
+    // const environmentTemplate = body.environmentTemplate || body.environment || 'cyber-office';
+    // const { hostName } = body;
 
     // Generate unique room ID (8 characters, URL-safe)
     const roomId = nanoid(8);
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       hostId,
       config: {
-        hostName: hostName.trim(),
-        environmentTemplate: environmentTemplate.trim(),
+        // hostName: hostName.trim(),
+        // environmentTemplate: environmentTemplate.trim(),
       },
     };
 

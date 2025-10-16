@@ -45,7 +45,7 @@ export function RoomHeader({ roomId, layout, onLayoutChange }: RoomHeaderProps) 
           <Button
             size="sm"
             variant={layout === "grid" ? "secondary" : "ghost"}
-            onClick={() => onLayoutChange("grid")}
+            onClick={() =>{ alert("fuck off");  onLayoutChange("grid")}}
             className="h-8 px-3"
             title="Grid layout"
           >

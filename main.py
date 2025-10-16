@@ -19,7 +19,7 @@ LIVEKIT_URL = "wss://twngo-e2fpi6u8.livekit.cloud"
 GCP_API_KEY = "AIzaSyBZq4Suo0KFjf4GEOv2WHcK5-18H1uKAIw"
 
 # ElevenLabs settings
-ELEVENLABS_API_KEY = "YOUR_ELEVENLABS_API_KEY_HERE"  # ADD YOUR KEY
+ELEVENLABS_API_KEY = "sk_a576bc8fdb15b8421803d4a0935404bdfe3020c45321ca47"  # ADD YOUR KEY
 ELEVENLABS_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Default voice (Rachel), change if needed
 
 SOUNDS_FOLDER = "./sounds"
@@ -247,5 +247,5 @@ async def stream_audio_to_livekit(audio_source: rtc.AudioSource, raw_audio: byte
         await asyncio.sleep(0.02)  # 20ms delay
 
 if __name__ == "__main__":
-    room_name = "Q9GkRdZj"  # CHANGE TO YOUR ROOM NAME
+    room_name = "gEVkClsW"  # CHANGE TO YOUR ROOM NAME
     asyncio.run(bot_join_room(room_name))

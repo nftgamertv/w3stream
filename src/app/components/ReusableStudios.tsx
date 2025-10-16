@@ -6,8 +6,8 @@ import { useRef, Suspense } from "react"
 import { gsap } from "gsap"
 import { Plus, MoreHorizontal, Infinity } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { StudioPreviewIcons } from "@/components/studio-preview-icons"
-
+import { StudioPreviewIcons } from "@/components/StudioPreviewIcons"
+import CreateRoomModal   from "@/components/CreateRoomModal"
 const studios = [
   {
     name: "Jam Session",
@@ -60,11 +60,8 @@ export function ReusableStudios() {
       <div className="flex items-center justify-between">
     
          
-          <button className="button  uppercase w-8 h-8 bg-linear-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-lg flex items-center justify-center hover:from-cyan-500/30 hover:to-purple-500/30 transition-all duration-300">
-            <Plus className="w-4 h-4 mx-1 text-cyan-400  " />
-            <span className="text-cyan-400 text-xs">Create</span>
-          </button>
-       
+     
+         <CreateRoomModal />
       </div>
 
       {/* Icon Preview Cards Grid */}
@@ -126,7 +123,7 @@ export function ReusableStudios() {
       </div>
 
       {/* Traditional Table View */}
-      <div
+      {/* <div
         ref={tableRef}
         className="bg-slate-900 border border-slate-700/50 rounded-2xl overflow-hidden"
       >
@@ -190,7 +187,7 @@ export function ReusableStudios() {
         <div className="p-4 border-t border-slate-700/50">
           <button className="text-cyan-400 hover:text-cyan-300 text-sm transition-colors">Load more</button>
         </div>
-      </div>
+      </div> */}
     </section>
   )
 }

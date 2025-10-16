@@ -1,8 +1,9 @@
 
+// /lib/livekit-config.ts
 export const LIVEKIT_CONFIG = {
-  wsUrl: process.env.NEXT_PUBLIC_LIVEKIT_URL || "",
+  wsUrl: process.env.NEXT_PUBLIC_LIVEKIT_URL ?? "",
   tokenEndpoint: "/api/token",
-}
+};
 
 export function validateLivekitConfig(): boolean {
   if (typeof window === "undefined") {

@@ -29,15 +29,13 @@ export const Navbar = () => {
   }
 
   return (
-    <div className="w-full px-6 py-4 bg-slate-900/50 backdrop-blur-md border-b border-slate-800">
+    <div className="w-full">
             <header className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
                     <SidebarTrigger className="md:hidden" />
                     <div>
-                      <h1 className="text-4xl font-bold bg-linear-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                        Dashboard
-                      </h1>
-                      <p className="text-slate-400 mt-2">Next-generation streaming platform</p>
+                   
+  
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
