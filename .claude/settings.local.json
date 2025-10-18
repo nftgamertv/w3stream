@@ -10,7 +10,17 @@
       "Bash(npm init -y)",
       "WebSearch",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(python:*)",
+      "Bash(timeout 10 python:*)",
+      "Bash(echo:*)",
+      "WebFetch(domain:elevenlabs.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(timeout 120 pnpm run build:*)",
+      "Bash(timeout 30 pnpm dev:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []

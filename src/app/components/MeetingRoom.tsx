@@ -2,6 +2,7 @@
 
 import { useEffect, useState, createContext, useContext } from "react"
 import { useRouter } from "next/navigation"
+import { useNicknames } from "react-together"
 import {
   LiveKitRoom,
   ParticipantTile,
@@ -25,7 +26,7 @@ import "@livekit/components-styles"
 import { LIVEKIT_CONFIG } from "@/lib/livekit-config"
 import { RoomHeader } from "@/components/RoomHeader"
 import { BackroomPanel } from "@/components/BackroomPanel"
-import { ChatPanel } from "@/components/ChatPanel"
+import { ChatDrawer } from "@/components/ChatDrawer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, Users, UserMinus } from "lucide-react"
@@ -214,6 +215,20 @@ function SelectiveAudioRenderer() {
   )
 }
 
+/* -------- Nickname initializer -------- */
+function NicknameInitializer({ participantName }: { participantName: string }) {
+  const [, setNickname] = useNicknames()
+
+  useEffect(() => {
+    if (participantName && participantName.trim()) {
+      console.log("[NicknameInitializer] Setting nickname to:", participantName)
+      setNickname(participantName.trim())
+    }
+  }, [participantName, setNickname])
+
+  return null
+}
+
 /* -------- Metadata change pings -------- */
 function MetadataListener() {
   const room = useRoomContext()
@@ -301,12 +316,13 @@ function RoomContent({ roomId, participantName, layout, onLayoutChange, isUserHo
 
   return (
     <HostControlsContext.Provider value={hostControlsValue}>
+      <NicknameInitializer participantName={participantName} />
       <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
       <div className="flex-1 overflow-hidden flex relative">
         {/* Put stage area on a higher layer than footers just in case */}
         <div className="flex-1 relative z-10 pointer-events-auto">
           <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
-          {/* Guests see overlay while backstage. Host stays clean so tiles aren’t masked. */}
+          {/* Guests see overlay while backstage. Host stays clean so tiles aren't masked. */}
           {!isUserHost && <WaitingRoomOverlay />}
         </div>
       </div>
@@ -318,7 +334,7 @@ function RoomContent({ roomId, participantName, layout, onLayoutChange, isUserHo
       <StageSubscriptionManager />
       <SelectiveAudioRenderer />
       <MetadataListener />
-      <ChatPanel participantName={participantName} isHost={isUserHost} />
+      <ChatDrawer participantName={participantName} isHost={isUserHost} />
     </HostControlsContext.Provider>
   )
 }

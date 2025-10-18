@@ -135,10 +135,33 @@ export async function replaceParticipantMetadata(
   metadata: Record<string, unknown>
 ) {
   const roomService = getRoomService();
-  await roomService.updateParticipant(roomName, participantIdentity, {
-    metadata: JSON.stringify(metadata),
-  });
-  return metadata;
+
+  // Retry logic for when room is being created
+  const maxRetries = 5;
+  const retryDelay = 500; // ms
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      await roomService.updateParticipant(roomName, participantIdentity, {
+        metadata: JSON.stringify(metadata),
+      });
+      return metadata;
+    } catch (error: any) {
+      const isRoomNotFound = error?.message?.includes("requested room does not exist");
+
+      if (isRoomNotFound && attempt < maxRetries - 1) {
+        // Room hasn't been created yet, wait and retry
+        console.log(`[livekit-server] Room ${roomName} not found, retrying (${attempt + 1}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
+        continue;
+      }
+
+      // Either not a room-not-found error, or we've exhausted retries
+      throw error;
+    }
+  }
+
+  throw new Error(`Failed to update participant metadata after ${maxRetries} retries`);
 }
 
 export async function updateParticipantOnStage(
@@ -147,18 +170,41 @@ export async function updateParticipantOnStage(
   onStage: boolean
 ) {
   const roomService = getRoomService();
-  const p = await roomService.getParticipant(roomName, participantIdentity).catch(() => null);
-  let current: Record<string, unknown> = {};
-  if (p?.metadata) {
+
+  // Retry logic for when room is being created
+  const maxRetries = 5;
+  const retryDelay = 500; // ms
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      current = JSON.parse(p.metadata);
-    } catch {
-      current = {};
+      const p = await roomService.getParticipant(roomName, participantIdentity).catch(() => null);
+      let current: Record<string, unknown> = {};
+      if (p?.metadata) {
+        try {
+          current = JSON.parse(p.metadata);
+        } catch {
+          current = {};
+        }
+      }
+      const next = { ...current, onStage };
+      await roomService.updateParticipant(roomName, participantIdentity, {
+        metadata: JSON.stringify(next),
+      });
+      return next;
+    } catch (error: any) {
+      const isRoomNotFound = error?.message?.includes("requested room does not exist");
+
+      if (isRoomNotFound && attempt < maxRetries - 1) {
+        // Room hasn't been created yet, wait and retry
+        console.log(`[livekit-server] Room ${roomName} not found, retrying (${attempt + 1}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
+        continue;
+      }
+
+      // Either not a room-not-found error, or we've exhausted retries
+      throw error;
     }
   }
-  const next = { ...current, onStage };
-  await roomService.updateParticipant(roomName, participantIdentity, {
-    metadata: JSON.stringify(next),
-  });
-  return next;
+
+  throw new Error(`Failed to update participant onStage after ${maxRetries} retries`);
 }

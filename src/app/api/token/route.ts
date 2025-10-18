@@ -75,8 +75,15 @@ export async function GET(req: Request) {
     if (!persistedHost) {
       // No host yet. Only assign host if caller explicitly claims it.
       if (callerClaimsHost) {
-        hostIdentity = await setRoomHostIfEmpty(roomName, identity)
-        isHost = hostIdentity === identity
+        try {
+          hostIdentity = await setRoomHostIfEmpty(roomName, identity)
+          isHost = hostIdentity === identity
+        } catch (error: any) {
+          // Room doesn't exist yet - that's OK, it will be created on first join
+          console.log(`[token] Room ${roomName} doesn't exist yet, will be created on join`)
+          hostIdentity = identity
+          isHost = true
+        }
       } else {
         // No host assigned yet AND caller is not creator → they are guest backstage.
         isHost = false
@@ -100,7 +107,12 @@ export async function GET(req: Request) {
 
     // If we just set a host, persist it in room metadata (best-effort).
     if (hostIdentity) {
-      await ensureRoomHostMetadata(roomName, hostIdentity)
+      try {
+        await ensureRoomHostMetadata(roomName, hostIdentity)
+      } catch (error: any) {
+        // Room doesn't exist yet - that's OK, metadata will be set after room is created
+        console.log(`[token] Could not set room metadata yet: ${error.message}`)
+      }
     }
 
     return NextResponse.json({ token })

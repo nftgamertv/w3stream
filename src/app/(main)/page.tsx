@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react"
 import KeystrokeListener from "@/components/KeystrokeListener"
 import SolanaCursorEffect from "@/components/SolanaCursorEffect"
  import { LoginModalTestButton } from "@/components/LoginModalTestButton";
+import {WaitlistForm} from "@/components/WaitlistForm"
 export default function SplashPage() {
   return (
     <div className="min-h-screen absolute bg-transparent left-1/2 top-0 transform -translate-x-1/2 flex flex-col items-center justify-center overflow-hidden">
@@ -41,11 +42,11 @@ export default function SplashPage() {
             </div>
 
             {/* Waitlist Form - Enhanced */}
-            {/* <div className="max-w-2xl mx-auto">
+           <div className="max-w-2xl mx-auto">
               <div className="bg-slate-800/70 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 shadow-2xl">
                 <WaitlistForm />
               </div>
-            </div> */}
+            </div>  
 
             {/* Social Proof */}
             <div className="flex items-center justify-center gap-2 text-sm text-slate-400">

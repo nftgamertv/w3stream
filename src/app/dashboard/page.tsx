@@ -69,13 +69,14 @@ export default function DashboardPage() {
   const addOns = [
     {
       icon: Puzzle,
-      title: "AI Assistant",
-      description: "Enhance your streams with AI-powered moderation and content generation.",
+      title: "CHTBXX",
+      description: "Twitch chat text-to-speech with unique character voices for immersive streaming.",
       buttonText: "Learn More",
       buttonLink: "#",
       gradientFrom: "from-pink-500",
       gradientTo: "to-purple-500",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+      imageUrl: "/images/chtbxx_logo_white.png",
+      status: "testing",
     },
     {
       icon: Headphones,
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                <Navbar />
              
                 <ReusableStudios />
-      
+      {/* @ts-ignore */}
                 <HorizontalCardSection title="Add Ons" items={addOns} />
                 <HorizontalCardSection title="Games" items={games} />
               </div>

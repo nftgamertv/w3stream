@@ -172,6 +172,7 @@
       BlinkMacSystemFont,
       sans-serif;
       background-color: #000;
+      overflow: hidden;
     /* background:
       radial-gradient(
         ellipse at 20% 80%,
