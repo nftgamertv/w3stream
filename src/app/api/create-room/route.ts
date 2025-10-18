@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       hostId,
       config: {
-        // hostName: hostName.trim(),
-        // environmentTemplate: environmentTemplate.trim(),
+        hostName: 'default-host', // TODO: Uncomment validation and use actual hostName
+        environmentTemplate: 'cyber-office', // TODO: Uncomment validation and use actual environmentTemplate
       },
     };
 
