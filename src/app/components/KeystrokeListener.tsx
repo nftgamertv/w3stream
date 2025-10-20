@@ -57,7 +57,7 @@ export default function KeystrokeListener() {
   }, []);
 
   return (<>
-     <button onClick={() => openLoginModal()}>Login</button> 
+    
     <LoginModal
       isOpen={showModal}
       onClose={() => setShowModal(false)}

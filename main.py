@@ -309,7 +309,7 @@ async def receive_audio_from_agent(ws, audio_source: rtc.AudioSource, participan
         print(f"❌ Receive error: {e}")
 
 if __name__ == "__main__":
-    room_name = "Aw3OJT5A"
+    room_name = "1ZEyZ2ar"
     
     print("=" * 60)
     print("LiveKit <-> ElevenLabs Agent Bridge")

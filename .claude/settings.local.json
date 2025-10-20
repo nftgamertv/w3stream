@@ -23,7 +23,8 @@
       "Bash(pnpm add:*)",
       "Bash(git add .)",
       "Bash(git commit -m \"$(cat <<''EOF''\nFix TypeScript build errors\n\n- Add default values to room config (hostName, environmentTemplate)\n- Fix import paths for room components (room-header, backroom-panel, chat-panel)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(pnpm dev)"
     ],
     "deny": [],
     "ask": []

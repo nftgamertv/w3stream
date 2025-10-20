@@ -3,18 +3,19 @@
 import { ThreeBackground } from '@/components/ThreeBackground'
     
     export default function MainLayout({children}:{children:React.ReactNode}) {
-      return (<>
-      <div className='min-h-screen flex flex-col items-center justify-center '>
-   <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.77/build/spline-viewer.js"></script>
-   {/* @ts-ignore */}
-<spline-viewer loading-anim-type="spinner-small-dark" url="https://prod.spline.design/6cUAvh71RWmBlya2/scene.splinecode"></spline-viewer> </div>
-  
-     
-            <ThreeBackground />
+      return (
+        <> 
+
+          <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.82/build/spline-viewer.js"></script>
+          {/* @ts-ignore */}
+   
+<spline-viewer url="https://prod.spline.design/t0wbk9SR1W-64x63/scene.splinecode"></spline-viewer>
+         
           {children}
           <div id="portal"></div>
-             <SolanaCursorEffect />
-       </>
+          <ThreeBackground />
+          <SolanaCursorEffect />
+        </>
       )
     }
     
