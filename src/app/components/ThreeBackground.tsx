@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect, useState } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Sphere } from "@react-three/drei"
 import * as THREE from "three"
@@ -193,17 +193,79 @@ function StreamingBackground() {
 }
 
 export function ThreeBackground() {
+  const [isClient, setIsClient] = useState(false)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [hasWebGL, setHasWebGL] = useState(true)
+
+  useEffect(() => {
+    setIsClient(true)
+
+    // Check for WebGL support
+    try {
+      const canvas = document.createElement('canvas')
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+      if (!gl) {
+        setHasWebGL(false)
+        return
+      }
+    } catch (e) {
+      setHasWebGL(false)
+      return
+    }
+
+    // Set initial dimensions
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight
+    })
+
+    // Handle window resize
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Don't render until we have valid dimensions or if WebGL is not supported
+  if (!isClient || !hasWebGL || dimensions.width === 0 || dimensions.height === 0) {
+    return null
+  }
+
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0 pointer-events-none" style={{ width: '100vw', height: '100vh' }}>
       <Canvas
         camera={{ position: [0, 0, 1], fov: 75 }}
         gl={{
           alpha: true,
           antialias: false, // Disable antialiasing for better performance
-          powerPreference: "high-performance"
+          powerPreference: "high-performance",
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false, // Don't fail on low-end devices
         }}
         dpr={[1, 1.5]} // Limit pixel ratio for better performance
         frameloop="always" // Continuously render for animations
+        onCreated={({ gl }) => {
+          // Ensure canvas has proper dimensions
+          if (dimensions.width > 0 && dimensions.height > 0) {
+            gl.setSize(dimensions.width, dimensions.height)
+          }
+
+          // Add WebGL context lost/restored handlers
+          const canvas = gl.domElement
+          canvas.addEventListener('webglcontextlost', (e) => {
+            e.preventDefault()
+            console.warn('WebGL context lost')
+          })
+
+          canvas.addEventListener('webglcontextrestored', () => {
+            console.log('WebGL context restored')
+          })
+        }}
       >
         <StreamingBackground />
       </Canvas>

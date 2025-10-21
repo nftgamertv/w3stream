@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { CyclingText } from "@/components/CyclingText"
-import { Sparkles } from "lucide-react"
+
  
 
 import KeystrokeListener from "@/components/KeystrokeListener"
@@ -32,24 +32,19 @@ export default function SplashPage() {
     
   ]
   return (
-    <div className="fixed inset-0 bg-transparent flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 bg-transparent flex flex-col items-center justify-center overflow-hidden z-10">
       {/* Animated background effect */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gray-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gray-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-transparent rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-transparent rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
- <ScrollingVideo />
       {/* Main content */}
-      <div className="w-full">
+      <div className="w-full relative z-20">
+      <ScrollingVideo />
         {/* Hero Section */}
         <main className="container mx-auto px-4 pb-16 md:pb-24">
           <div className="text-center space-y-2 max-w-4xl mx-auto">
-            <div className="absolute  top-8  left-1/2 transform -translate-x-1/2">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 backdrop-blur-sm text-green-300 px-4 py-2 rounded-full text-sm font-medium animate-pulse">
-              <Sparkles className="w-4 h-4" />
-              Coming Soon
-            </div> </div>
+      
 
             <div className="relative mx-auto max-w-2xl">
               {/* Floating elements */}
@@ -67,7 +62,7 @@ export default function SplashPage() {
           <CyclingText items={cyclingItems} interval={2500} className="font-bold min-w-[180px]" />{" "} revolution
         </h2>
                 </div>  
-                 <Link href="/waitlist" className="btn-brand max-w-md mt-12 mx-auto">
+                 <Link href="/waitlist" className="btn-brand max-w-md mt-12 relative mx-auto">
                   Join the Waitlist
                 </Link>
            
@@ -82,24 +77,7 @@ export default function SplashPage() {
  {/* <LoginModalTestButton/> */}
         </main>
 
-        {/* Footer */}
-        <footer className="absolute left-1/2 transform -translate-x-1/2 w-full bottom-0 border-t border-slate-700/50 py-8 mt-4">
-          <div className="container mx-auto px-4 text-center">
-            <p className="text-sm text-slate-400">
-              © 2025 w3Stream, Inc. All rights reserved.
-              <span className="mx-2">•</span>
-              <a href="#" className="hover:text-gray-400 transition-colors">
-                Privacy Policy
-              </a>
-           
-              <span className="mx-2">•</span>
-              <a href="#" className="hover:text-gray-400 transition-colors">
-                Terms of Service
-              </a>
-            </p>
 
-          </div>
-        </footer>
       </div>
    
        <KeystrokeListener />

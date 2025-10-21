@@ -1,30 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm install:*)",
-      "Bash(pnpm run build)",
-      "Bash(mkdir:*)",
-      "Bash(Remove-Item -Path \".next\" -Recurse -Force -ErrorAction SilentlyContinue)",
-      "Bash(pnpm tsc:*)",
-      "Bash(npm install:*)",
-      "Bash(npm init -y)",
-      "WebSearch",
-      "Bash(netstat:*)",
-      "Bash(findstr:*)",
-      "Bash(python:*)",
-      "Bash(timeout 10 python:*)",
-      "Bash(echo:*)",
-      "WebFetch(domain:elevenlabs.io)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:medium.com)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(timeout 120 pnpm run build:*)",
-      "Bash(timeout 30 pnpm dev:*)",
-      "Bash(pnpm add:*)",
-      "Bash(git add .)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix TypeScript build errors\n\n- Add default values to room config (hostName, environmentTemplate)\n- Fix import paths for room components (room-header, backroom-panel, chat-panel)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push)",
-      "Bash(pnpm dev)"
+      "Bash(Where-Object { $_ame -eq \"package.json\" })",
+      "Bash(Select-Object -First 1)",
+      "Bash(Get-Content)",
+      "Bash(ConvertFrom-Json:*)",
+      "Bash(Select-Object -ExpandProperty dependencies)",
+      "Bash(test:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

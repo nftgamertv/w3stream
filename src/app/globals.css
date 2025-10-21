@@ -122,9 +122,7 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+ 
 }
 
 /* Updated keyframe animation to use background-position for seamless scrolling without overlapping elements */
@@ -165,7 +163,7 @@
       -apple-system,
       BlinkMacSystemFont,
       sans-serif;
-      background-color: #000;
+      background-color: transparent;
       overflow-x: hidden;
       overflow-y: auto;
     /* background:
@@ -611,4 +609,53 @@
 
 .animate-scroll-background {
   animation: scroll-background 20s linear infinite;
+}
+
+ 
+
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.video-element {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+/* Optional: Add an overlay to improve text readability */
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Adjust opacity as needed */
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  color: white; /* Adjust based on your video */
+}
+
+/* Optimize for mobile devices */
+@media (max-width: 768px) {
+  .video-element {
+    /* On mobile, you might want to use a different approach */
+    /* or adjust the video positioning */
+  }
 }

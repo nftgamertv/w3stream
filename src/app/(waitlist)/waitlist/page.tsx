@@ -1,3 +1,5 @@
+'use client'
+
  
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -16,29 +18,38 @@ export default function Waitlist() {
       useEffect(() => {
         const checkAuth = async () => {
           const supabase = createClient()
-    
-          // Check if user is logged in
-          const { data: { user }, error: userError } = await supabase.auth.getUser()
-          console.log("user", user, userError)
-          if (!user || userError) {
-            router.push("/no-access")
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) {
+            // User is not authenticated
+            setIsCheckingAuth(false)
+            router.push("/waitlist/login")
             return
           }
-    
-          // Check if user ID is in w3s_testers table
-          const { data: testerData, error: testerError } = await supabase
-            .from("waitlist")
-            .select("*")
-            .eq("user_id", user.id)
-    
-    
-          if (testerError || !testerData) {
-            router.push("/no-access")
-            return
-          }
-    
-          // User is authorized
           setIsCheckingAuth(false)
+           // Chekc for existing submissions 
+
+           const { data, error } = await supabase 
+            .from('w3s_waitlist')   
+            .select('*')
+            .eq('id', user.id)
+            
+            if (error) {
+              console.error("Error checking waitlist submission:", error)
+              return
+            }
+            if (data && data.length > 0) {
+              // User has already submitted to the waitlist
+              router.push("/waitlist/success")
+              return
+            } 
+
+            if (!data || data.length === 0) {
+              // User has not submitted to the waitlist
+              setIsCheckingAuth(false)
+               router.push("/waitlist/signup")
+              return
+            }
+ 
         }
     
         checkAuth()

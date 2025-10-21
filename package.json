@@ -75,6 +75,7 @@
     "react-dom": "19.1.0",
     "react-email": "^4.3.1",
     "react-hook-form": "^7.65.0",
+    "react-icons": "^5.5.0",
     "react-resizable-panels": "^3.0.6",
     "react-together": "^0.4.4",
     "recharts": "^3.2.1",

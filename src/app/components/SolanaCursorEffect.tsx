@@ -98,9 +98,8 @@ export default function SolanaCursorEffect() {
 
     // Main animation loop
     const animate = () => {
-      // Create fade trail effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Clear canvas for fresh frame
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw glowing trail
       trailRef.current.forEach((point) => {
@@ -214,7 +213,6 @@ export default function SolanaCursorEffect() {
           width: '100vw',
           height: '100vh',
           pointerEvents: 'none',
-          mixBlendMode: 'screen',
           zIndex: 999999
         }}
       />

@@ -5,11 +5,13 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@livekit/components-styles";
 import "./globals.css";
 import { LoginModalWrapper } from "./components/LoginModalWrapper";
+import { ThreeBackground } from "./components/ThreeBackground";
 
- 
+
 import { Suspense } from "react";
 import ReactQueryProvider from "./providers/ReactQueryProvider";
 import "./globals.css";
+import VideoBackground from "./components/VideoBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,15 +35,32 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcEEfErAAAAAJoE9c5PrX1uJcAGv6OZx-pY1VYY" async defer />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense fallback={null}>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
-        </Suspense>
+          <ReactQueryProvider>
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="video-element"
+            >
+              <source src="/videos/_background.webm" type="video/webm" />
+              Your browser does not support the video tag.
+            </video>
     
+            {children}
+                    <ThreeBackground />
+          </ReactQueryProvider>
+        </Suspense>
+
         <LoginModalWrapper />
-  
+
       </body>
     </html>
   );

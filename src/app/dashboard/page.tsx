@@ -9,7 +9,6 @@ import { getQueryClient } from '@/get-query-client'
 import { generateRoomId } from "@/lib/livekit-config"
 import { ReusableStudios } from "@/components/ReusableStudios"
 import { StreamsRecordings } from "@/components/StreamsRocordings"
-import { ThreeBackground } from "@/components/ThreeBackground"
 import { HorizontalCardSection } from "@/components/HorizontalCardSection"
 import { Gamepad, Puzzle, Headphones, Rocket, Zap, Award } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -179,8 +178,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden relative">
-      {/* Toggle between 3D streaming background or animated gradient */}
-      <ThreeBackground />
       <SidebarProvider defaultOpen={true}>
         <div className="flex relative z-10 w-full">
           <AppSidebar />
