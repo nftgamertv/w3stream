@@ -55,6 +55,9 @@ export function CyclingText({ items, interval = 2500, className, transitionDurat
         backgroundColor: backgroundColor,
         color: textColor,
       }}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
     >
       {content}
     </span>
