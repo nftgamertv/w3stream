@@ -182,7 +182,7 @@ export default function BetaSignupPage() {
 
                 {/* Conditional Influencer Fields */}
                 {formData.isInfluencer && (
-                  <div className="ml-6 space-y-4 rounded-lg border bg-muted/50 p-4">
+                  <div className="ml-6 space-y-4 bg-slate-900 rounded-lg border bg-muted/50 p-4">
                     <div className="space-y-2">
                       <Label htmlFor="influencer-platform" className="text-sm font-medium">
                         Primary Platform <span className="text-destructive">*</span>

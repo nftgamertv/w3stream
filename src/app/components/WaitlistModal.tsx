@@ -7,6 +7,7 @@ import { WaitlistForm } from "@/components/WaitlistForm"
 
 export function WaitlistModal() {
   const [open, setOpen] = useState(false)
+  const WaitlistFormAny = WaitlistForm as any
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -32,7 +33,7 @@ export function WaitlistModal() {
           </div>
         </DialogHeader>
         <div className="px-6 py-6">
-          <WaitlistForm onSuccess={() => setOpen(false)} />
+          <WaitlistFormAny onSuccess={() => setOpen(false)} />
         </div>
       </DialogContent>
     </Dialog>
