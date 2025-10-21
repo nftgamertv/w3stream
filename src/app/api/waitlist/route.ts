@@ -4,9 +4,9 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export async function POST(req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { name, email } = req.body;
+    const { name, email } = req.body; 
 
     if (!name || !email) {
       console.error('[Waitlist API] Missing required fields:', { name: !!name, email: !!email });
