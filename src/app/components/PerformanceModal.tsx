@@ -65,10 +65,10 @@ export default function PerformanceModal() {
             <button
               ref={closeButtonRef}
               onClick={() => setIsOpen(false)}
-              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded"
+              className="sr-only focus:not-sr-only focus:absolute focus:-right-4 focus:-top-4   focus:text-red-500 focus:px-4 focus:py-2 focus:rounded"
               aria-label="Close performance stats modal"
             >
-              Close
+              x
             </button>
 
             <PerformanceInfo />
