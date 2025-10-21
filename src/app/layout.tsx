@@ -43,9 +43,9 @@ export default function RootLayout({
       >
         <Suspense fallback={null}>
           <ReactQueryProvider>
-            <VideoBackground /> 
+           <ThreeBackground />
+            <VideoBackground />  
             {children}
-                    <ThreeBackground />
           </ReactQueryProvider>
         </Suspense>
 

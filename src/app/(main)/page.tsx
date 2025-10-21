@@ -16,7 +16,7 @@ export default function SplashPage() {
     },
     {
       content: "collaboration",
-      backgroundColor: "#8b5cf6",
+      backgroundColor: "#a855f7",
       textColor: "#ffffff",
     },
     {
@@ -26,7 +26,7 @@ export default function SplashPage() {
     },
        {
       content: "decentralized",
-      backgroundColor: "cyan",
+      backgroundColor: "#10b981",
       textColor: "#1a1a1a",
     },
     

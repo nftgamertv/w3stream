@@ -196,11 +196,10 @@ export function ThreeBackground() {
   const [isClient, setIsClient] = useState(false)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [hasWebGL, setHasWebGL] = useState(true)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    setIsClient(true)
-
-    // Check for WebGL support
+    // Check for WebGL support first
     try {
       const canvas = document.createElement('canvas')
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
@@ -213,46 +212,64 @@ export function ThreeBackground() {
       return
     }
 
-    // Set initial dimensions
-    setDimensions({
-      width: window.innerWidth,
-      height: window.innerHeight
-    })
+    // Wait for DOM to be ready
+    const initDimensions = () => {
+      if (typeof window !== 'undefined' && window.innerWidth > 0 && window.innerHeight > 0) {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight
+        })
+        setIsClient(true)
+        // Add a small delay to ensure everything is ready
+        setTimeout(() => setIsReady(true), 100)
+      }
+    }
+
+    // Try immediately
+    initDimensions()
+
+    // Fallback: try on next frame if not ready
+    if (!isClient) {
+      requestAnimationFrame(initDimensions)
+    }
 
     // Handle window resize
     const handleResize = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight
-      })
+      if (window.innerWidth > 0 && window.innerHeight > 0) {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight
+        })
+      }
     }
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [isClient])
 
-  // Don't render until we have valid dimensions or if WebGL is not supported
-  if (!isClient || !hasWebGL || dimensions.width === 0 || dimensions.height === 0) {
+  // Don't render until we have valid dimensions, WebGL support, and everything is ready
+  if (!isClient || !hasWebGL || !isReady || dimensions.width === 0 || dimensions.height === 0) {
     return null
   }
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none" style={{ width: '100vw', height: '100vh' }}>
+    <div className="fixed inset-0 pointer-events-none" style={{ width: '100vw', height: '100vh', zIndex: 0 }}>
       <Canvas
         camera={{ position: [0, 0, 1], fov: 75 }}
         gl={{
           alpha: true,
-          antialias: false, // Disable antialiasing for better performance
+          antialias: false,
           powerPreference: "high-performance",
           preserveDrawingBuffer: false,
-          failIfMajorPerformanceCaveat: false, // Don't fail on low-end devices
+          failIfMajorPerformanceCaveat: false,
         }}
-        dpr={[1, 1.5]} // Limit pixel ratio for better performance
-        frameloop="always" // Continuously render for animations
-        onCreated={({ gl }) => {
-          // Ensure canvas has proper dimensions
-          if (dimensions.width > 0 && dimensions.height > 0) {
-            gl.setSize(dimensions.width, dimensions.height)
+        dpr={[1, 1.5]}
+        frameloop="always"
+        style={{ width: '100%', height: '100%' }}
+        onCreated={({ gl, size }) => {
+          // Only set size if valid
+          if (size.width > 0 && size.height > 0) {
+            gl.setSize(size.width, size.height, false)
           }
 
           // Add WebGL context lost/restored handlers
@@ -260,11 +277,11 @@ export function ThreeBackground() {
           canvas.addEventListener('webglcontextlost', (e) => {
             e.preventDefault()
             console.warn('WebGL context lost')
-          })
+          }, false)
 
           canvas.addEventListener('webglcontextrestored', () => {
             console.log('WebGL context restored')
-          })
+          }, false)
         }}
       >
         <StreamingBackground />

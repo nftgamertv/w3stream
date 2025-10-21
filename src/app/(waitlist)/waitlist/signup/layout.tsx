@@ -5,7 +5,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { Nav } from 'react-day-picker'
 export default function WaitlistLayout({ children }: { children: React.ReactNode } ) {
   return (
-    <div>
+    <div style={{background: 'black'}}>
         {children }
     </div>
   )

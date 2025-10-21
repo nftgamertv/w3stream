@@ -1,126 +1,45 @@
-import { NextResponse } from "next/server"
-import { Resend } from "resend"
-import WaitlistConfirmationEmail from "@/emails/waitlist-confirmation"
+import type { NextApiRequest, NextApiResponse } from 'next';
+import WaitlistConfirmationEmail from '@/emails/waitlist-confirmation';
+import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number; error?: string }> {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const projectId = process.env.RECAPTCHA_PROJECT_ID || 'soy-radius-475713-k3'
-    const apiKey = process.env.RECAPTCHA_API_KEY
+    const { name, email } = req.body;
 
-    if (!apiKey) {
-      console.error('RECAPTCHA_API_KEY not configured')
-      return { success: false, error: 'reCAPTCHA verification not configured' }
+    if (!name || !email) {
+      console.error('[Waitlist API] Missing required fields:', { name: !!name, email: !!email });
+      return res.status(400).json({ error: 'Name and email are required' });
     }
 
-    const response = await fetch(
-      `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/assessments?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          event: {
-            token: token,
-            expectedAction: 'WAITLIST_SUBMIT',
-            siteKey: '6LcEEfErAAAAAJoE9c5PrX1uJcAGv6OZx-pY1VYY',
-          },
-        }),
-      }
-    )
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      to: [email],
+      subject: 'Welcome to Our Private Beta Waitlist!',
+      react: WaitlistConfirmationEmail({ name }),
+    });
 
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error('reCAPTCHA verification failed:', errorData)
-      return { success: false, error: 'reCAPTCHA verification failed' }
+    if (error) {
+      console.error('[Waitlist API] Resend error:', {
+        error,
+        email,
+        name,
+      });
+      return res.status(400).json(error);
     }
 
-    const result = await response.json()
+    console.log('[Waitlist API] Email sent successfully:', {
+      id: data?.id,
+      to: email,
+    });
 
-    // Check if the token is valid and the action matches
-    const isValid = result.tokenProperties?.valid &&
-                   result.tokenProperties?.action === 'WAITLIST_SUBMIT'
-
-    const riskScore = result.riskAnalysis?.score || 0
-
-    console.log('reCAPTCHA assessment:', {
-      valid: isValid,
-      score: riskScore,
-      reasons: result.riskAnalysis?.reasons
-    })
-
-    // You can adjust the threshold (0.5 is recommended for form submissions)
-    if (!isValid || riskScore < 0.5) {
-      return {
-        success: false,
-        score: riskScore,
-        error: 'Failed reCAPTCHA verification. Please try again.'
-      }
-    }
-
-    return { success: true, score: riskScore }
+    res.status(200).json(data);
   } catch (error) {
-    console.error('Error verifying reCAPTCHA:', error)
-    return { success: false, error: 'reCAPTCHA verification error' }
+    console.error('[Waitlist API] Exception:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    res.status(500).json({ error: 'Internal server error' });
   }
-}
-
-export async function POST(request: Request) {
-  try {
-    const data = await request.json()
-
-    // Verify reCAPTCHA token
-    if (!data.recaptchaToken) {
-      return NextResponse.json(
-        { error: 'reCAPTCHA token missing', message: 'Please complete the reCAPTCHA verification.' },
-        { status: 400 }
-      )
-    }
-
-    const recaptchaResult = await verifyRecaptcha(data.recaptchaToken)
-
-    if (!recaptchaResult.success) {
-      return NextResponse.json(
-        {
-          error: 'reCAPTCHA verification failed',
-          message: recaptchaResult.error || 'Failed security verification. Please try again.'
-        },
-        { status: 403 }
-      )
-    }
-
-    // Remove the token from data before processing
-    const { recaptchaToken, ...cleanData } = data
-
-    // Send confirmation email to the user
-    await resend.emails.send({
-      from: 'w3Stream <onboarding@w3stream.com>',
-      to: cleanData.email,
-      subject: 'Welcome to the w3Stream Waitlist!',
-      react: WaitlistConfirmationEmail({ name: cleanData.name }),
-    })
-
-    // You can also send a notification to your team
-    // await resend.emails.send({
-    //   from: 'w3Stream <notifications@w3stream.com>',
-    //   to: 'team@w3stream.com',
-    //   subject: 'New Waitlist Signup',
-    //   react: NewSignupNotification(cleanData),
-    // })
-
-    console.log("[v0] Waitlist submission received:", {
-      ...cleanData,
-      recaptchaScore: recaptchaResult.score
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("[v0] Error processing waitlist submission:", error)
-    return NextResponse.json(
-      { error: "Failed to process submission", message: "An error occurred. Please try again." },
-      { status: 500 }
-    )
-  }
-}
+};
