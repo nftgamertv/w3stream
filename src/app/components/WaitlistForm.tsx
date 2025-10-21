@@ -8,7 +8,11 @@ import { Input } from "@/components/ui/input"
 import { ArrowRight, CheckCircle, Loader2, Mail } from "lucide-react"
 import { useToast } from "./ui/use-toast"
 
-export function WaitlistForm() {
+interface WaitlistFormProps {
+  onSuccess?: () => void
+}
+
+export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -54,6 +58,7 @@ export function WaitlistForm() {
         title: "Welcome to the waitlist! 🎉",
         description: "Check your email for a confirmation message.",
       })
+      onSuccess?.() // Call the callback if provided
     } catch (error) {
       toast({
         title: "Oops! Something went wrong",

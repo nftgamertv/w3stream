@@ -1,180 +1,340 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, useMemo } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Sphere } from "@react-three/drei"
 import * as THREE from "three"
 
+// Optimized StreamingWaves with geometry/material reuse
 function StreamingWaves() {
   const groupRef = useRef<THREE.Group>(null)
   const waveRefs = useRef<THREE.Mesh[]>([])
 
-  // Create broadcasting wave rings
-  const waves = Array.from({ length: 8 }, (_, i) => ({
+  // Wave configuration
+  const waves = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
     radius: 2 + i * 1.5,
     speed: 0.5 + i * 0.1,
     opacity: 0.8 - i * 0.08,
-  }))
+  })), [])
+
+  // Shared geometries - reduced segments from 32 to 16 (visually acceptable, 50% reduction)
+  const geometries = useMemo(() =>
+    waves.map(wave => new THREE.RingGeometry(wave.radius, wave.radius + 0.1, 16))
+  , [waves])
+
+  // Shared materials with proper initialization
+  const materials = useMemo(() =>
+    waves.map((wave, i) => new THREE.MeshBasicMaterial({
+      color: i % 2 === 0 ? 0x06b6d4 : 0x8b5cf6,
+      transparent: true,
+      opacity: wave.opacity,
+      side: THREE.DoubleSide,
+      depthWrite: false, // Performance optimization for transparent objects
+    }))
+  , [waves])
+
+  // Pre-allocate temp objects to avoid garbage collection
+  const tempScale = useMemo(() => new THREE.Vector3(), [])
 
   useFrame((state) => {
+    const time = state.clock.elapsedTime
+
     if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.1
+      groupRef.current.rotation.y = time * 0.1
     }
 
-    waveRefs.current.forEach((wave, i) => {
-      if (wave) {
-        const scale = 1 + Math.sin(state.clock.elapsedTime * waves[i].speed) * 0.3
-        wave.scale.setScalar(scale)
-        const material = wave.material as THREE.MeshBasicMaterial
-        material.opacity = waves[i].opacity * (0.5 + Math.sin(state.clock.elapsedTime * waves[i].speed) * 0.5)
-      }
-    })
+    // Batch all wave updates
+    for (let i = 0; i < waveRefs.current.length; i++) {
+      const wave = waveRefs.current[i]
+      if (!wave) continue
+
+      const waveSpeed = waves[i].speed
+      const sinValue = Math.sin(time * waveSpeed)
+
+      // Update scale using temp vector
+      const scale = 1 + sinValue * 0.3
+      tempScale.setScalar(scale)
+      wave.scale.copy(tempScale)
+
+      // Update opacity
+      const material = materials[i]
+      material.opacity = waves[i].opacity * (0.5 + sinValue * 0.5)
+    }
   })
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      geometries.forEach(geo => geo.dispose())
+      materials.forEach(mat => mat.dispose())
+    }
+  }, [geometries, materials])
 
   return (
     <group ref={groupRef}>
-      {waves.map((wave, i) => (
+      {waves.map((_, i) => (
         <mesh
           key={i}
           ref={(el) => {
             if (el) waveRefs.current[i] = el
           }}
-          position={[0, 0, 0]}
-        >
-          <ringGeometry args={[wave.radius, wave.radius + 0.1, 32]} />
-          <meshBasicMaterial
-            color={i % 2 === 0 ? "#06b6d4" : "#8b5cf6"}
-            transparent
-            opacity={wave.opacity}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+          geometry={geometries[i]}
+          material={materials[i]}
+        />
       ))}
     </group>
   )
 }
 
+// Optimized DataStreams using InstancedMesh for better performance
 function DataStreams() {
-  const streamRefs = useRef<THREE.Group[]>([])
+  const instancedMeshRef = useRef<THREE.InstancedMesh>(null)
 
-  // Create data packet streams
-  const streams = Array.from({ length: 12 }, (_, i) => ({
+  // Stream configuration
+  const streams = useMemo(() => Array.from({ length: 12 }, (_, i) => ({
     angle: (i / 12) * Math.PI * 2,
     radius: 8 + Math.random() * 4,
     speed: 0.5 + Math.random() * 0.5,
-  }))
+    colorIndex: i % 3,
+  })), [])
+
+  // Shared geometry - reduced segments from default (32/16) to 8/6
+  const geometry = useMemo(() => new THREE.SphereGeometry(0.05, 8, 6), [])
+
+  // Create 3 materials for the 3 colors
+  const materials = useMemo(() => [
+    new THREE.MeshBasicMaterial({ color: 0x06b6d4, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: 0x8b5cf6, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: 0x10b981, depthWrite: false }),
+  ], [])
+
+  // Pre-allocate temp objects
+  const tempMatrix = useMemo(() => new THREE.Matrix4(), [])
+  const tempPosition = useMemo(() => new THREE.Vector3(), [])
+
+  // Initialize instance matrices
+  useEffect(() => {
+    if (!instancedMeshRef.current) return
+
+    const mesh = instancedMeshRef.current
+    for (let i = 0; i < streams.length; i++) {
+      tempMatrix.identity()
+      mesh.setMatrixAt(i, tempMatrix)
+      mesh.setColorAt(i, materials[streams[i].colorIndex].color)
+    }
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+  }, [streams, materials, tempMatrix])
 
   useFrame((state) => {
-    streamRefs.current.forEach((stream, i) => {
-      if (stream) {
-        const angle = streams[i].angle + state.clock.elapsedTime * streams[i].speed
-        stream.position.x = Math.cos(angle) * streams[i].radius
-        stream.position.z = Math.sin(angle) * streams[i].radius
-        stream.position.y = Math.sin(state.clock.elapsedTime * 2 + i) * 2
-      }
-    })
+    if (!instancedMeshRef.current) return
+
+    const time = state.clock.elapsedTime
+    const mesh = instancedMeshRef.current
+
+    // Update all instances in a single pass
+    for (let i = 0; i < streams.length; i++) {
+      const stream = streams[i]
+      const angle = stream.angle + time * stream.speed
+
+      tempPosition.set(
+        Math.cos(angle) * stream.radius,
+        Math.sin(time * 2 + i) * 2,
+        Math.sin(angle) * stream.radius
+      )
+
+      tempMatrix.setPosition(tempPosition)
+      mesh.setMatrixAt(i, tempMatrix)
+    }
+
+    mesh.instanceMatrix.needsUpdate = true
   })
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      geometry.dispose()
+      materials.forEach(mat => mat.dispose())
+    }
+  }, [geometry, materials])
+
   return (
-    <>
-      {streams.map((_, i) => (
-        <group
-          key={i}
-          ref={(el) => {
-            if (el) streamRefs.current[i] = el
-          }}
-        >
-          <Sphere args={[0.05]}>
-            <meshBasicMaterial color={i % 3 === 0 ? "#06b6d4" : i % 3 === 1 ? "#8b5cf6" : "#10b981"} />
-          </Sphere>
-        </group>
-      ))}
-    </>
+    <instancedMesh
+      ref={instancedMeshRef}
+      args={[geometry, materials[0], streams.length]}
+      frustumCulled={true}
+    >
+      <instancedBufferAttribute attach="instanceColor" args={[new Float32Array(streams.length * 3), 3]} />
+    </instancedMesh>
   )
 }
 
+// Optimized AudioWaveform using InstancedMesh
 function AudioWaveform() {
-  const waveformRef = useRef<THREE.Group>(null)
-  const barsRef = useRef<THREE.Mesh[]>([])
+  const groupRef = useRef<THREE.Group>(null)
+  const instancedMeshRef = useRef<THREE.InstancedMesh>(null)
 
-  const bars = Array.from({ length: 20 }, (_, i) => ({
+  const bars = useMemo(() => Array.from({ length: 20 }, (_, i) => ({
     x: (i - 10) * 0.3,
     baseHeight: 0.2 + Math.random() * 0.3,
     frequency: 1 + Math.random() * 2,
-  }))
+  })), [])
+
+  // Shared geometry
+  const geometry = useMemo(() => new THREE.BoxGeometry(0.1, 1, 0.1), [])
+
+  // Shared material
+  const material = useMemo(() => new THREE.MeshBasicMaterial({
+    color: 0x06b6d4,
+    transparent: true,
+    opacity: 0.4,
+    depthWrite: false,
+  }), [])
+
+  // Pre-allocate temp objects
+  const tempMatrix = useMemo(() => new THREE.Matrix4(), [])
+  const tempPosition = useMemo(() => new THREE.Vector3(), [])
+  const tempScale = useMemo(() => new THREE.Vector3(1, 1, 1), [])
+  const tempColor = useMemo(() => new THREE.Color(0x06b6d4), [])
+
+  // Initialize instance matrices
+  useEffect(() => {
+    if (!instancedMeshRef.current) return
+
+    const mesh = instancedMeshRef.current
+    for (let i = 0; i < bars.length; i++) {
+      tempPosition.set(bars[i].x, 0, 0)
+      tempMatrix.compose(tempPosition, new THREE.Quaternion(), tempScale)
+      mesh.setMatrixAt(i, tempMatrix)
+      mesh.setColorAt(i, tempColor)
+    }
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+  }, [bars, tempMatrix, tempPosition, tempScale, tempColor])
 
   useFrame((state) => {
-    if (waveformRef.current) {
-      waveformRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.3) * 2
+    const time = state.clock.elapsedTime
+
+    if (groupRef.current) {
+      groupRef.current.position.x = Math.sin(time * 0.3) * 2
     }
 
-    barsRef.current.forEach((bar, i) => {
-      if (bar) {
-        const height = bars[i].baseHeight + Math.sin(state.clock.elapsedTime * bars[i].frequency * 3) * 0.4
-        bar.scale.y = Math.max(0.1, height)
-        const material = bar.material as THREE.MeshBasicMaterial
-        material.opacity = 0.3 + height * 0.4
-      }
-    })
+    if (!instancedMeshRef.current) return
+
+    const mesh = instancedMeshRef.current
+
+    // Update all bar instances
+    for (let i = 0; i < bars.length; i++) {
+      const bar = bars[i]
+      const height = bar.baseHeight + Math.sin(time * bar.frequency * 3) * 0.4
+      const scaleY = Math.max(0.1, height)
+
+      tempPosition.set(bar.x, 0, 0)
+      tempScale.set(1, scaleY, 1)
+      tempMatrix.compose(tempPosition, new THREE.Quaternion(), tempScale)
+      mesh.setMatrixAt(i, tempMatrix)
+
+      // Update color opacity via color intensity
+      const opacity = 0.3 + height * 0.4
+      tempColor.setRGB(
+        0x06 / 0xff * opacity,
+        0xb6 / 0xff * opacity,
+        0xd4 / 0xff * opacity
+      )
+      mesh.setColorAt(i, tempColor)
+    }
+
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
   })
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      geometry.dispose()
+      material.dispose()
+    }
+  }, [geometry, material])
+
   return (
-    <group ref={waveformRef} position={[0, -3, -8]}>
-      {bars.map((bar, i) => (
-        <mesh
-          key={i}
-          ref={(el) => {
-            if (el) barsRef.current[i] = el
-          }}
-          position={[bar.x, 0, 0]}
-        >
-          <boxGeometry args={[0.1, 1, 0.1]} />
-          <meshBasicMaterial color="#06b6d4" transparent opacity={0.4} />
-        </mesh>
-      ))}
+    <group ref={groupRef} position={[0, -3, -8]}>
+      <instancedMesh
+        ref={instancedMeshRef}
+        args={[geometry, material, bars.length]}
+        frustumCulled={true}
+      >
+        <instancedBufferAttribute attach="instanceColor" args={[new Float32Array(bars.length * 3), 3]} />
+      </instancedMesh>
     </group>
   )
 }
 
+// Optimized BroadcastSignals with shared geometry/materials
 function BroadcastSignals() {
   const signalRefs = useRef<THREE.Mesh[]>([])
 
-  // Create six broadcasting signal planes
-  const signals = Array.from({ length: 6 })
+  const signals = useMemo(() => Array.from({ length: 6 }, (_, i) => ({
+    rotation: (i / 6) * Math.PI * 2,
+    colorIndex: i % 2,
+  })), [])
+
+  // Shared geometry
+  const geometry = useMemo(() => new THREE.PlaneGeometry(0.02, 8), [])
+
+  // Shared materials
+  const materials = useMemo(() => [
+    new THREE.MeshBasicMaterial({
+      color: 0x06b6d4,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    }),
+    new THREE.MeshBasicMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    }),
+  ], [])
 
   useFrame((state) => {
-    // Rotate the whole ring slowly
-    signalRefs.current.forEach((mesh, i) => {
-      if (mesh) {
-        // Continuous radial rotation
-        mesh.rotation.z = state.clock.elapsedTime * 0.2 + (i / 6) * Math.PI * 2
+    const time = state.clock.elapsedTime
 
-        // Subtle pulsing opacity
-        const material = mesh.material as THREE.MeshBasicMaterial
-        material.opacity = 0.1 + Math.sin(state.clock.elapsedTime * 2 + i) * 0.05
-      }
-    })
+    // Update all signal meshes
+    for (let i = 0; i < signalRefs.current.length; i++) {
+      const mesh = signalRefs.current[i]
+      if (!mesh) continue
+
+      // Continuous radial rotation
+      mesh.rotation.z = time * 0.2 + signals[i].rotation
+
+      // Subtle pulsing opacity
+      const material = materials[signals[i].colorIndex]
+      material.opacity = 0.1 + Math.sin(time * 2 + i) * 0.05
+    }
   })
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      geometry.dispose()
+      materials.forEach(mat => mat.dispose())
+    }
+  }, [geometry, materials])
 
   return (
     <group position={[0, 0, -10]}>
-      {signals.map((_, i) => (
+      {signals.map((signal, i) => (
         <mesh
           key={i}
           ref={(el) => {
             if (el) signalRefs.current[i] = el
           }}
-          position={[0, 0, 0]}
-          rotation={[0, 0, (i / 6) * Math.PI * 2]}
-        >
-          <planeGeometry args={[0.02, 8]} />
-          <meshBasicMaterial
-            color={i % 2 === 0 ? "#06b6d4" : "#8b5cf6"}
-            transparent
-            opacity={0.15}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+          rotation={[0, 0, signal.rotation]}
+          geometry={geometry}
+          material={materials[signal.colorIndex]}
+        />
       ))}
     </group>
   )
@@ -262,6 +422,9 @@ export function ThreeBackground() {
           powerPreference: "high-performance",
           preserveDrawingBuffer: false,
           failIfMajorPerformanceCaveat: false,
+          // Additional performance optimizations
+          stencil: false,
+          depth: true,
         }}
         dpr={[1, 1.5]}
         frameloop="always"
@@ -271,6 +434,9 @@ export function ThreeBackground() {
           if (size.width > 0 && size.height > 0) {
             gl.setSize(size.width, size.height, false)
           }
+
+          // Performance optimizations
+          gl.setClearColor(0x000000, 0)
 
           // Add WebGL context lost/restored handlers
           const canvas = gl.domElement
