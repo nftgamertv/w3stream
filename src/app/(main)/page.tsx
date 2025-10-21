@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { CyclingText } from "@/components/CyclingText"
 
- 
+
 
 import KeystrokeListener from "@/components/KeystrokeListener"
- 
+
  import ScrollingVideo from "@/components/ScrollingVIdeo";
+ import PerformanceModal from "@/components/PerformanceModal";
  
 export default function SplashPage() {
   const cyclingItems = [
@@ -55,17 +56,22 @@ export default function SplashPage() {
 
             {/* Waitlist Form - Enhanced */}
            <div className="max-w-2xl mx-auto">
-    
+
  <div className="text-4xl md:text-5xl font-extrabold text-white mb-6">
                     <h2 className="text-xl md:text-xl font-bold text-balance">
           Be a part of the next-gen {" "}
           <CyclingText items={cyclingItems} interval={2500} className="font-bold min-w-[180px]" />{" "} revolution
         </h2>
-                </div>  
-                 <Link href="/waitlist" className="btn-brand max-w-md mt-12 relative mx-auto">
+                </div>
+
+                 {/* Performance Stats Button (temporarily replacing waitlist) */}
+                 <PerformanceModal />
+
+                 {/* Commented out waitlist - temporarily for performance testing */}
+                 {/* <Link href="/waitlist" className="btn-brand max-w-md mt-12 relative mx-auto">
                   Join the Waitlist
-                </Link>
-           
+                </Link> */}
+
             </div>  
 
             {/* Social Proof */}
