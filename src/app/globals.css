@@ -847,6 +847,12 @@ body::before {
   font-weight: 700;
 }
 
+.red-highlight {
+  color: #550707;
+  font-weight: 600;
+  font-size: 14px;  
+  color: cyan
+} 
 
 /* ============================================
    RESPONSIVE MEDIA QUERIES

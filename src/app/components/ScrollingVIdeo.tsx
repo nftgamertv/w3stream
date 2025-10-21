@@ -21,7 +21,7 @@ export default function ScrollingCinemaBanner() {
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <video autoPlay loop muted playsInline className="h-full w-auto relative z-50 mb-12"  width={600}
           height={200}>
-          <source src="/videos/w3SLogo2.webm" type="video/webm" />
+          <source src="/videos/w3SLogo.webm" type="video/webm" />
         </video>
          
        
