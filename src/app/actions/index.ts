@@ -31,7 +31,7 @@ export async function submitWaitlistForm(formData: WaitlistFormData) {
     }
 
     // Insert into Supabase
-    const { data, error } = await supabase.from("w3s_waitlist").insert([dbData]).select().single()
+    const { data, error } = await supabase.from("w3s_waitlist").insert([dbData]).select()
 
     if (error) {
       console.error("[v0] Supabase error:", error)

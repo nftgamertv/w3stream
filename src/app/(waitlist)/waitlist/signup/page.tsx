@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,19 +10,59 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { InfoIcon, CheckCircle2 } from "lucide-react"
+import { InfoIcon, CheckCircle2, Sparkles } from "lucide-react"
 import { submitWaitlistForm, type WaitlistFormData } from "@/actions/index"
+import { SocialPlatformInput } from "@/components/SocialPlatformInput"
 
 const PLATFORMS = [
-  "Twitch",
-  "YouTube",
-  "TikTok",
-  "Instagram",
-  "Twitter/X",
-  "Discord",
-  "Facebook Gaming",
-  "Kick",
-  "Other",
+  {
+    name: "Twitch",
+    icon: "twitch",
+    color: "bg-[#9146FF]",
+    hoverColor: "hover:bg-[#772CE8]",
+  },
+  {
+    name: "YouTube",
+    icon: "youtube",
+    color: "bg-[#FF0000]",
+    hoverColor: "hover:bg-[#CC0000]",
+  },
+  {
+    name: "TikTok",
+    icon: "tiktok",
+    color: "bg-gradient-to-r from-[#00F2EA] to-[#FF0050]",
+    hoverColor: "hover:opacity-90",
+  },
+  {
+    name: "Instagram",
+    icon: "instagram",
+    color: "bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737]",
+    hoverColor: "hover:opacity-90",
+  },
+  {
+    name: "Twitter/X",
+    icon: "twitter",
+    color: "bg-black",
+    hoverColor: "hover:bg-gray-900",
+  },
+  {
+    name: "Discord",
+    icon: "discord",
+    color: "bg-[#5865F2]",
+    hoverColor: "hover:bg-[#4752C4]",
+  },
+  {
+    name: "Facebook Gaming",
+    icon: "facebook",
+    color: "bg-[#0866FF]",
+    hoverColor: "hover:bg-[#0654D4]",
+  },
+  {
+    name: "Other",
+    icon: "other",
+    color: "bg-gradient-to-r from-cyan-500 to-blue-500",
+    hoverColor: "hover:opacity-90",
+  },
 ]
 
 export default function BetaSignupPage() {
@@ -46,12 +85,10 @@ export default function BetaSignupPage() {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
 
-    // Validation
     if (!formData.name.trim()) newErrors.name = "Name is required"
     if (!formData.email.trim()) newErrors.email = "Email is required"
     if (!formData.bio.trim()) newErrors.bio = "Please tell us about yourself"
 
-    // If they're an influencer, require handle and platform
     if (formData.isInfluencer) {
       if (!formData.influencerHandle.trim()) {
         newErrors.influencerHandle = "Handle is required for influencers"
@@ -61,7 +98,6 @@ export default function BetaSignupPage() {
       }
     }
 
-    // If they selected platforms, require at least one handle
     if (selectedPlatforms.length > 0) {
       const hasAtLeastOneHandle = selectedPlatforms.some((platform) => formData.socialHandles[platform]?.trim())
       if (!hasAtLeastOneHandle) {
@@ -73,9 +109,7 @@ export default function BetaSignupPage() {
 
     if (Object.keys(newErrors).length === 0) {
       setIsSubmitting(true)
-
       const result = await submitWaitlistForm(formData as WaitlistFormData)
-
       setIsSubmitting(false)
 
       if (result.success) {
@@ -102,19 +136,36 @@ export default function BetaSignupPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background py-12 px-4 flex items-center justify-center"  style={{zIndex: 9999999}}>
-        <Card className="max-w-md w-full border-2">
-          <CardContent className="pt-6 text-center space-y-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-12 px-4 flex items-center justify-center relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        </div>
+
+        <Card className="max-w-md w-full border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-cyan-500/10 relative z-10">
+          <CardContent className="pt-8 text-center space-y-6">
             <div className="flex justify-center">
-              <CheckCircle2 className="h-16 w-16 text-primary" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-xl animate-pulse" />
+                <CheckCircle2 className="h-20 w-20 text-cyan-400 relative z-10" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Thank You!</h2>
-              <p className="text-muted-foreground">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold text-balance bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                Welcome Aboard!
+              </h2>
+              <p className="text-slate-300 leading-relaxed">
                 We've received your application for private beta access. Check your email for confirmation and we'll be
                 in touch soon!
               </p>
             </div>
+            <Button
+              onClick={() => (window.location.href = "/")}
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold"
+            >
+              Back to Home
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -122,36 +173,50 @@ export default function BetaSignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="mx-auto max-w-2xl">
-        <Card className="border-2">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-3xl font-bold text-balance">Join Our Private Beta</CardTitle>
-            <CardDescription className="text-base">
-              Be among the first to experience our platform. Fill out the form below to request access.
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-12 px-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="mx-auto max-w-2xl relative z-10">
+        <Card className="border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-cyan-500/10">
+          <CardHeader className="space-y-4 pb-8">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-cyan-400" />
+              <CardTitle className="text-4xl font-bold text-balance bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Join Our Private Beta
+              </CardTitle>
+            </div>
+            <CardDescription className="text-base text-slate-300 leading-relaxed">
+              Be among the first to experience the next-gen streaming revolution. Fill out the form below to request
+              access.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Name <span className="text-destructive">*</span>
+                <Label htmlFor="name" className="text-sm font-medium text-slate-200">
+                  Name <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Enter your full name"
-                  className={errors.name ? "border-destructive" : ""}
+                  className={`bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
                 />
-                {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                {errors.name && <p className="text-sm text-red-400">{errors.name}</p>}
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email <span className="text-destructive">*</span>
+                <Label htmlFor="email" className="text-sm font-medium text-slate-200">
+                  Email <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -159,33 +224,33 @@ export default function BetaSignupPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="your.email@example.com"
-                  className={errors.email ? "border-destructive" : ""}
+                  className={`bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20 ${
+                    errors.email ? "border-red-500" : ""
+                  }`}
                 />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
               </div>
 
               {/* Influencer Checkbox */}
               <div className="space-y-4">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3 p-4 rounded-lg bg-slate-800/30 border border-slate-700/50 hover:border-cyan-500/30 transition-colors">
                   <Checkbox
                     id="influencer"
                     checked={formData.isInfluencer}
                     onCheckedChange={(checked) => setFormData({ ...formData, isInfluencer: checked as boolean })}
+                    className="border-slate-600 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
                   />
-                  <Label
-                    htmlFor="influencer"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
+                  <Label htmlFor="influencer" className="text-sm font-medium text-slate-200 cursor-pointer">
                     I am a streamer/gamer/influencer/KOL
                   </Label>
                 </div>
 
                 {/* Conditional Influencer Fields */}
                 {formData.isInfluencer && (
-                  <div className="ml-6 space-y-4 rounded-lg border bg-muted/50 p-4">
+                  <div className="space-y-4 rounded-lg border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 p-6 backdrop-blur-sm">
                     <div className="space-y-2">
-                      <Label htmlFor="influencer-platform" className="text-sm font-medium">
-                        Primary Platform <span className="text-destructive">*</span>
+                      <Label htmlFor="influencer-platform" className="text-sm font-medium text-slate-200">
+                        Primary Platform <span className="text-red-400">*</span>
                       </Label>
                       <Select
                         value={formData.influencerPlatform}
@@ -193,35 +258,41 @@ export default function BetaSignupPage() {
                       >
                         <SelectTrigger
                           id="influencer-platform"
-                          className={errors.influencerPlatform ? "border-destructive" : ""}
+                          className={`bg-slate-800/50 border-slate-700 text-white focus:border-cyan-500 focus:ring-cyan-500/20 ${
+                            errors.influencerPlatform ? "border-red-500" : ""
+                          }`}
                         >
                           <SelectValue placeholder="Select your platform" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-slate-800 border-slate-700">
                           {PLATFORMS.map((platform) => (
-                            <SelectItem key={platform} value={platform}>
-                              {platform}
+                            <SelectItem
+                              key={platform.name}
+                              value={platform.name}
+                              className="text-white focus:bg-slate-700 focus:text-white"
+                            >
+                              {platform.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {errors.influencerPlatform && (
-                        <p className="text-sm text-destructive">{errors.influencerPlatform}</p>
-                      )}
+                      {errors.influencerPlatform && <p className="text-sm text-red-400">{errors.influencerPlatform}</p>}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="influencer-handle" className="text-sm font-medium">
-                        Handle/Username <span className="text-destructive">*</span>
+                      <Label htmlFor="influencer-handle" className="text-sm font-medium text-slate-200">
+                        Handle/Username <span className="text-red-400">*</span>
                       </Label>
                       <Input
                         id="influencer-handle"
                         value={formData.influencerHandle}
                         onChange={(e) => setFormData({ ...formData, influencerHandle: e.target.value })}
                         placeholder="@yourhandle"
-                        className={errors.influencerHandle ? "border-destructive" : ""}
+                        className={`bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20 ${
+                          errors.influencerHandle ? "border-red-500" : ""
+                        }`}
                       />
-                      {errors.influencerHandle && <p className="text-sm text-destructive">{errors.influencerHandle}</p>}
+                      {errors.influencerHandle && <p className="text-sm text-red-400">{errors.influencerHandle}</p>}
                     </div>
                   </div>
                 )}
@@ -229,8 +300,8 @@ export default function BetaSignupPage() {
 
               {/* Bio */}
               <div className="space-y-2">
-                <Label htmlFor="bio" className="text-sm font-medium">
-                  Tell us a bit about yourself <span className="text-destructive">*</span>
+                <Label htmlFor="bio" className="text-sm font-medium text-slate-200">
+                  Tell us a bit about yourself <span className="text-red-400">*</span>
                 </Label>
                 <Textarea
                   id="bio"
@@ -238,70 +309,69 @@ export default function BetaSignupPage() {
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   placeholder="What brings you here? What are you interested in?"
                   rows={4}
-                  className={errors.bio ? "border-destructive" : ""}
+                  className={`bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:ring-cyan-500/20 resize-none ${
+                    errors.bio ? "border-red-500" : ""
+                  }`}
                 />
-                {errors.bio && <p className="text-sm text-destructive">{errors.bio}</p>}
+                {errors.bio && <p className="text-sm text-red-400">{errors.bio}</p>}
               </div>
 
-              {/* Social Platforms (Optional) */}
+              {/* Social Platforms */}
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">
-                    Social Media Handles <span className="text-muted-foreground">(Optional)</span>
+                  <Label className="text-sm font-medium text-slate-200">
+                    Social Media Handles <span className="text-slate-400">(Optional)</span>
                   </Label>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-slate-400 mt-1 leading-relaxed">
                     Select platforms and add your handles to help us connect with you
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   {PLATFORMS.map((platform) => (
-                    <div key={platform} className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`platform-${platform}`}
-                          checked={selectedPlatforms.includes(platform)}
-                          onCheckedChange={() => handlePlatformToggle(platform)}
-                        />
-                        <Label
-                          htmlFor={`platform-${platform}`}
-                          className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {platform}
-                        </Label>
-                      </div>
-                      {selectedPlatforms.includes(platform) && (
-                        <Input
-                          value={formData.socialHandles[platform] || ""}
-                          onChange={(e) => handleSocialHandleChange(platform, e.target.value)}
-                          placeholder={`Your ${platform} handle`}
-                          className="ml-6"
-                        />
-                      )}
-                    </div>
+                    <SocialPlatformInput
+                      key={platform.name}
+                      platform={platform}
+                      isSelected={selectedPlatforms.includes(platform.name)}
+                      value={formData.socialHandles[platform.name] || ""}
+                      onToggle={() => handlePlatformToggle(platform.name)}
+                      onChange={(value) => handleSocialHandleChange(platform.name, value)}
+                    />
                   ))}
                 </div>
 
-                {errors.socialHandles && <p className="text-sm text-destructive">{errors.socialHandles}</p>}
+                {errors.socialHandles && <p className="text-sm text-red-400">{errors.socialHandles}</p>}
               </div>
 
               {/* Info Alert */}
-              <Alert className="bg-primary/5 border-primary/20">
-                <InfoIcon className="h-4 w-4 text-primary" />
-                <AlertDescription className="text-sm text-foreground">
+              <Alert className="bg-cyan-500/10 border-cyan-500/30 backdrop-blur-sm">
+                <InfoIcon className="h-4 w-4 text-cyan-400" />
+                <AlertDescription className="text-sm text-slate-300">
                   We'll use this information to contact you about private beta access. Your data will be kept
                   confidential.
                 </AlertDescription>
               </Alert>
 
               {errors.submit && (
-                <Alert className="bg-destructive/10 border-destructive/50">
-                  <AlertDescription className="text-sm text-destructive">{errors.submit}</AlertDescription>
+                <Alert className="bg-red-500/10 border-red-500/30">
+                  <AlertDescription className="text-sm text-red-400">{errors.submit}</AlertDescription>
                 </Alert>
               )}
 
-              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Request Beta Access"}
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold text-base shadow-lg shadow-cyan-500/20 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Submitting...
+                  </span>
+                ) : (
+                  "Request Beta Access"
+                )}
               </Button>
             </form>
           </CardContent>
