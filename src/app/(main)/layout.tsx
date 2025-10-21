@@ -1,17 +1,17 @@
 import React from 'react'
 import { Sparkles } from "lucide-react"
 // Uncomment after running 'npm install' and adding your Spline scene to public/spline/
-// import { SelfHostedSplineScene } from '@/components/SplineScene'
+  import { SelfHostedSplineScene } from '@/components/SplineScene'
 
 export default function MainLayout({children}:{children:React.ReactNode}) {
   return (
     <div style={{minHeight: '100vh', position: 'relative', overflow: 'hidden'}}>
       {/* Self-hosted Spline scene - ultra-deferred for performance */}
       {/* Uncomment after exporting your Spline scene and placing in public/spline/ */}
-      {/* <SelfHostedSplineScene
+     <SelfHostedSplineScene
         sceneUrl="/spline/scene.splinecode"
-        className="absolute inset-0 pointer-events-none"
-      /> */}
+        className="absolute -bottom-28 pointer-events-none"
+      />  
 
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
         {/* Badge */}

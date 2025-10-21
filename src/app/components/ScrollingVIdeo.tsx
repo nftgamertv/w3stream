@@ -88,7 +88,7 @@ export default function ScrollingCinemaBanner() {
       {/* Background carousel videos - DEFERRED */}
       <div className="absolute inset-0 flex animate-scroll-video">
         <video
-          ref={(el) => (carouselVideoRefs.current[0] = el)}
+          ref={(el) => { carouselVideoRefs.current[0] = el }}
           loop
           muted
           playsInline
@@ -104,7 +104,7 @@ export default function ScrollingCinemaBanner() {
           <source src="/videos/carousel.webm" type="video/webm" />
         </video>
         <video
-          ref={(el) => (carouselVideoRefs.current[1] = el)}
+          ref={(el) => { carouselVideoRefs.current[1] = el }}
           loop
           muted
           playsInline
@@ -120,7 +120,7 @@ export default function ScrollingCinemaBanner() {
           <source src="/videos/carousel.webm" type="video/webm" />
         </video>
         <video
-          ref={(el) => (carouselVideoRefs.current[2] = el)}
+          ref={(el) => { carouselVideoRefs.current[2] = el }}
           loop
           muted
           playsInline
@@ -143,9 +143,9 @@ export default function ScrollingCinemaBanner() {
           ref={logoVideoRef}
           loop
           muted
+          autoPlay
           playsInline
           preload="metadata"
-          fetchpriority="high"
           className="h-full w-auto relative z-50 mb-12"
           width={600}
           height={200}
