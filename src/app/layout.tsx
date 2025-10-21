@@ -43,17 +43,7 @@ export default function RootLayout({
       >
         <Suspense fallback={null}>
           <ReactQueryProvider>
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="video-element"
-            >
-              <source src="/videos/_background.webm" type="video/webm" />
-              Your browser does not support the video tag.
-            </video>
-    
+            <VideoBackground /> 
             {children}
                     <ThreeBackground />
           </ReactQueryProvider>
