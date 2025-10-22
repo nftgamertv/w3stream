@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const data = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: [email],
-      subject: 'Welcome to Our Private Beta Waitlist!',
+      subject: 'Thank you for joining the w3Stream waitlist!',
       react: WaitlistConfirmationEmail({ name }),
     });
 
