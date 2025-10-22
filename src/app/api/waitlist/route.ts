@@ -9,21 +9,57 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, email, recaptchaToken } = body;
 
-    // Verify reCAPTCHA token first
+    // Verify reCAPTCHA v3 token
     if (!recaptchaToken) {
       console.error('[Waitlist API] Missing reCAPTCHA token');
       return NextResponse.json({ error: 'reCAPTCHA verification required' }, { status: 400 });
     }
 
-    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`;
-    
-    const recaptchaResponse = await fetch(verificationUrl, { method: 'POST' });
+    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify`;
+    const verificationBody = new URLSearchParams({
+      secret: process.env.RECAPTCHA_SECRET_KEY!,
+      response: recaptchaToken,
+    });
+
+    const recaptchaResponse = await fetch(verificationUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: verificationBody,
+    });
     const recaptchaData = await recaptchaResponse.json();
 
+    // reCAPTCHA v3 returns a score (0.0 - 1.0)
+    // 1.0 is very likely a good interaction, 0.0 is very likely a bot
     if (!recaptchaData.success) {
       console.error('[Waitlist API] reCAPTCHA verification failed:', recaptchaData);
       return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 400 });
     }
+
+    // Verify the action matches what we expect
+    if (recaptchaData.action !== 'submit_waitlist') {
+      console.error('[Waitlist API] Invalid reCAPTCHA action:', recaptchaData.action);
+      return NextResponse.json({ error: 'Invalid reCAPTCHA action' }, { status: 400 });
+    }
+
+    // Check the score - you can adjust this threshold (0.5 is recommended default)
+    const scoreThreshold = 0.5;
+    if (recaptchaData.score < scoreThreshold) {
+      console.warn('[Waitlist API] Low reCAPTCHA score:', {
+        score: recaptchaData.score,
+        threshold: scoreThreshold,
+        email: email,
+      });
+      return NextResponse.json({
+        error: 'Your submission appears suspicious. Please try again or contact support.'
+      }, { status: 400 });
+    }
+
+    console.log('[Waitlist API] reCAPTCHA verification successful:', {
+      score: recaptchaData.score,
+      action: recaptchaData.action,
+    });
 
     if (!name || !email) {
       console.error('[Waitlist API] Missing required fields:', { name: !!name, email: !!email });

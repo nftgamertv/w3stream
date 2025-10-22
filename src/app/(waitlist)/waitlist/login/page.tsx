@@ -84,7 +84,7 @@ export default function WaitlistLogin() {
 
           {/* Footer */}
           <div className="mt-8 text-center text-sm text-slate-400">
-            <p>
+            <p className='text-balance'>
               By signing in, you agree to our{' '}
               <a href="#" className="text-cyan-400 hover:text-cyan-300 transition-colors">
                 Terms of Service
