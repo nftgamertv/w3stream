@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react"
 export default function MainLayout({children}:{children:React.ReactNode}) {
   return (
     <div style={{minHeight: '100vh', position: 'relative', overflow: 'hidden', 
-    backgroundImage: 'url(https://imagedelivery.net/dCSlCQNYRsUOWJPw5n2BPQ/w3StreamBg/1920)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
+    backgroundImage: 'url(https://imagedelivery.net/dCSlCQNYRsUOWJPw5n2BPQ/w3streamBG/1920)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
       {/* Self-hosted Spline scene - ultra-deferred for performance */}
       {/* Uncomment after exporting your Spline scene and placing in public/spline/ */}
      <SelfHostedSplineScene
