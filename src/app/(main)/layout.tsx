@@ -10,7 +10,7 @@ export default function MainLayout({children}:{children:React.ReactNode}) {
       {/* Uncomment after exporting your Spline scene and placing in public/spline/ */}
      <SelfHostedSplineScene
         sceneUrl="/spline/scene.splinecode"
-        className="absolute -bottom-28 pointer-events-none"
+        className="absolute bottom-0 pointer-events-none"
       />  
 
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
@@ -28,14 +28,8 @@ export default function MainLayout({children}:{children:React.ReactNode}) {
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-slate-400">
             © 2025 w3Stream, Inc. All rights reserved.
-            <span className="mx-2">•</span>
-            <a href="#" className="hover:text-gray-400 transition-colors">
-              Privacy Policy
-            </a>
-            <span className="mx-2">•</span>
-            <a href="#" className="hover:text-gray-400 transition-colors">
-              Terms of Service
-            </a>
+         
+ 
           </p>
         </div>
       </footer>

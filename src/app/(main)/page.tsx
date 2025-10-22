@@ -73,9 +73,7 @@ export default function SplashPage() {
               </h1>
 
               {/* Performance Stats Button - Lazy loaded with suspense */}
-              <Suspense fallback={<PerformanceModalFallback />}>
-                <LazyPerformanceModal />
-              </Suspense>
+           <Link href="/waitlist" className="btn-brand flex justify-center mx-auto max-w-md mt-12 relative"> Join the Waitlist</Link>
 
               {/* Commented out waitlist - temporarily for performance testing */}
               {/* <Link href="/waitlist" className="btn-brand max-w-md mt-12 relative mx-auto">

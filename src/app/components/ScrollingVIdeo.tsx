@@ -81,7 +81,7 @@ export default function ScrollingCinemaBanner() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[200px] w-full overflow-hidden bg-transparent pointer-events-none"
+      className="relative h-[200px] w-full overflow-hidden bg-transparent pointer-events-none -mt-44"
       role="presentation"
       aria-hidden="true"
     >

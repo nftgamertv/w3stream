@@ -153,9 +153,9 @@ export default function BetaSignupPage() {
             </div>
             <div className="space-y-3">
               <h2 className="text-3xl font-bold text-balance bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                Welcome Aboard!
+               Thank You!
               </h2>
-              <p className="text-slate-300 leading-relaxed">
+              <p className="text-slate-300 leading-relaxed text-balance">
                 We've received your application for private beta access. Check your email for confirmation and we'll be
                 in touch soon!
               </p>
