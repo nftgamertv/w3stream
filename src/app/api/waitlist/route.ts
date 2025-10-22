@@ -7,7 +7,23 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email } = body;
+    const { name, email, recaptchaToken } = body;
+
+    // Verify reCAPTCHA token first
+    if (!recaptchaToken) {
+      console.error('[Waitlist API] Missing reCAPTCHA token');
+      return NextResponse.json({ error: 'reCAPTCHA verification required' }, { status: 400 });
+    }
+
+    const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`;
+    
+    const recaptchaResponse = await fetch(verificationUrl, { method: 'POST' });
+    const recaptchaData = await recaptchaResponse.json();
+
+    if (!recaptchaData.success) {
+      console.error('[Waitlist API] reCAPTCHA verification failed:', recaptchaData);
+      return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 400 });
+    }
 
     if (!name || !email) {
       console.error('[Waitlist API] Missing required fields:', { name: !!name, email: !!email });

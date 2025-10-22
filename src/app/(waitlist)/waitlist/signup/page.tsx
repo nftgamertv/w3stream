@@ -1,7 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
+import ReCAPTCHA from "react-google-recaptcha"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -80,6 +81,7 @@ export default function BetaSignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -105,17 +107,28 @@ export default function BetaSignupPage() {
       }
     }
 
+    // Get reCAPTCHA token
+    const token = recaptchaRef.current?.getValue()
+    if (!token) {
+      newErrors.recaptcha = "Please complete the reCAPTCHA verification"
+    }
+
     setErrors(newErrors)
 
-    if (Object.keys(newErrors).length === 0) {
+    if (Object.keys(newErrors).length === 0 && token) {
       setIsSubmitting(true)
-      const result = await submitWaitlistForm(formData as WaitlistFormData)
+      const result = await submitWaitlistForm({
+        ...formData,
+        recaptchaToken: token,
+      } as WaitlistFormData & { recaptchaToken: string })
       setIsSubmitting(false)
 
       if (result.success) {
         setIsSuccess(true)
+        recaptchaRef.current?.reset()
       } else {
         setErrors({ submit: result.error || "Something went wrong. Please try again." })
+        recaptchaRef.current?.reset()
       }
     }
   }
@@ -180,21 +193,21 @@ export default function BetaSignupPage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="mx-auto max-w-2xl relative z-10">
+      <div className="relative z-10 max-w-3xl mx-auto">
         <Card className="border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-2xl shadow-cyan-500/10">
-          <CardHeader className="space-y-4 pb-8">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-cyan-400" />
-              <CardTitle className="text-4xl font-bold text-balance bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Join Our Private Beta
-              </CardTitle>
+          <CardHeader className="space-y-3 text-center pb-8 border-b border-slate-800">
+            <div className="flex justify-center mb-2">
+              <Sparkles className="h-8 w-8 text-cyan-400" />
             </div>
-            <CardDescription className="text-base text-slate-300 leading-relaxed">
-              Be among the first to experience the next-gen streaming revolution. Fill out the form below to request
-              access.
+            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              Join the Private Beta
+            </CardTitle>
+            <CardDescription className="text-slate-300 text-lg leading-relaxed max-w-xl mx-auto">
+              Be among the first to experience our platform. Fill out the form below to request access.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+
+          <CardContent className="pt-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div className="space-y-2">
@@ -341,6 +354,16 @@ export default function BetaSignupPage() {
                 </div>
 
                 {errors.socialHandles && <p className="text-sm text-red-400">{errors.socialHandles}</p>}
+              </div>
+
+              {/* reCAPTCHA */}
+              <div className="flex flex-col items-center space-y-2">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                  theme="dark"
+                />
+                {errors.recaptcha && <p className="text-sm text-red-400">{errors.recaptcha}</p>}
               </div>
 
               {/* Info Alert */}

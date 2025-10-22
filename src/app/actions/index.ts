@@ -5,16 +5,16 @@ import { Resend } from "resend"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export interface WaitlistFormData {
-  name: string
-  email: string
-  isInfluencer: boolean
-  influencerHandle?: string
-  influencerPlatform?: string
-  bio: string
-  socialHandles: Record<string, string>
+export type WaitlistFormData = {
+  name: string;
+  email: string;
+  isInfluencer: boolean;
+  influencerHandle: string;
+  influencerPlatform: string;
+  bio: string;
+  socialHandles: Record<string, string>;
+  recaptchaToken?: string; // Add this
 }
-
 export async function submitWaitlistForm(formData: WaitlistFormData) {
   try {
     const supabase = await getSupabaseServerClient()
