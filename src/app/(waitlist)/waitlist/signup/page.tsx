@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,16 +13,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InfoIcon, CheckCircle2, Sparkles } from "lucide-react"
 import { submitWaitlistForm, type WaitlistFormData } from "@/actions/index"
 import { SocialPlatformInput } from "@/components/SocialPlatformInput"
-
-// Declare grecaptcha type
-declare global {
-  interface Window {
-    grecaptcha: {
-      ready: (callback: () => void) => void
-      execute: (siteKey: string, options: { action: string }) => Promise<string>
-    }
-  }
-}
 
 const PLATFORMS = [
   {
@@ -90,31 +80,6 @@ export default function BetaSignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false)
-
-  // Load reCAPTCHA v3 script
-  useEffect(() => {
-    const script = document.createElement("script")
-    script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`
-    script.async = true
-    script.defer = true
-    script.onload = () => {
-      if (window.grecaptcha) {
-        window.grecaptcha.ready(() => {
-          setRecaptchaLoaded(true)
-        })
-      }
-    }
-    document.head.appendChild(script)
-
-    return () => {
-      // Cleanup: remove script on unmount
-      const existingScript = document.querySelector(`script[src*="recaptcha"]`)
-      if (existingScript) {
-        existingScript.remove()
-      }
-    }
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -144,34 +109,15 @@ export default function BetaSignupPage() {
 
     if (Object.keys(newErrors).length === 0) {
       setIsSubmitting(true)
+      const result = await submitWaitlistForm({
+        ...formData,
+      } as WaitlistFormData)
+      setIsSubmitting(false)
 
-      try {
-        // Execute reCAPTCHA v3 - this happens invisibly without user interaction
-        if (!window.grecaptcha || !recaptchaLoaded) {
-          throw new Error("reCAPTCHA not loaded yet. Please try again.")
-        }
-
-        const token = await window.grecaptcha.execute(
-          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!,
-          { action: "submit_waitlist" }
-        )
-
-        const result = await submitWaitlistForm({
-          ...formData,
-          recaptchaToken: token,
-        } as WaitlistFormData & { recaptchaToken: string })
-
-        if (result.success) {
-          setIsSuccess(true)
-        } else {
-          setErrors({ submit: result.error || "Something went wrong. Please try again." })
-        }
-      } catch (error) {
-        setErrors({
-          submit: error instanceof Error ? error.message : "reCAPTCHA verification failed. Please try again."
-        })
-      } finally {
-        setIsSubmitting(false)
+      if (result.success) {
+        setIsSuccess(true)
+      } else {
+        setErrors({ submit: result.error || "Something went wrong. Please try again." })
       }
     }
   }
@@ -301,6 +247,7 @@ export default function BetaSignupPage() {
                   </Label>
                 </div>
 
+
                 {/* Conditional Influencer Fields */}
                 {formData.isInfluencer && (
                   <div className="space-y-4 rounded-lg border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 p-6 backdrop-blur-sm">
@@ -398,6 +345,16 @@ export default function BetaSignupPage() {
 
                 {errors.socialHandles && <p className="text-sm text-red-400">{errors.socialHandles}</p>}
               </div>
+
+              {/* reCAPTCHA */}
+              {/* <div className="flex flex-col items-center space-y-2">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                  theme="dark"
+                />
+                {errors.recaptcha && <p className="text-sm text-red-400">{errors.recaptcha}</p>}
+              </div> */}
 
               {/* Info Alert */}
               <Alert className="bg-cyan-500/10 border-cyan-500/30 backdrop-blur-sm">

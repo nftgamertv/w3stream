@@ -8,7 +8,11 @@
       "Bash(npm install:*)",
       "Bash(cat:*)",
       "Bash(npm uninstall:*)",
-      "Bash(pnpm remove:*)"
+      "Bash(pnpm remove:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

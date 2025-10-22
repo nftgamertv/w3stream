@@ -29,7 +29,7 @@ const embedData = {
   site_name: "w3stream",
   author: "@w3stream",
   title: "Join the next-gen streaming (r)evolution",
-  description: "w3Stream is a next-generation live streaming and collaboration platform where creators, communities, and AI co-hosts come together inside interactive 2D and 3D spaces. We empower creators and brands to build immersive, monetizable experiences that go far beyond the traditional livestream — a creator-first studio built for the new era of streaming and value exchange.",
+  description: "w3Stream is a next-gen live streaming and collaboration platform where creators, communities, and agentic AI come together inside interactive 2D and 3D spaces. We empower creators and brands to build immersive experiences that go far beyond the traditional livestream",
   image_path: "/images/oembed.png", // 1200x630 in /public/images
   theme_color: "#0090ff",
   og_type: "website",

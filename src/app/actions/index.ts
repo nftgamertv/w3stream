@@ -2,7 +2,7 @@
 
 import { createClient as getSupabaseServerClient } from "@/utils/supabaseClients/server"
 import { Resend } from "resend"
-
+import WaitlistConfirmationEmail from "@/emails/waitlist-confirmation"
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export type WaitlistFormData = {
@@ -13,10 +13,11 @@ export type WaitlistFormData = {
   influencerPlatform: string;
   bio: string;
   socialHandles: Record<string, string>;
-  recaptchaToken?: string; // Add this
+ 
 }
 export async function submitWaitlistForm(formData: WaitlistFormData) {
-  try {
+ 
+
     const supabase = await getSupabaseServerClient()
 
     // Prepare data for database
@@ -44,13 +45,7 @@ export async function submitWaitlistForm(formData: WaitlistFormData) {
         from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
         to: formData.email,
         subject: "Welcome to Our Private Beta Waitlist!",
-        html: `
-          <h1>Thank you for joining our waitlist, ${formData.name}!</h1>
-          <p>We've received your application for private beta access.</p>
-          <p>Our team will review your information and get back to you soon.</p>
-          ${formData.isInfluencer ? `<p><strong>Platform:</strong> ${formData.influencerPlatform}<br><strong>Handle:</strong> ${formData.influencerHandle}</p>` : ""}
-          <p>Stay tuned!</p>
-        `,
+        react: WaitlistConfirmationEmail({ name: formData.name }),
       })
 
       if (emailResult.error) {
@@ -75,8 +70,5 @@ export async function submitWaitlistForm(formData: WaitlistFormData) {
     }
 
     return { success: true, data }
-  } catch (error) {
-    console.error("[v0] Submission error:", error)
-    return { success: false, error: "An unexpected error occurred. Please try again." }
-  }
-}
+  }  
+ 
