@@ -1,34 +1,28 @@
-// File: auth/callback/route.ts
-
-import {  createClient } from "@/utils/supabaseClients/server";
+// app/auth/callback/route.ts
 import { NextResponse } from "next/server";
-import { headers, cookies } from "next/headers";
+import { createClient } from "@/utils/supabaseClients/server";
 
 export async function GET(request: Request) {
-  const supabase = await createClient();
-
-  const { searchParams } = new URL(request.url);
+  const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
 
   if (!code) {
     return NextResponse.json({ error: "Authorization code is missing" }, { status: 400 });
   }
 
-  // Exchange the code for a session
-  const { data: session, error } = await supabase.auth.exchangeCodeForSession(code);
+  const supabase = await createClient();
+
+  // IMPORTANT: pass an object { code } — not a raw string
+  const { data, error } = await supabase.auth.exchangeCodeForSession({ code });
 
   if (error) {
     console.error("Error exchanging code for session:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.redirect(new URL(`/auth/error?message=${encodeURIComponent(error.message)}`, origin), { status: 303 });
   }
 
-  // Set the session in cookies
-  if (session && session.session) {
-    const { access_token, refresh_token } = session.session;
-    supabase.auth.setSession({ access_token, refresh_token });
-  }
+  // With @supabase/ssr server client, exchangeCodeForSession writes cookies for you.
+  // Do NOT call setSession here — it’s redundant and can break things.
 
-  // Redirect to the specified URL or dashboard
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
-  return NextResponse.redirect(new URL(redirectTo, request.url));
+  return NextResponse.redirect(new URL(redirectTo, origin), { status: 303 });
 }
