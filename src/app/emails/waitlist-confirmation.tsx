@@ -27,7 +27,7 @@ export default function WaitlistConfirmationEmail({ name }: WaitlistConfirmation
             {/* Header with logo */}
             <Section style={header}>
               <Img
-                src="/images/design-mode/w3Stream_banner_line.png"
+                src="https://w3stream.com/images/w3Stream_banner_line.png"
                 alt="w3Stream"
                 width="280"
                 height="auto"
