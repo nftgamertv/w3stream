@@ -1,5 +1,0 @@
-onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
-  - node-datachannel
-  - sharp
-  - unrs-resolver
