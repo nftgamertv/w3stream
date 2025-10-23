@@ -7,6 +7,7 @@ export default function ScrollingCinemaBanner() {
   const logoVideoRef = useRef<HTMLVideoElement>(null)
   const carouselVideoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const [carouselVisible, setCarouselVisible] = useState(false)
+  const [logoVideoLoaded, setLogoVideoLoaded] = useState(false)
 
   // Logo video (LCP element) loads immediately - no intersection observer
   useEffect(() => {
@@ -15,6 +16,7 @@ export default function ScrollingCinemaBanner() {
 
     // Attempt autoplay as soon as video metadata is loaded
     const handleCanPlay = () => {
+      setLogoVideoLoaded(true)
       logoVideo.play().catch(err => {
         console.log('Logo video autoplay prevented:', err)
       })
@@ -137,8 +139,22 @@ export default function ScrollingCinemaBanner() {
         </video>
       </div>
 
-      {/* LCP ELEMENT: Logo video with HIGHEST priority */}
+      {/* LCP ELEMENT: Logo with blur placeholder to prevent CLS */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Blur logo placeholder - shown until video loads */}
+        <img
+          src="/images/blurLogo.png"
+          alt=""
+          className="h-full w-auto relative z-50 mb-12 transition-opacity  duration-300"
+          width={600}
+          height={200}
+          style={{
+            opacity: logoVideoLoaded ? 0 : 0.41,
+            position: 'absolute'
+          }}
+          aria-hidden="true"
+        />
+        {/* Actual logo video - fades in when loaded */}
         <video
           ref={logoVideoRef}
           loop
@@ -146,9 +162,12 @@ export default function ScrollingCinemaBanner() {
           autoPlay
           playsInline
           preload="metadata"
-          className="h-full w-auto relative z-50 mb-12"
+          className="h-full w-auto relative z-50 mb-12 transition-opacity duration-300"
           width={600}
           height={200}
+          style={{
+            opacity: logoVideoLoaded ? 1 : 0
+          }}
           aria-label="w3stream animated logo"
           title="w3stream logo animation"
         >

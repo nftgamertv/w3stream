@@ -7,9 +7,18 @@
 
 export function ScrollingVideoFallback() {
   return (
-    <div className="relative h-[200px] w-full overflow-hidden bg-transparent pointer-events-none">
-      {/* Placeholder with same dimensions as ScrollingVideo */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-800/5 to-transparent animate-pulse" />
+    <div className="relative h-[200px] w-full overflow-hidden bg-transparent pointer-events-none -mt-44">
+      {/* Blur logo placeholder - prevents CLS by reserving exact space for logo video */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <img
+          src="/images/blurLogo.png"
+          alt=""
+          className="h-full w-auto relative z-50 mb-12"
+          width={600}
+          height={200}
+          aria-hidden="true"
+        />
+      </div>
     </div>
   );
 }

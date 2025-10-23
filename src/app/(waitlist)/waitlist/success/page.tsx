@@ -31,7 +31,7 @@ export default function Success() {
             </div>
             <Button
               onClick={() => (window.location.href = "/")}
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold"
+              className="btn-brand w-full text-white font-semibold"
             >
               Back to Home
             </Button>

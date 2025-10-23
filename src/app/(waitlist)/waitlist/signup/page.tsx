@@ -164,7 +164,7 @@ export default function BetaSignupPage() {
             </div>
             <Button
               onClick={() => (window.location.href = "/")}
-              className="btn-brand text-white font-semibold"
+              className="btn-brand w-full text-white font-semibold"
             >
               Back to Home
             </Button>
@@ -175,7 +175,7 @@ export default function BetaSignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen py-12 px-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
@@ -374,7 +374,7 @@ export default function BetaSignupPage() {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold text-base shadow-lg shadow-cyan-500/20 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
+                className="w-full btn-brand text-white font-semibold text-base shadow-lg shadow-cyan-500/20 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
