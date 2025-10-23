@@ -52,7 +52,6 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: base,
     title: embedData.title,
     description: embedData.description,
-    themeColor: embedData.theme_color,
     openGraph: {
       type: embedData.og_type as "website",
       siteName: embedData.site_name,
@@ -83,6 +82,13 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: base.toString(),
     },
+  };
+}
+
+// Viewport configuration (required for Next.js 15+)
+export async function generateViewport() {
+  return {
+    themeColor: embedData.theme_color,
   };
 }
 

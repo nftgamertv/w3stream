@@ -71,10 +71,10 @@ export default function SplashPage() {
                 <CyclingText items={cyclingItems} interval={2500} className="font-bold min-w-[180px]" />{" "}
                 revolution
               </h1>
-
+<div className="min-h-12">
               {/* Performance Stats Button - Lazy loaded with suspense */}
            <Link href="/waitlist" className="btn-brand flex justify-center mx-auto max-w-md mt-12 relative"> Join the Waitlist</Link>
-
+</div>
               {/* Commented out waitlist - temporarily for performance testing */}
               {/* <Link href="/waitlist" className="btn-brand max-w-md mt-12 relative mx-auto">
                 Join the Waitlist

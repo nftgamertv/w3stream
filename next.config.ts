@@ -1,12 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config) => {
+  webpack: (config, { dev, isServer }) => {
     // Ensure only one instance of Three.js is loaded
     config.resolve.alias = {
       ...config.resolve.alias,
       three: require.resolve('three'),
     };
+
+    // Disable CSS source maps in development to prevent 404 errors
+    if (dev && !isServer) {
+      config.devtool = false;
+    }
+
     return config;
   },
   images: {

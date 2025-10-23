@@ -1,5 +1,5 @@
 "use client"
-
+import { Cursors } from "react-together"
 import { useEffect, useState, createContext, useContext } from "react"
 import { useRouter } from "next/navigation"
 import { useNicknames } from "react-together"
@@ -316,6 +316,7 @@ function RoomContent({ roomId, participantName, layout, onLayoutChange, isUserHo
 
   return (
     <HostControlsContext.Provider value={hostControlsValue}>
+      <Cursors />
       <NicknameInitializer participantName={participantName} />
       <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
       <div className="flex-1 overflow-hidden flex relative">
