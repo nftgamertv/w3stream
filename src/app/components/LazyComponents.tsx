@@ -66,3 +66,11 @@ export const LazyKeystrokeListener = dynamic(
     loading: () => <KeystrokeListenerFallback />,
   }
 );
+
+export const LazySolanaCursorEffect = dynamic(
+  () => import("./SolanaCursorEffect"),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);

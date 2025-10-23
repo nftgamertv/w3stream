@@ -19,12 +19,17 @@ export default function LoginForm() {
   const handleLogin = async ({ provider }: { provider: Provider }) => {
     setIsLoading(true)
     try {
-      await supabase.auth.signInWithOAuth({ 
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: false
         }
       })
+
+      if (error) {
+        console.error('OAuth error:', error)
+      }
     } catch (error) {
       console.error('Login failed:', error)
     } finally {
