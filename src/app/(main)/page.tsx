@@ -13,7 +13,9 @@ import {
   LazyScrollingVideo,
   LazyPerformanceModal,
   LazyKeystrokeListener,
+  LazySolanaCursorEffect,
 } from "@/components/LazyComponents"
+
 
 export default function SplashPage() {
   const cyclingItems = [
@@ -52,6 +54,7 @@ export default function SplashPage() {
         {/* Lazy-loaded scrolling video with suspense boundary */}
         <Suspense fallback={<ScrollingVideoFallback />}>
           <LazyScrollingVideo />
+                   <LazySolanaCursorEffect />
         </Suspense>
 
         {/* Hero Section */}

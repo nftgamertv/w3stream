@@ -1,0 +1,240 @@
+:root {
+  /*
+   * Color palette
+   */
+
+  --puck-color-rose-12: #4a001c;
+  --puck-color-rose-11: #670833;
+  --puck-color-rose-10: #87114c;
+  --puck-color-rose-09: #a81a66;
+  --puck-color-rose-08: #bc5089;
+  --puck-color-rose-07: #cc7ca5;
+  --puck-color-rose-06: #d89aba;
+  --puck-color-rose-05: #e3b8cf;
+  --puck-color-rose-04: #efd6e3;
+  --puck-color-rose-03: #f6eaf1;
+  --puck-color-rose-02: #faf4f8;
+  --puck-color-rose-01: #fef8fc;
+
+  --puck-color-azure-12: #00175d;
+  --puck-color-azure-11: #002c77;
+  --puck-color-azure-10: #014292;
+  --puck-color-azure-09: #0158ad;
+  --puck-color-azure-08: #3479be;
+  --puck-color-azure-07: #6499cf;
+  --puck-color-azure-06: #88b0da;
+  --puck-color-azure-05: #abc7e5;
+  --puck-color-azure-04: #cfdff0;
+  --puck-color-azure-03: #e7eef7;
+  --puck-color-azure-02: #f3f6fb;
+  --puck-color-azure-01: #f7faff;
+
+  --puck-color-green-12: #002000;
+  --puck-color-green-11: #043604;
+  --puck-color-green-10: #084e08;
+  --puck-color-green-09: #0c680c;
+  --puck-color-green-08: #1d882f;
+  --puck-color-green-07: #2faa53;
+  --puck-color-green-06: #56c16f;
+  --puck-color-green-05: #7dd78b;
+  --puck-color-green-04: #b8e8bf;
+  --puck-color-green-03: #ddf3e0;
+  --puck-color-green-02: #eff8f0;
+  --puck-color-green-01: #f3fcf4;
+
+  --puck-color-yellow-12: #211000;
+  --puck-color-yellow-11: #362700;
+  --puck-color-yellow-10: #4c4000;
+  --puck-color-yellow-09: #645a00;
+  --puck-color-yellow-08: #877614;
+  --puck-color-yellow-07: #ab9429;
+  --puck-color-yellow-06: #bfac4e;
+  --puck-color-yellow-05: #d4c474;
+  --puck-color-yellow-04: #e6deb1;
+  --puck-color-yellow-03: #f3efd9;
+  --puck-color-yellow-02: #f9f7ed;
+  --puck-color-yellow-01: #fcfaf0;
+
+  --puck-color-red-12: #4c0000;
+  --puck-color-red-11: #6a0a10;
+  --puck-color-red-10: #8a1422;
+  --puck-color-red-09: #ac1f35;
+  --puck-color-red-08: #bf5366;
+  --puck-color-red-07: #ce7e8e;
+  --puck-color-red-06: #d99ca8;
+  --puck-color-red-05: #e4b9c2;
+  --puck-color-red-04: #efd7db;
+  --puck-color-red-03: #f6eaec;
+  --puck-color-red-02: #faf4f5;
+  --puck-color-red-01: #fff9fa;
+
+  --puck-color-grey-12: #181818;
+  --puck-color-grey-11: #292929;
+  --puck-color-grey-10: #404040;
+  --puck-color-grey-09: #5a5a5a;
+  --puck-color-grey-08: #767676;
+  --puck-color-grey-07: #949494;
+  --puck-color-grey-06: #ababab;
+  --puck-color-grey-05: #c3c3c3;
+  --puck-color-grey-04: #dcdcdc;
+  --puck-color-grey-03: #efefef;
+  --puck-color-grey-02: #f5f5f5;
+  --puck-color-grey-01: #fafafa;
+
+  --puck-color-black: #000000;
+  --puck-color-white: #ffffff;
+
+--blue-1: #121723;
+--blue-2: #141a29;
+--blue-3: #19264a;
+--blue-4: #1e2f63;
+--blue-5: #253975;
+--blue-6: #2e4485;
+--blue-7: #375098;
+--blue-8: #405eb2;
+--blue-9: #375098;
+--blue-10: #2c4182;
+--blue-11: #93b4ff;
+--blue-12: #d5e2ff;
+
+--blue-a1: #91170002;
+--blue-a2: #d1d7e604;
+--blue-a3: #4170fc2b;
+--blue-a4: #406cff48;
+--blue-a5: #4874ff5d;
+--blue-a6: #537eff70;
+--blue-a7: #5a84ff86;
+--blue-a8: #5a85ffa5;
+--blue-a9: #5a84ff86;
+--blue-a10: #507afd6d;
+--blue-a11: #93b4ff;
+--blue-a12: #d5e2ff;
+
+--blue-contrast: #fff;
+--blue-surface: #171d2c80;
+--blue-indicator: #375098;
+--blue-track: #375098;
+
+--blue-1: oklch(20.7% 0.0249 267.1);
+--blue-2: oklch(21.9% 0.0304 267.1);
+--blue-3: oklch(27.8% 0.0699 267.1);
+--blue-4: oklch(32.2% 0.094 267.1);
+--blue-5: oklch(36.3% 0.1054 267.1);
+--blue-6: oklch(40.4% 0.1115 267.1);
+--blue-7: oklch(45.1% 0.1213 267.1);
+--blue-8: oklch(50.3% 0.1384 267.1);
+--blue-9: oklch(45% 0.1213 267.1);
+--blue-10: oklch(39.6% 0.1115 267.1);
+--blue-11: oklch(77.7% 0.1243 267.1);
+--blue-12: oklch(91.1% 0.0432 267.1);
+
+--blue-a1: color(display-p3 0.8549 0.0902 0 / 0.005);
+--blue-a2: color(display-p3 0.9137 0.9333 0.9882 / 0.014);
+--blue-a3: color(display-p3 0.3176 0.4588 1 / 0.161);
+--blue-a4: color(display-p3 0.3059 0.4392 1 / 0.271);
+--blue-a5: color(display-p3 0.3294 0.4627 1 / 0.349);
+--blue-a6: color(display-p3 0.3804 0.502 1 / 0.423);
+--blue-a7: color(display-p3 0.3961 0.5255 1 / 0.505);
+--blue-a8: color(display-p3 0.4 0.5333 1 / 0.62);
+--blue-a9: color(display-p3 0.3961 0.5255 1 / 0.505);
+--blue-a10: color(display-p3 0.3569 0.4824 1 / 0.409);
+--blue-a11: color(display-p3 0.6196 0.7176 1 / 0.973);
+--blue-a12: color(display-p3 0.8549 0.898 1 / 0.987);
+
+--blue-contrast: #fff;
+--blue-surface: color(display-p3 0.0941 0.1098 0.1569 / 0.5);
+--blue-indicator: oklch(45% 0.1213 267.1);
+--blue-track: oklch(45% 0.1213 267.1);
+  }
+
+label {
+  color: #F0FDFa !important;
+}
+
+input,   [class^="_Input-input_"]  {
+    background-color:  var(--blue-1) !important; 
+    color: #F0FDFa !important;
+    border: 1px solid var(--blue-a4) !important;
+    padding: 20px !important;
+    max-height: 40px;
+    margin-bottom: 10px;
+}
+[class^="_Input_"]:empty {
+display: none !important;
+}
+from > div > div {
+margin: 0 !important;
+}
+[class^="_Input-label_"], [class^="_ComponentList-title_"], [class^="_ArrayFieldItem"], [class^="_Sidebar"] {
+  background-color:  var(--blue-1) !important; 
+  color: #e1ecea !important;
+  font-size: 12px !important;
+ }
+
+[class^="_DrawerItem-draggableWrapper"] [class^="_DrawerItem-draggable"] {
+  background-color: var(--blue-2) !important;
+  color: #F0FDFa !important;
+  border: 1px solid var(--blue-5) !important;
+  
+}
+[class^="_DrawerItem-draggableWrapper"] [class^="_DrawerItem-draggable"]:hover {
+  background-color:#2a2a2a !important;
+  color: #F0FDFa !important;
+  border: 1px solid var(--blue-6) !important;    
+}
+[class^="_DrawerItem-draggableWrapper"] {
+  background: #000 !important;
+}
+[class^="_DrawerItem-draggable_"] {
+    background-color: var(--blue-2) !important;
+    color: #F0FDFa !important;
+    border: 1px solid var(--blue-5) !important;    
+}
+.flex.flex-col.h-screen > header > div:first-child > button:first-child::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 24px !important;
+  height: 24px !important;
+  background-image: url('/images/go-back.svg') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+}
+[class^="Puck _Puck_"] div div button {
+  background-color: var(--blue-2) !important;
+  color: #F0FDFa !important;
+  border: 1px solid var(--blue-5) !important;    
+}
+
+[class^="Puck _Puck_"] div div button:hover {
+  border: 1px solid var(--blue-6) !important;    
+}
+
+[class^="_ComponentList_"] > button > div   {
+  color: rgb(136, 119, 21) !important;   
+  font-size: 10px !important; 
+}
+
+
+/* For WebKit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+    width: 8px; /* Adjust the width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+    background-color: #1a1a1a; /* Dark background for the scrollbar track */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #008080; /* Teal color for the thumb */
+    border-radius: 10px; /* Optional: round the corners of the thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #00a3a3; /* Optional: slightly lighter teal on hover */
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #008080 #1a1a1a;
+}
