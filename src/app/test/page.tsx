@@ -3,34 +3,23 @@ import { Metadata } from "next";
 
 import { getQueryClient } from '@/get-query-client';
 import { ClientPage } from './ClientPage';
-import { fetchPageData } from '@/actions/fetchPageData';
-import { getCookie } from 'cookies-next';
 
-export async function generateMetadata({
-  params: { username },
-}: {
-  params: { username: string };
-}): Promise<Metadata> {
-  const data = await fetchPageData(username?.toLowerCase());
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: data?.root?.props?.title || 'Page Not Found',
+    title: 'Test Page',
   };
 }
- 
- 
-export default async function Page({
-  params: { username },
-}: {
-  params: { username: string };
-}) {
- 
-  const queryClient = getQueryClient()
- 
 
+
+export default async function Page() {
+  const queryClient = getQueryClient()
+
+  // Use a test username for this static test page
+  const testUsername = 'test';
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClientPage username={username} />
+      <ClientPage username={testUsername} />
     </HydrationBoundary>
   )
 }

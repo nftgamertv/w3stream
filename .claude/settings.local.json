@@ -14,7 +14,8 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(mv:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(pnpm build:*)"
     ],
     "deny": [],
     "ask": []
