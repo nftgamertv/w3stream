@@ -1,11 +1,20 @@
 import { Data } from "@measured/puck";
-import fs from "fs";
+import { createClient } from "../utils/supabaseClients/server";
 
-// Replace with call to your database
-export const getPage = (path: string) => {
-  const allData: Record<string, Data> | null = fs.existsSync("database.json")
-    ? JSON.parse(fs.readFileSync("database.json", "utf-8"))
-    : null;
+export const getPage = async (path: string): Promise<Data | null> => {
+  const username = path.toLowerCase().replace('/user/', '');
 
-  return allData ? allData[path] : null;
+  const supabase = await createClient();
+  const { data: page, error } = await supabase
+    .from('w3s_pages')
+    .select('data')
+    .eq('username', username)
+    .single();
+
+  if (error) {
+    console.log(`No page found for ${username}`);
+    return null;
+  }
+
+  return page?.data || null;
 };

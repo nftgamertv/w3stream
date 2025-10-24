@@ -165,12 +165,18 @@ display: none !important;
 from > div > div {
 margin: 0 !important;
 }
-[class^="_Input-label_"], [class^="_ComponentList-title_"], [class^="_ArrayFieldItem"], [class^="_Sidebar"] {
+[class^="_Input-label_"], [class^="_ComponentList-title_"], [class^="_ArrayFieldItem"], [class^="_Sidebar"], [class^="_Button"] {
   background-color:  var(--blue-1) !important; 
   color: #e1ecea !important;
   font-size: 12px !important;
  }
 
+ [class^="_PuckHeader_"], [class^="_MenuBar_"] {
+  background-color: var(--blue-1) !important;
+  border-bottom: 1px solid var(--blue-5) !important; 
+  color: #F0FDFa;      
+    }
+ 
 [class^="_DrawerItem-draggableWrapper"] [class^="_DrawerItem-draggable"] {
   background-color: var(--blue-2) !important;
   color: #F0FDFa !important;

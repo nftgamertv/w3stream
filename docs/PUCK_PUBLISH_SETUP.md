@@ -2,114 +2,83 @@
 
 ## Overview
 
-The Puck editor's Publish button has been wired up to save pages to IPFS via Pinata and update Solana NFT metadata.
+The Puck editor's Publish button saves page content directly to the Supabase database.
 
 ## What Was Changed
 
 ### 1. Updated Puck Client (`src/app/puck/[...puckPath]/client.tsx`)
 
 The `onPublish` handler now:
-- Saves page data to IPFS using Pinata
-- Updates the database with the new IPFS hash
-- Updates Solana NFT metadata if an NFT mint exists
+- Saves page data to the `w3s_pages` table in Supabase
+- Uses upsert operation to handle both create and update
 - Provides user feedback on success/failure
 - Prevents duplicate publish operations
 
-### 2. Created Pinata API Endpoints
-
-**`/api/pinata/swap` - Pin new content and unpin old**
-- Accepts: `{ filename, CID (old), data }`
-- Pins new data to IPFS
-- Unpins old CID (if provided)
-- Returns new IPFS CID
-
-**`/api/pinata/retrieve` - Fetch content from IPFS**
-- Accepts: `{ CID }`
-- Retrieves data from IPFS via Pinata gateway
-- Returns the JSON data
-
-### 3. Publish Flow
+### 2. Publish Flow
 
 When the user clicks Publish:
 
-1. **Save to IPFS** (`savePage` action)
-   - Fetches user's current IPFS hash from database
-   - Calls `/api/pinata/swap` to pin new data
-   - Returns new CID
+1. **Save to Database** (`savePage` action)
+   - Extracts username from the path
+   - Upserts page data to `w3s_pages` table
+   - Returns success status and page ID
 
-2. **Update Database & Solana** (`updateMutable` action)
-   - Updates `redirects` table with new IPFS hash
-   - If NFT mint exists, calls Supabase Edge Function to update NFT metadata
-   - Updates metadata with:
-     - New IPFS URI
-     - Page preview image
-     - Username and platform attributes
+## Database Schema
+
+### `w3s_pages` Table
+- `id` - UUID (primary key)
+- `username` - Text (unique)
+- `data` - JSONB (page content)
+- `created_at` - Timestamp
+- `updated_at` - Timestamp (auto-updated)
 
 ## Required Configuration
 
-### Pinata Setup
+Ensure your Supabase database has the `w3s_pages` table created with:
 
-1. Go to [Pinata](https://app.pinata.cloud/developers/api-keys)
-2. Create a new API key with the following permissions:
-   - `pinFileToIPFS`
-   - `pinJSONToIPFS`
-   - `unpin`
-3. Copy the JWT token
-4. Add to `.env.local`:
+```sql
+CREATE TABLE w3s_pages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT UNIQUE NOT NULL,
+  data JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
-```env
-PINATA_JWT=your_actual_jwt_token_here
-NEXT_PUBLIC_PINATA_GATEWAY=gateway.pinata.cloud
+-- Add trigger to auto-update updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_w3s_pages_updated_at BEFORE UPDATE ON w3s_pages
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
-
-### Solana Edge Function (Optional)
-
-For Solana NFT metadata updates to work, ensure you have a Supabase Edge Function at:
-- `${SUPABASE_URL}/functions/v1/update-solana-nft`
-
-This function should:
-- Accept: `{ nft_mint, wallet_address, new_uri, metadata }`
-- Update the NFT's metadata URI on Solana
-- Return success/failure status
-
-If this function doesn't exist, the publish will still work (saving to IPFS and database), but NFT metadata won't be updated.
-
-### Wallet Address
-
-The wallet address is retrieved from cookies (`wallet_address`). Ensure your authentication flow sets this cookie when users connect their wallet.
 
 ## Testing
 
 1. Start the dev server: `npm run dev`
-2. Navigate to a Puck editor page (e.g., `/puck/user/[username]`)
+2. Navigate to a Puck editor page (e.g., `/puck/test/edit`)
 3. Make changes to the page
 4. Click the "Publish" button
 5. Check the browser console for:
-   - "Publishing to IPFS and Solana..."
-   - "IPFS Hash: [CID]"
+   - "Publishing page..."
+   - "Page saved successfully: [UUID]"
    - "Published successfully!"
 
 ## Error Handling
 
 The publish button will show alerts for:
 - Publishing already in progress
-- IPFS pinning failures
-- Database update failures
-- Solana NFT update failures (warning only)
+- Database save failures
 
 All errors are logged to the console for debugging.
 
-## Database Schema
-
-The `redirects` table should have:
-- `destination` (username)
-- `ipfs_hash` (current CID)
-- `updated_at` (timestamp)
-- `nft_mint` (optional Solana NFT mint address)
-
 ## Next Steps
 
-1. Add your Pinata JWT to `.env.local`
-2. Restart your dev server
+1. Ensure your Supabase connection is configured in `.env.local`
+2. Create the `w3s_pages` table if it doesn't exist
 3. Test the Publish functionality
-4. Optionally set up the Solana Edge Function for NFT metadata updates
