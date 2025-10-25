@@ -32,10 +32,12 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, Users, UserMinus } from "lucide-react"
 import StageSubscriptionManager from "@/components/StageSubscriptionManager"
 
-interface MeetingRoomProps {
+// TODO: This component will eventually be fully customizable via Puck
+// The layout structure below is set up to be easily converted to Puck components
+
+interface PresentationRoomProps {
   roomId: string
   participantName: string
-  roomType: "collaborative" | "presentation"
   initialSettings: { video: boolean; audio: boolean }
 }
 
@@ -98,70 +100,7 @@ function TileWithControls({ participant }: { participant: LocalParticipant | Rem
   )
 }
 
-/* -------- Layouts (tiles are now guaranteed to sit above footers) -------- */
-function ConstrainedGridLayout() {
-  const participants = useParticipants()
-  const stagePeople = participants.filter(isOnStage)
-  return (
-    <div className="flex items-center justify-center h-full p-6">
-      <div className="w-full max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
-          {stagePeople.map((p) => (
-            <div key={p.identity} className="aspect-video max-h-[480px] overflow-hidden rounded-lg bg-black/20">
-              <TileWithControls participant={p} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SidebarLayoutView() {
-  const participants = useParticipants()
-  const stagePeople = participants.filter(isOnStage)
-  const screenSharer = stagePeople.find(hasScreenShare)
-  const cameraPeople = stagePeople.filter(hasCamera)
-
-  if (screenSharer) {
-    return (
-      <div className="flex h-full gap-4 p-4">
-        <div className="w-64 flex flex-col gap-3 overflow-y-auto">
-          {cameraPeople.filter((p) => p.identity !== screenSharer.identity).map((p) => (
-            <div key={p.identity} className="aspect-video flex-shrink-0 overflow-hidden rounded-lg bg-black/20">
-              <TileWithControls participant={p} />
-            </div>
-          ))}
-        </div>
-        <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden">
-          <div className="w-full h-full"><TileWithControls participant={screenSharer} /></div>
-        </div>
-      </div>
-    )
-  }
-
-  const main = cameraPeople[0]
-  const sidebar = cameraPeople.slice(1)
-  return (
-    <div className="flex h-full gap-4 p-4">
-      {sidebar.length > 0 && (
-        <div className="w-64 flex flex-col gap-3 overflow-y-auto">
-          {sidebar.map((p) => (
-            <div key={p.identity} className="aspect-video flex-shrink-0 overflow-hidden rounded-lg bg-black/20">
-              <TileWithControls participant={p} />
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="flex-1 flex items-center justify-center">
-        {main && <div className="w-full h-full max-w-5xl max-h-[800px] overflow-hidden rounded-lg bg-black/20">
-          <TileWithControls participant={main} />
-        </div>}
-      </div>
-    </div>
-  )
-}
-
+/* -------- TODO: Puck Component - SpotlightLayout -------- */
 function SpotlightLayoutView() {
   const participants = useParticipants()
   const stagePeople = participants.filter(isOnStage)
@@ -171,14 +110,28 @@ function SpotlightLayoutView() {
   const carousel = screenSharer ? cameraPeople : cameraPeople.slice(1)
 
   return (
-    <div className="flex flex-col h-full p-4 gap-4">
-      <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden">
-        {main && <div className="w-full h-full"><TileWithControls participant={main} /></div>}
+    <div className="flex flex-col h-full p-4 gap-4 bg-gradient-to-br from-purple-950/20 to-pink-950/20">
+      {/* Main stage area */}
+      <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden border-2 border-purple-500/20">
+        {main ? (
+          <div className="w-full h-full"><TileWithControls participant={main} /></div>
+        ) : (
+          <div className="text-center p-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">Presentation Stage</h3>
+            <p className="text-gray-400">Waiting for presenters to join the stage...</p>
+          </div>
+        )}
       </div>
+      {/* Carousel of other participants */}
       {carousel.length > 0 && (
         <div className="h-32 flex gap-4 overflow-x-auto pb-2">
           {carousel.map((p) => (
-            <div key={p.identity} className="w-48 flex-shrink-0 overflow-hidden rounded-lg bg-black/20">
+            <div key={p.identity} className="w-48 flex-shrink-0 overflow-hidden rounded-lg bg-black/20 border border-purple-500/10">
               <TileWithControls participant={p} />
             </div>
           ))}
@@ -186,20 +139,6 @@ function SpotlightLayoutView() {
       )}
     </div>
   )
-}
-
-function VideoConferenceLayout({ layout, onLayoutChange }: { layout: LayoutType; onLayoutChange: (l: LayoutType) => void }) {
-  const tracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }, { source: Track.Source.ScreenShare, withPlaceholder: false }], { onlySubscribed: false })
-  const hasScreenShare = tracks.some((t) => t.source === Track.Source.ScreenShare)
-
-  useEffect(() => { if (hasScreenShare && layout === "grid") onLayoutChange("sidebar") }, [hasScreenShare, layout, onLayoutChange])
-
-  switch (layout) {
-    case "grid": return <ConstrainedGridLayout />
-    case "sidebar": return <SidebarLayoutView />
-    case "spotlight": return <SpotlightLayoutView />
-    default: return <ConstrainedGridLayout />
-  }
 }
 
 /* -------- Audio from on-stage only -------- */
@@ -217,13 +156,13 @@ function SelectiveAudioRenderer() {
 }
 
 /* -------- Nickname initializer -------- */
-function NicknameInitializer({ participantName, roomType }: { participantName: string; roomType: "collaborative" | "presentation" }) {
+function NicknameInitializer({ participantName }: { participantName: string }) {
   const [, setNickname] = useNicknames()
 
   // Use useLayoutEffect to set nickname synchronously before paint
   useLayoutEffect(() => {
     if (participantName && participantName.trim()) {
-      console.log("[NicknameInitializer] Setting nickname to:", participantName)
+      console.log("[PresentationRoom] Setting nickname to:", participantName)
       setNickname(participantName.trim())
     }
   }, [participantName, setNickname])
@@ -253,7 +192,7 @@ function MetadataListener() {
   return null
 }
 
-/* -------- Host self-toggle (uses context.isHost; not metadata) -------- */
+/* -------- Host self-toggle -------- */
 function SelfStageToggle() {
   const room = useRoomContext()
   const { localParticipant } = useLocalParticipant()
@@ -290,59 +229,7 @@ function SelfStageToggle() {
   )
 }
 
-/* -------- Room shell -------- */
-interface RoomContentProps {
-  roomId: string
-  participantName: string
-  roomType: "collaborative" | "presentation"
-  layout: LayoutType
-  onLayoutChange: (layout: LayoutType) => void
-  isUserHost: boolean
-}
-function RoomContent({ roomId, participantName, roomType, layout, onLayoutChange, isUserHost }: RoomContentProps) {
-  const room = useRoomContext()
-
-  const removeFromStage = async (participant: RemoteParticipant) => {
-    try {
-      const md = participant.metadata ? JSON.parse(participant.metadata) : {}
-      const newMetadata = { ...md, onStage: false }
-      const res = await fetch("/api/participant/update-metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomName: room.name, participantIdentity: participant.identity, metadata: newMetadata }),
-      })
-      if (!res.ok) throw new Error((await res.json()).error || "Failed to update participant metadata")
-    } catch (e) { console.error("[v0] Error removing participant from stage:", e) }
-  }
-
-  const hostControlsValue: HostControlsContextType = { isHost: isUserHost, removeFromStage }
-
-  return (
-    <HostControlsContext.Provider value={hostControlsValue}>
-      <Cursors />
-      <NicknameInitializer participantName={participantName} roomType={roomType} />
-      <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
-      <div className="flex-1 overflow-hidden flex relative">
-        {/* Put stage area on a higher layer than footers just in case */}
-        <div className="flex-1 relative z-10 pointer-events-auto">
-          <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
-          {/* Guests see overlay while backstage. Host stays clean so tiles aren't masked. */}
-          {!isUserHost && <WaitingRoomOverlay />}
-        </div>
-      </div>
-      <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel />}
-        <div className="flex items-center gap-2"><SelfStageToggle /></div>
-        <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
-      </div>
-      <StageSubscriptionManager />
-      <SelectiveAudioRenderer />
-      <MetadataListener />
-      <ChatDrawer participantName={participantName} isHost={isUserHost} />
-    </HostControlsContext.Provider>
-  )
-}
-
+/* -------- Waiting room overlay for guests -------- */
 function WaitingRoomOverlay() {
   const { localParticipant } = useLocalParticipant()
   const [isWaiting, setIsWaiting] = useState(false)
@@ -361,29 +248,87 @@ function WaitingRoomOverlay() {
   if (!isWaiting) return null
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-30 pointer-events-none">
-      <div className="bg-background border-2 border-primary/50 rounded-lg p-8 max-w-md text-center shadow-2xl">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-          <Users className="w-8 h-8 text-primary" />
+      <div className="bg-background border-2 border-purple-500/50 rounded-lg p-8 max-w-md text-center shadow-2xl">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center">
+          <Users className="w-8 h-8 text-purple-400" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">Waiting to Join</h3>
-        <p className="text-muted-foreground mb-4">You're in the backstage area. The host will add you to the stage shortly.</p>
+        <h3 className="text-xl font-semibold mb-2">Waiting to Present</h3>
+        <p className="text-muted-foreground mb-4">You're in the backstage area. The host will invite you to the stage when ready.</p>
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-          <span>Waiting for host...</span>
+          <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+          <span>Standing by...</span>
         </div>
       </div>
     </div>
   )
 }
 
+/* -------- Room content -------- */
+interface PresentationRoomContentProps {
+  roomId: string
+  participantName: string
+  layout: LayoutType
+  onLayoutChange: (layout: LayoutType) => void
+  isUserHost: boolean
+}
+
+function PresentationRoomContent({ roomId, participantName, layout, onLayoutChange, isUserHost }: PresentationRoomContentProps) {
+  const room = useRoomContext()
+
+  const removeFromStage = async (participant: RemoteParticipant) => {
+    try {
+      const md = participant.metadata ? JSON.parse(participant.metadata) : {}
+      const newMetadata = { ...md, onStage: false }
+      const res = await fetch("/api/participant/update-metadata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomName: room.name, participantIdentity: participant.identity, metadata: newMetadata }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error || "Failed to update participant metadata")
+    } catch (e) { console.error("[PresentationRoom] Error removing participant from stage:", e) }
+  }
+
+  const hostControlsValue: HostControlsContextType = { isHost: isUserHost, removeFromStage }
+
+  return (
+    <HostControlsContext.Provider value={hostControlsValue}>
+      <Cursors />
+      <NicknameInitializer participantName={participantName} />
+
+      {/* TODO: Puck Component - PresentationHeader */}
+      <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
+
+      {/* TODO: Puck Component - PresentationStage */}
+      <div className="flex-1 overflow-hidden flex relative">
+        <div className="flex-1 relative z-10 pointer-events-auto">
+          <SpotlightLayoutView />
+          {!isUserHost && <WaitingRoomOverlay />}
+        </div>
+      </div>
+
+      {/* TODO: Puck Component - PresentationControls */}
+      <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
+        {isUserHost && <BackroomPanel />}
+        <div className="flex items-center gap-2"><SelfStageToggle /></div>
+        <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
+      </div>
+
+      <StageSubscriptionManager />
+      <SelectiveAudioRenderer />
+      <MetadataListener />
+      <ChatDrawer participantName={participantName} isHost={isUserHost} />
+    </HostControlsContext.Provider>
+  )
+}
+
 /* -------- Entry component -------- */
-export function MeetingRoom({ roomId, participantName, roomType, initialSettings }: MeetingRoomProps) {
+export function PresentationRoom({ roomId, participantName, initialSettings }: PresentationRoomProps) {
   const router = useRouter()
   const [token, setToken] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   const [missingVars, setMissingVars] = useState<string[]>([])
-  const [layout, setLayout] = useState<LayoutType>("grid")
+  const [layout, setLayout] = useState<LayoutType>("spotlight")
   const [isUserHost, setIsUserHost] = useState(false)
 
   useEffect(() => {
@@ -408,7 +353,6 @@ export function MeetingRoom({ roomId, participantName, roomType, initialSettings
           setIsUserHost(true)
         }
 
-        // Host starts BACKSTAGE. Server should set { isHost:true, onStage:false } in token metadata.
         const tokenUrl =
           `${LIVEKIT_CONFIG.tokenEndpoint}?roomName=${encodeURIComponent(roomId)}&participantName=${encodeURIComponent(participantName)}&participantId=${encodeURIComponent(participantId)}${claimHost ? "&creator=1" : ""}`
         const r = await fetch(tokenUrl)
@@ -420,7 +364,7 @@ export function MeetingRoom({ roomId, participantName, roomType, initialSettings
         const { token } = await r.json()
         setToken(token)
       } catch (e: any) {
-        console.error("[v0] Error fetching token:", e)
+        console.error("[PresentationRoom] Error fetching token:", e)
         setError(e?.message ?? "Failed to connect to room")
       } finally {
         setIsLoading(false)
@@ -436,7 +380,7 @@ export function MeetingRoom({ roomId, participantName, roomType, initialSettings
       <div className="h-screen w-full bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Connecting to room...</p>
+          <p className="text-muted-foreground">Connecting to presentation room...</p>
         </div>
       </div>
     )
@@ -457,12 +401,6 @@ export function MeetingRoom({ roomId, participantName, roomType, initialSettings
                   <ul className="list-disc list-inside space-y-1">
                     {missingVars.map((v) => (<li key={v} className="font-mono text-sm">{v}</li>))}
                   </ul>
-                  <p className="mt-3 text-sm">Please add these environment variables in your project settings:</p>
-                  <div className="mt-2 p-2 bg-background rounded text-xs font-mono">
-                    <div>LIVEKIT_API_KEY=your_api_key</div>
-                    <div>LIVEKIT_API_SECRET=your_api_secret</div>
-                    <div>NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud</div>
-                  </div>
                 </div>
               )}
             </AlertDescription>
@@ -486,10 +424,9 @@ export function MeetingRoom({ roomId, participantName, roomType, initialSettings
         onDisconnected={handleDisconnect}
         className="flex-1 flex flex-col"
       >
-        <RoomContent
+        <PresentationRoomContent
           roomId={roomId}
           participantName={participantName}
-          roomType={roomType}
           layout={layout}
           onLayoutChange={setLayout}
           isUserHost={isUserHost}

@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { MeetingRoom } from "@/components/MeetingRoom"
+import { CollaborativeRoom } from "@/components/CollaborativeRoom"
+import { PresentationRoom } from "@/components/PresentationRoom"
+import { ClientReactTogetherWrapper } from "@/providers/ClientReactTogetherWrapper"
+import { createClient } from "@/utils/supabaseClients/client"
+
+type RoomType = "collaborative" | "presentation"
 
 export default function RoomPage({
   params,
@@ -13,12 +18,29 @@ export default function RoomPage({
   const searchParams = useSearchParams()
   const [roomId, setRoomId] = useState<string>("")
   const [isValidated, setIsValidated] = useState(false)
+  const [roomType, setRoomType] = useState<RoomType | null>(null)
 
   useEffect(() => {
     const validateAndRedirect = async () => {
       const resolvedParams = await params
       const currentRoomId = resolvedParams.roomId
       setRoomId(currentRoomId)
+
+      // Fetch room type from Supabase
+      const supabase = createClient()
+      const { data: roomData, error } = await supabase
+        .from('w3s_rooms')
+        .select('room_type')
+        .eq('room_id', currentRoomId)
+        .single()
+
+      if (error) {
+        console.error('Error fetching room type:', error)
+        // Default to collaborative if we can't fetch
+        setRoomType('collaborative')
+      } else {
+        setRoomType(roomData.room_type as RoomType)
+      }
 
       // Check if user has gone through prejoin (required params: name, video, audio)
       const name = searchParams.get("name")
@@ -45,7 +67,7 @@ export default function RoomPage({
   }, [params, searchParams, router])
 
   // Show loading while validating
-  if (!isValidated || !roomId) {
+  if (!isValidated || !roomId || !roomType) {
     return (
       <div className="h-screen w-full bg-background flex items-center justify-center">
         <div className="text-center">
@@ -60,14 +82,28 @@ export default function RoomPage({
   const videoEnabled = searchParams.get("video") === "true"
   const audioEnabled = searchParams.get("audio") === "true"
 
+  const initialSettings = {
+    video: videoEnabled,
+    audio: audioEnabled,
+  }
+
+  // Render different room components based on room type
+  // Both wrapped with ReactTogether for shared state (needed for chat and cursors)
   return (
-    <MeetingRoom
-      roomId={roomId}
-      participantName={participantName}
-      initialSettings={{
-        video: videoEnabled,
-        audio: audioEnabled,
-      }}
-    />
+    <ClientReactTogetherWrapper>
+      {roomType === "collaborative" ? (
+        <CollaborativeRoom
+          roomId={roomId}
+          participantName={participantName}
+          initialSettings={initialSettings}
+        />
+      ) : (
+        <PresentationRoom
+          roomId={roomId}
+          participantName={participantName}
+          initialSettings={initialSettings}
+        />
+      )}
+    </ClientReactTogetherWrapper>
   )
 }
