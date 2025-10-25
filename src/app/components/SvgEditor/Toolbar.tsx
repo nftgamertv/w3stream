@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { useEditorStore, TOOL_CONFIG, useCanUndo, useCanRedo, useHasSelection } from './store';
+import { TOOL_CONFIG } from './store';
+import { editorState$ } from './editorState';
+import { useObservable } from '@legendapp/state/react';
 import { ToolId } from './types';
 import Tooltip from '../Tooltip';
 import TopMenu from './TopMenu';
@@ -277,53 +279,41 @@ const BackgroundToggle: React.FC<BackgroundToggleProps> = ({ isEditing, onToggle
 
 // Main Toolbar component
 const Toolbar: React.FC = () => {
-  const { 
-    tools,
-    selection,
-    background,
-    setActiveToolId,
-    setBrushSize,
-    setPenSize,
-    setFillColor,
-    setStrokeColor,
-    setIsEditingBackground,
-    addToHistory,
-  } = useEditorStore();
-
-  const canUndo = useCanUndo();
-  const canRedo = useCanRedo();
-  const hasSelection = useHasSelection();
+  const tools = useObservable(editorState$.tools);
+  const selection = useObservable(editorState$.selection);
+  const background = useObservable(editorState$.background);
 
   const [activeColorPicker, setActiveColorPicker] = useState<'fill' | 'stroke'>('fill');
 
   // Tool handlers
   const handleToolClick = useCallback((toolId: ToolId) => {
-    const newToolId = toolId === tools.activeToolId ? null : toolId;
-    setActiveToolId(newToolId);
-  }, [tools.activeToolId, setActiveToolId]);
+    const newToolId = toolId === tools.activeToolId.get() ? null : toolId;
+    editorState$.tools.activeToolId.set(newToolId);
+  }, [tools.activeToolId]);
 
   const handleColorChange = useCallback((color: string, type: 'fill' | 'stroke') => {
     if (type === 'fill') {
-      setFillColor(color);
+      editorState$.tools.fillColor.set(color);
     } else {
-      setStrokeColor(color);
+      editorState$.tools.strokeColor.set(color);
     }
 
     // Apply color to selected elements
-    if (hasSelection) {
-      selection.selectedElements.forEach(id => {
+    const selectedElements = selection.selectedElements.get();
+    if (selectedElements.length > 0) {
+      selectedElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
           element.setAttribute(type, color);
         }
       });
-      addToHistory();
+      // History removed - using React Together
     }
-  }, [setFillColor, setStrokeColor, hasSelection, selection.selectedElements, addToHistory]);
+  }, [selection.selectedElements]);
 
   const handleBackgroundToggle = useCallback(() => {
-    setIsEditingBackground(!background.isEditingBackground);
-  }, [background.isEditingBackground, setIsEditingBackground]);
+    editorState$.background.isEditingBackground.set(!background.isEditingBackground.get());
+  }, [background.isEditingBackground]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -335,13 +325,13 @@ const Toolbar: React.FC = () => {
       const tool = TOOLS.find(t => t.shortcut.toLowerCase() === e.key.toLowerCase());
       if (tool) {
         e.preventDefault();
-        setActiveToolId(tool.id === tools.activeToolId ? null : tool.id);
+        editorState$.tools.activeToolId.set(tool.id === tools.activeToolId.get() ? null : tool.id);
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [tools.activeToolId, setActiveToolId]);
+  }, [tools.activeToolId]);
 
   // Memoized tool groups
   const toolsByGroup = useMemo(() => {
@@ -354,36 +344,37 @@ const Toolbar: React.FC = () => {
 
   // Current tool config for size sliders
   const currentToolConfig = useMemo(() => {
-    if (tools.activeToolId === 'brush') {
+    const activeToolId = tools.activeToolId.get();
+    if (activeToolId === 'brush') {
       return {
-        value: tools.brushSize,
-        onChange: setBrushSize,
+        value: tools.brushSize.get(),
+        onChange: (val: number) => editorState$.tools.brushSize.set(val),
         ...TOOL_CONFIG.brush,
         label: 'Brush Size'
       };
     }
-    if (tools.activeToolId === 'pen') {
+    if (activeToolId === 'pen') {
       return {
-        value: tools.penSize,
-        onChange: setPenSize,
+        value: tools.penSize.get(),
+        onChange: (val: number) => editorState$.tools.penSize.set(val),
         ...TOOL_CONFIG.pen,
         label: 'Pen Size'
       };
     }
     return null;
-  }, [tools.activeToolId, tools.brushSize, tools.penSize, setBrushSize, setPenSize]);
+  }, [tools.activeToolId, tools.brushSize, tools.penSize]);
 
   return (
     <div className="h-full bg-gray-800 flex flex-col" role="toolbar" aria-label="Drawing Tools">
       <div className="w-20 flex-1 px-2 py-4">
         {/* Top Menu */}
-        <TopMenu disabled={background.isEditingBackground} />
-        
+        <TopMenu disabled={background.isEditingBackground.get()} />
+
         {/* Main Tools */}
         <div className="flex flex-col items-center space-y-3 mt-4" role="group" aria-label="Drawing Tools">
           {TOOLS.map((tool) => {
-            const isActive = tool.id === tools.activeToolId;
-            const isDisabled = background.isEditingBackground;
+            const isActive = tool.id === tools.activeToolId.get();
+            const isDisabled = background.isEditingBackground.get();
             
             return (
               <ToolButton
@@ -405,15 +396,15 @@ const Toolbar: React.FC = () => {
                 min={currentToolConfig.minSize}
                 max={currentToolConfig.maxSize}
                 label={currentToolConfig.label}
-                disabled={background.isEditingBackground}
+                disabled={background.isEditingBackground.get()}
               />
             </div>
           )}
         </div>
 
         {/* Color Controls */}
-        <div 
-          className={`w-full flex justify-center mt-8 ${background.isEditingBackground ? 'opacity-50' : ''}`}
+        <div
+          className={`w-full flex justify-center mt-8 ${background.isEditingBackground.get() ? 'opacity-50' : ''}`}
           role="group"
           aria-label="Color Controls"
         >
@@ -424,10 +415,10 @@ const Toolbar: React.FC = () => {
               onClick={() => setActiveColorPicker('stroke')}
             >
               <ColorPicker
-                value={tools.strokeColor}
+                value={tools.strokeColor.get()}
                 onChange={(color) => handleColorChange(color, 'stroke')}
                 label="Stroke Color"
-                disabled={background.isEditingBackground}
+                disabled={background.isEditingBackground.get()}
                 size="md"
               />
             </div>
@@ -435,7 +426,7 @@ const Toolbar: React.FC = () => {
              {/* Background Edit Toggle */}
         <div className="w-full flex justify-center mt-6">
           <BackgroundToggle
-            isEditing={background.isEditingBackground}
+            isEditing={background.isEditingBackground.get()}
             onToggle={handleBackgroundToggle}
           />
         </div>
@@ -449,10 +440,10 @@ const Toolbar: React.FC = () => {
               onClick={() => setActiveColorPicker('fill')}
             >
               <ColorPicker
-                value={tools.fillColor}
+                value={tools.fillColor.get()}
                 onChange={(color) => handleColorChange(color, 'fill')}
                 label="Fill Color"
-                disabled={background.isEditingBackground}
+                disabled={background.isEditingBackground.get()}
                 size="md"
               />
             </div>

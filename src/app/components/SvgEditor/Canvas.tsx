@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
-import { useEditorStore, CANVAS_WIDTH, CANVAS_HEIGHT } from './store';
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from './store';
+import { editorState$ } from './editorState';
+import { useObservable } from '@legendapp/state/react';
 import { createColorPicker } from '@/utils/createColorPicker';
 import type { Point, PathData, CanvasEvent, DrawingState, ToolId, SVGElement as SVGElementType } from './types';
 import { useRouter } from 'next/navigation';
@@ -7,22 +9,13 @@ import { gsap } from 'gsap';
 import { createClient } from '@/utils/supabaseClients/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-// import type { useSVGCollaboration } from './ReactTogetherCollaboration';
 
 // Custom hooks for Canvas functionality
 const useCanvasEvents = () => {
-  const {
-    viewport,
-    tools,
-    selection,
-    background,
-    setSelectedElements,
-    setActiveToolId,
-    addToHistory,
-    undo,
-    redo,
-    clearSelection,
-  } = useEditorStore();
+  const viewport = useObservable(editorState$.viewport);
+  const tools = useObservable(editorState$.tools);
+  const selection = useObservable(editorState$.selection);
+  const background = useObservable(editorState$.background);
 
   const handleKeyboard = useCallback((e: KeyboardEvent) => {
     // Prevent default for editor shortcuts
@@ -30,31 +23,22 @@ const useCanvasEvents = () => {
       e.preventDefault();
     }
 
-    // Undo/Redo
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-      if (e.shiftKey) {
-        redo();
-      } else {
-        undo();
-      }
-      return;
-    }
-
     // Delete selected elements
-    if (['Delete', 'Backspace'].includes(e.key) && selection.selectedElements.length > 0) {
+    const selectedElements = selection.selectedElements.get();
+    if (['Delete', 'Backspace'].includes(e.key) && selectedElements.length > 0) {
       e.preventDefault();
-      selection.selectedElements.forEach(id => {
+      selectedElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.remove();
       });
-      setSelectedElements([]);
-      addToHistory();
+      editorState$.selection.selectedElements.set([]);
       return;
     }
 
     // Clear selection
     if (e.key === 'Escape') {
-      clearSelection();
+      editorState$.selection.selectedElements.set([]);
+      editorState$.selection.selectedAnchors.set([]);
       const mainLayer = document.getElementById('mainLayer');
       if (mainLayer) {
         mainLayer.querySelectorAll('*').forEach(el => {
@@ -78,9 +62,9 @@ const useCanvasEvents = () => {
 
     if (toolShortcuts[e.key.toLowerCase()]) {
       e.preventDefault();
-      setActiveToolId(toolShortcuts[e.key.toLowerCase()] as ToolId);
+      editorState$.tools.activeToolId.set(toolShortcuts[e.key.toLowerCase()] as ToolId);
     }
-  }, [selection.selectedElements, setSelectedElements, addToHistory, undo, redo, clearSelection, setActiveToolId]);
+  }, [selection.selectedElements]);
 
   return { handleKeyboard };
 };
@@ -107,7 +91,7 @@ const useDrawingState = () => {
 };
 
 const useBackgroundInteraction = () => {
-  const { background, setIsEditingBackground } = useEditorStore();
+  const background = useObservable(editorState$.background);
   const [backgroundContent, setBackgroundContent] = useState<string | null>(null);
 
   const setupBackgroundInteraction = useCallback((backgroundRef: React.RefObject<SVGSVGElement>) => {
@@ -150,10 +134,10 @@ const useBackgroundInteraction = () => {
     elements.forEach(element => {
       if (!(element instanceof SVGElement)) return;
 
-      element.style.cursor = background.isEditingBackground ? 'pointer' : 'default';
+      element.style.cursor = background.isEditingBackground.get() ? 'pointer' : 'default';
       
       const handleClick = (e: Event) => {
-        if (!background.isEditingBackground) return;
+        if (!background.isEditingBackground.get()) return;
         e.stopPropagation();
         
         const target = e.target as SVGElement;
@@ -187,8 +171,9 @@ const useBackgroundInteraction = () => {
   }, [background.isEditingBackground, backgroundContent]);
 
   useEffect(() => {
-    if (background.backgroundSvg && !backgroundContent) {
-      setBackgroundContent(background.backgroundSvg);
+    const bgSvg = background.backgroundSvg.get();
+    if (bgSvg && !backgroundContent) {
+      setBackgroundContent(bgSvg);
     }
   }, [background.backgroundSvg, backgroundContent]);
 
@@ -203,12 +188,12 @@ const useCanvasSubmission = () => {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
-  const { clearSelection } = useEditorStore();
 
   const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
-      clearSelection();
+      editorState$.selection.selectedElements.set([]);
+      editorState$.selection.selectedAnchors.set([]);
 
       // Clear all element outlines
       const mainLayer = document.getElementById('mainLayer');
@@ -314,32 +299,33 @@ const useCanvasSubmission = () => {
     } finally {
       setLoading(false);
     }
-  }, [supabase, router, clearSelection]);
+  }, [supabase, router]);
 
   return { handleSubmit, loading };
 };
 
 interface CanvasProps {
-  // collaboration?: ReturnType<typeof useSVGCollaboration>;
+  collaboration?: {
+    isConnected: boolean;
+    myId?: string;
+    createElement: (element: any) => void;
+    updateElement: (elementId: string, updates: any) => void;
+    activeUsers: any[];
+  };
   onDrawingStart?: () => void;
   onDrawingEnd?: () => void;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ 
-  // collaboration, 
+const Canvas: React.FC<CanvasProps> = ({
+  collaboration,
   onDrawingStart, onDrawingEnd }) => {
   const canvasRef = useRef<SVGSVGElement>(null);
   const backgroundRef = useRef<SVGSVGElement>(null);
-  
-  const {
-    viewport,
-    tools,
-    selection,
-    background,
-    setSelectedElements,
-    setActiveToolId,
-    addToHistory,
-  } = useEditorStore();
+
+  const viewport = useObservable(editorState$.viewport);
+  const tools = useObservable(editorState$.tools);
+  const selection = useObservable(editorState$.selection);
+  const background = useObservable(editorState$.background);
 
   const { handleKeyboard } = useCanvasEvents();
   const {
@@ -398,8 +384,8 @@ const Canvas: React.FC<CanvasProps> = ({
     const isSelectableElement = ['rect', 'ellipse', 'path'].includes(target.tagName.toLowerCase());
     
     if (isSelectableElement && target.id) {
-      setSelectedElements([target.id]);
-      setActiveToolId('select');
+      editorState$.selection.selectedElements.set([target.id]);
+      editorState$.tools.activeToolId.set('select');
       
       // Clear other outlines
       const mainLayer = document.getElementById('mainLayer');
@@ -415,21 +401,27 @@ const Canvas: React.FC<CanvasProps> = ({
       target.style.outline = '2px solid #4299e1';
       target.style.outlineOffset = '2px';
     }
-  }, [background.isEditingBackground, setSelectedElements, setActiveToolId]);
+  }, [background.isEditingBackground]);
 
   const handleMouseDown = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    if (!canvasRef.current || background.isEditingBackground || !tools.activeToolId) return;
+    const activeToolId = tools.activeToolId.get();
+    const isEditingBackground = background.isEditingBackground.get();
+    const fillColor = tools.fillColor.get();
+    const strokeColor = tools.strokeColor.get();
+    const penSize = tools.penSize.get();
+    const brushSize = tools.brushSize.get();
+    if (!canvasRef.current || isEditingBackground || !activeToolId) return;
 
     const canvasEvent = createCanvasEvent(event);
     const point = canvasEvent.point;
-    
+
     setDrawingState(prev => ({ ...prev, startPoint: point }));
 
     const mainLayer = document.getElementById('mainLayer');
     if (!mainLayer) return;
 
     // Handle selection tool
-    if (tools.activeToolId === 'select') {
+    if (activeToolId === 'select') {
       const target = event.target as SVGElement;
       const isSelectableElement = ['rect', 'ellipse', 'path'].includes(target.tagName.toLowerCase());
       
@@ -446,9 +438,9 @@ const Canvas: React.FC<CanvasProps> = ({
         }));
 
         if (!canvasEvent.modifiers.shift) {
-          setSelectedElements([target.id]);
+          editorState$.selection.selectedElements.set([target.id]);
         } else {
-          setSelectedElements((prev: string[]) => 
+          editorState$.selection.selectedElements.set((prev: string[]) => 
             prev.includes(target.id) 
               ? prev.filter((id: string) => id !== target.id)
               : [...prev, target.id]
@@ -457,7 +449,7 @@ const Canvas: React.FC<CanvasProps> = ({
         target.style.outline = '2px solid #4299e1';
         target.style.outlineOffset = '2px';
       } else if (!canvasEvent.modifiers.shift) {
-        setSelectedElements([]);
+        editorState$.selection.selectedElements.set([]);
         mainLayer.querySelectorAll('*').forEach(el => {
           if (el instanceof SVGElement) {
             el.style.outline = 'none';
@@ -470,10 +462,10 @@ const Canvas: React.FC<CanvasProps> = ({
 
     setDrawingState(prev => ({ ...prev, isDrawing: true }));
     onDrawingStart?.(); // Notify that user started drawing
-    console.log('🎨 Drawing started with tool:', tools.activeToolId);
+    console.log('🎨 Drawing started with tool:', activeToolId);
 
     // Handle pen tool (polygon creation)
-    if (tools.activeToolId === 'pen') {
+    if (activeToolId === 'pen') {
       if (penPoints.length > 2) {
         const startPoint = penPoints[0];
         const distance = Math.sqrt(
@@ -486,32 +478,32 @@ const Canvas: React.FC<CanvasProps> = ({
           const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
           const d = `M ${penPoints.map(p => `${p.x},${p.y}`).join(' L ')} Z`;
           pathElement.setAttribute('d', d);
-          pathElement.setAttribute('fill', tools.fillColor);
-          pathElement.setAttribute('stroke', tools.strokeColor);
-          pathElement.setAttribute('stroke-width', tools.penSize.toString());
-          pathElement.id = `polygon-${Date.now()}`;
+          pathElement.setAttribute('fill', fillColor);
+          pathElement.setAttribute('stroke', strokeColor);
+          pathElement.setAttribute('stroke-width', penSize.toString());
+          pathElement.id = `polygon-${Date.now()}-${collaboration?.myId || 'local'}`;
           mainLayer.appendChild(pathElement);
-          
+
           // Sync polygon creation
-          // if (collaboration && collaboration.isConnected) {
-          //   const svgElement: SVGElementType = {
-          //     id: pathElement.id,
-          //     type: 'path',
-          //     attributes: {
-          //       d: pathElement.getAttribute('d') || '',
-          //       fill: pathElement.getAttribute('fill') || '',
-          //       stroke: pathElement.getAttribute('stroke') || '',
-          //       'stroke-width': pathElement.getAttribute('stroke-width') || '',
-          //     },
-          //     content: '',
-          //   };
-          //   collaboration?.createElement(svgElement);
-          //   console.log('🔗 Synced element to collaboration:', svgElement.id, svgElement.type);
-          // }
-          
+          if (collaboration && collaboration.isConnected) {
+            const svgElement: SVGElementType = {
+              id: pathElement.id,
+              type: 'path',
+              attributes: {
+                d: pathElement.getAttribute('d') || '',
+                fill: pathElement.getAttribute('fill') || '',
+                stroke: pathElement.getAttribute('stroke') || '',
+                'stroke-width': pathElement.getAttribute('stroke-width') || '',
+              },
+              content: '',
+            };
+            collaboration.createElement(svgElement);
+            console.log('🔗 Synced polygon to collaboration:', svgElement.id);
+          }
+
           setPenPoints([]);
           setCurrentPolygonPath(null);
-          addToHistory();
+          // addToHistory removed - using React Together for sync
           return;
         }
       }
@@ -529,8 +521,8 @@ const Canvas: React.FC<CanvasProps> = ({
           const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
           pathElement.setAttribute('d', `M ${point.x},${point.y}`);
           pathElement.setAttribute('fill', 'none');
-          pathElement.setAttribute('stroke', tools.strokeColor);
-          pathElement.setAttribute('stroke-width', tools.penSize.toString());
+          pathElement.setAttribute('stroke', strokeColor);
+          pathElement.setAttribute('stroke-width', penSize.toString());
           pathElement.id = `pen-path-${Date.now()}`;
           mainLayer.appendChild(pathElement);
           setCurrentPolygonPath(pathElement.id);
@@ -540,36 +532,36 @@ const Canvas: React.FC<CanvasProps> = ({
       // Create shape elements
       let element: SVGElement;
       
-      switch (tools.activeToolId) {
+      switch (activeToolId) {
         case 'brush': {
           element = document.createElementNS("http://www.w3.org/2000/svg", "path");
           element.setAttribute('d', `M ${point.x} ${point.y}`);
           element.setAttribute('fill', 'none');
-          element.setAttribute('stroke', tools.fillColor);
-          element.setAttribute('stroke-width', tools.brushSize.toString());
+          element.setAttribute('stroke', fillColor);
+          element.setAttribute('stroke-width', brushSize.toString());
           element.setAttribute('stroke-linecap', 'round');
           element.setAttribute('stroke-linejoin', 'round');
-          element.id = `brush-${Date.now()}`;
+          element.id = `brush-${Date.now()}-${collaboration?.myId || 'local'}`;
           setDrawingState(prev => ({ ...prev, currentPath: element.id }));
-          
+
           // Sync with collaboration
-          // if (collaboration && collaboration.isConnected) {
-          //   const svgElement: SVGElementType = {
-          //     id: element.id,
-          //     type: 'path',
-          //     attributes: {
-          //       d: element.getAttribute('d') || '',
-          //       fill: element.getAttribute('fill') || 'none',
-          //       stroke: element.getAttribute('stroke') || '',
-          //       'stroke-width': element.getAttribute('stroke-width') || '',
-          //       'stroke-linecap': element.getAttribute('stroke-linecap') || '',
-          //       'stroke-linejoin': element.getAttribute('stroke-linejoin') || '',
-          //     },
-          //     content: '',
-          //   };
-          //   collaboration?.createElement(svgElement);
-          //   console.log('🔗 Synced element to collaboration:', svgElement.id, svgElement.type);
-          // }
+          if (collaboration && collaboration.isConnected) {
+            const svgElement: SVGElementType = {
+              id: element.id,
+              type: 'path',
+              attributes: {
+                d: element.getAttribute('d') || '',
+                fill: element.getAttribute('fill') || 'none',
+                stroke: element.getAttribute('stroke') || '',
+                'stroke-width': element.getAttribute('stroke-width') || '',
+                'stroke-linecap': element.getAttribute('stroke-linecap') || '',
+                'stroke-linejoin': element.getAttribute('stroke-linejoin') || '',
+              },
+              content: '',
+            };
+            collaboration.createElement(svgElement);
+            console.log('🔗 Synced brush element to collaboration:', svgElement.id);
+          }
           break;
         }
         case 'rectangle': {
@@ -578,28 +570,28 @@ const Canvas: React.FC<CanvasProps> = ({
           element.setAttribute('y', point.y.toString());
           element.setAttribute('width', '0');
           element.setAttribute('height', '0');
-          element.setAttribute('fill', tools.fillColor);
-          element.setAttribute('stroke', tools.strokeColor);
-          element.id = `rect-${Date.now()}`;
-          
+          element.setAttribute('fill', fillColor);
+          element.setAttribute('stroke', strokeColor);
+          element.id = `rect-${Date.now()}-${collaboration?.myId || 'local'}`;
+
           // Sync with collaboration
-          // if (collaboration && collaboration.isConnected) {
-          //   const svgElement: SVGElementType = {
-          //     id: element.id,
-          //     type: 'rect',
-          //     attributes: {
-          //       x: element.getAttribute('x') || '0',
-          //       y: element.getAttribute('y') || '0',
-          //       width: element.getAttribute('width') || '0',
-          //       height: element.getAttribute('height') || '0',
-          //       fill: element.getAttribute('fill') || '',
-          //       stroke: element.getAttribute('stroke') || '',
-          //     },
-          //     content: '',
-          //   };
-          //   collaboration?.createElement(svgElement);
-          //   console.log('🔗 Synced element to collaboration:', svgElement.id, svgElement.type);
-          // }
+          if (collaboration && collaboration.isConnected) {
+            const svgElement: SVGElementType = {
+              id: element.id,
+              type: 'rect',
+              attributes: {
+                x: element.getAttribute('x') || '0',
+                y: element.getAttribute('y') || '0',
+                width: element.getAttribute('width') || '0',
+                height: element.getAttribute('height') || '0',
+                fill: element.getAttribute('fill') || '',
+                stroke: element.getAttribute('stroke') || '',
+              },
+              content: '',
+            };
+            collaboration.createElement(svgElement);
+            console.log('🔗 Synced rectangle to collaboration:', svgElement.id);
+          }
           break;
         }
         case 'ellipse': {
@@ -608,28 +600,28 @@ const Canvas: React.FC<CanvasProps> = ({
           element.setAttribute('cy', point.y.toString());
           element.setAttribute('rx', '0');
           element.setAttribute('ry', '0');
-          element.setAttribute('fill', tools.fillColor);
-          element.setAttribute('stroke', tools.strokeColor);
-          element.id = `ellipse-${Date.now()}`;
-          
+          element.setAttribute('fill', fillColor);
+          element.setAttribute('stroke', strokeColor);
+          element.id = `ellipse-${Date.now()}-${collaboration?.myId || 'local'}`;
+
           // Sync with collaboration
-          // if (collaboration && collaboration.isConnected) {
-          //   const svgElement: SVGElementType = {
-          //     id: element.id,
-          //     type: 'ellipse',
-          //     attributes: {
-          //       cx: element.getAttribute('cx') || '0',
-          //       cy: element.getAttribute('cy') || '0',
-          //       rx: element.getAttribute('rx') || '0',
-          //       ry: element.getAttribute('ry') || '0',
-          //       fill: element.getAttribute('fill') || '',
-          //       stroke: element.getAttribute('stroke') || '',
-          //     },
-          //     content: '',
-          //   };
-          //   collaboration?.createElement(svgElement);
-          //   console.log('🔗 Synced element to collaboration:', svgElement.id, svgElement.type);
-          // }
+          if (collaboration && collaboration.isConnected) {
+            const svgElement: SVGElementType = {
+              id: element.id,
+              type: 'ellipse',
+              attributes: {
+                cx: element.getAttribute('cx') || '0',
+                cy: element.getAttribute('cy') || '0',
+                rx: element.getAttribute('rx') || '0',
+                ry: element.getAttribute('ry') || '0',
+                fill: element.getAttribute('fill') || '',
+                stroke: element.getAttribute('stroke') || '',
+              },
+              content: '',
+            };
+            collaboration.createElement(svgElement);
+            console.log('🔗 Synced ellipse to collaboration:', svgElement.id);
+          }
           break;
         }
         default:
@@ -639,29 +631,31 @@ const Canvas: React.FC<CanvasProps> = ({
       mainLayer.appendChild(element);
     }
   }, [
-    canvasRef, background.isEditingBackground, tools, createCanvasEvent, 
-    setDrawingState, setSelectedElements, penPoints, setPenPoints, 
-    currentPolygonPath, setCurrentPolygonPath, addToHistory, 
+    canvasRef, background.isEditingBackground, tools, createCanvasEvent,
+    setDrawingState, penPoints, setPenPoints,
+    currentPolygonPath, setCurrentPolygonPath, collaboration, 
     // collaboration, 
     onDrawingStart
   ]);
 
   const handleMouseMove = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
     const point = getMousePosition(event);
-    
+
     // Update cursor position for collaboration
     // if (collaboration && collaboration.isConnected) {
     //   collaboration.updateUserCursor(point);
     // }
 
-    if (!drawingState.isDrawing || !canvasRef.current || background.isEditingBackground) return;
+    const isEditingBackground = background.isEditingBackground.get();
+    if (!drawingState.isDrawing || !canvasRef.current || isEditingBackground) return;
     
     const mainLayer = document.getElementById('mainLayer');
     if (!mainLayer) return;
 
     // Handle selection dragging
-    if (tools.activeToolId === 'select' && drawingState.dragOffset && selection.selectedElements.length > 0) {
-      selection.selectedElements.forEach(id => {
+    const selectedElements = selection.selectedElements.get();
+    if (tools.activeToolId.get() === 'select' && drawingState.dragOffset && selectedElements.length > 0) {
+      selectedElements.forEach(id => {
         const element = document.getElementById(id);
         if (!element) return;
 
@@ -690,7 +684,8 @@ const Canvas: React.FC<CanvasProps> = ({
     if (!drawingState.startPoint) return;
 
     // Handle pen tool preview
-    if (tools.activeToolId === 'pen') {
+    const activeToolId = tools.activeToolId.get();
+    if (activeToolId === 'pen') {
       if (penPoints.length > 0 && currentPolygonPath) {
         const pathElement = document.getElementById(currentPolygonPath);
         if(pathElement) {
@@ -705,20 +700,20 @@ const Canvas: React.FC<CanvasProps> = ({
         const d = pathElement.getAttribute('d') || '';
         const newD = `${d} L ${point.x} ${point.y}`;
         pathElement.setAttribute('d', newD);
-        
-        // Sync path updates
-        // if (collaboration && collaboration.isConnected) {
-        //   collaboration.updateElement(drawingState.currentPath, {
-        //     attributes: { d: newD }
-        //   });
-        // }
+
+        // Sync path updates in real-time
+        if (collaboration && collaboration.isConnected) {
+          collaboration.updateElement(drawingState.currentPath, {
+            attributes: { d: newD }
+          });
+        }
       }
     } else {
       // Handle shape resizing
       const lastElement = mainLayer.lastElementChild as SVGElement;
       if (!lastElement) return;
 
-      switch (tools.activeToolId) {
+      switch (activeToolId) {
         case 'rectangle': {
           if (lastElement instanceof SVGRectElement) {
             const width = point.x - drawingState.startPoint.x;
@@ -727,18 +722,18 @@ const Canvas: React.FC<CanvasProps> = ({
             lastElement.setAttribute('y', (height >= 0 ? drawingState.startPoint.y : point.y).toString());
             lastElement.setAttribute('width', Math.abs(width).toString());
             lastElement.setAttribute('height', Math.abs(height).toString());
-            
-            // Sync rectangle updates
-            // if (collaboration && collaboration.isConnected && lastElement.id) {
-            //   collaboration?.updateElement(lastElement.id, {
-            //     attributes: {
-            //       x: lastElement.getAttribute('x') || '0',
-            //       y: lastElement.getAttribute('y') || '0',
-            //       width: lastElement.getAttribute('width') || '0',
-            //       height: lastElement.getAttribute('height') || '0',
-            //     }
-            //   });
-            // }
+
+            // Sync rectangle updates in real-time
+            if (collaboration && collaboration.isConnected && lastElement.id) {
+              collaboration.updateElement(lastElement.id, {
+                attributes: {
+                  x: lastElement.getAttribute('x') || '0',
+                  y: lastElement.getAttribute('y') || '0',
+                  width: lastElement.getAttribute('width') || '0',
+                  height: lastElement.getAttribute('height') || '0',
+                }
+              });
+            }
           }
           break;
         }
@@ -748,16 +743,16 @@ const Canvas: React.FC<CanvasProps> = ({
             const ry = Math.abs(point.y - drawingState.startPoint.y);
             lastElement.setAttribute('rx', rx.toString());
             lastElement.setAttribute('ry', ry.toString());
-            
-            // Sync ellipse updates
-            // if (collaboration && collaboration.isConnected && lastElement.id) {
-            //   collaboration?.updateElement(lastElement.id, {
-            //     attributes: {
-            //       rx: lastElement.getAttribute('rx') || '0',
-            //       ry: lastElement.getAttribute('ry') || '0',
-            //     }
-            //   });
-            // }
+
+            // Sync ellipse updates in real-time
+            if (collaboration && collaboration.isConnected && lastElement.id) {
+              collaboration.updateElement(lastElement.id, {
+                attributes: {
+                  rx: lastElement.getAttribute('rx') || '0',
+                  ry: lastElement.getAttribute('ry') || '0',
+                }
+              });
+            }
           }
           break;
         }
@@ -772,8 +767,9 @@ const Canvas: React.FC<CanvasProps> = ({
 
   const handleMouseUp = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
     if (!drawingState.isDrawing) return;
-    
-    if (tools.activeToolId !== 'pen') {
+
+    const activeToolId = tools.activeToolId.get();
+    if (activeToolId !== 'pen') {
       setDrawingState({
         isDrawing: false,
         startPoint: null,
@@ -781,13 +777,11 @@ const Canvas: React.FC<CanvasProps> = ({
         dragOffset: null,
       });
       onDrawingEnd?.(); // Notify that user stopped drawing
-      console.log('🎨 Drawing ended with tool:', tools.activeToolId);
-      
-      if (tools.activeToolId !== 'select') {
-        addToHistory();
-      }
+      console.log('🎨 Drawing ended with tool:', activeToolId);
+
+      // History removed - using React Together for sync
     }
-  }, [drawingState.isDrawing, tools.activeToolId, setDrawingState, addToHistory, 
+  }, [drawingState.isDrawing, tools.activeToolId, setDrawingState,
     // collaboration,
     onDrawingEnd]);
 
@@ -889,10 +883,10 @@ const Canvas: React.FC<CanvasProps> = ({
           viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
           className="absolute inset-0 w-full h-full"
           style={{
-            transform: `scale(${viewport.zoom}) translate(${viewport.panOffset.x}px, ${viewport.panOffset.y}px)`,
+            transform: `scale(${viewport.zoom.get()}) translate(${viewport.panOffset.get().x}px, ${viewport.panOffset.get().y}px)`,
             transformOrigin: 'center',
-            pointerEvents: background.isEditingBackground ? 'auto' : 'none',
-            zIndex: background.isEditingBackground ? 9999 : 0,
+            pointerEvents: background.isEditingBackground.get() ? 'auto' : 'none',
+            zIndex: background.isEditingBackground.get() ? 9999 : 0,
           }}
         />
 
@@ -906,8 +900,8 @@ const Canvas: React.FC<CanvasProps> = ({
           viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
           style={{
             transformOrigin: 'center',
-            pointerEvents: background.isEditingBackground ? 'none' : 'auto',
-            zIndex: background.isEditingBackground ? 10 : 20
+            pointerEvents: background.isEditingBackground.get() ? 'none' : 'auto',
+            zIndex: background.isEditingBackground.get() ? 10 : 20
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}

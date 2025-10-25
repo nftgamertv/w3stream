@@ -1,4 +1,7 @@
-import type { Point } from '@/types';
+interface Point {
+    x: number;
+    y: number;
+  }
 
 export const getSmoothPath = (points: Point[]): string => {
   if (points.length < 3) {

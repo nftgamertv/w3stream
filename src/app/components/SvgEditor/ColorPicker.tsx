@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState } from 'react';
-import { useEditorStore } from './store';
+import { useObservable } from '@legendapp/state/react';
+import { editorState$ } from './editorState';
 
 interface ColorPickerModalProps {
   isOpen: boolean;
@@ -82,13 +83,8 @@ function ColorPickerModal({ isOpen, onClose, onColorSelect, initialColor }: Colo
 export default function ColorPicker() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeColor, setActiveColor] = useState<'fill' | 'stroke'>('fill');
-  const { 
-    tools: { fillColor, strokeColor },
-    selection: { selectedElements },
-    setFillColor, 
-    setStrokeColor, 
-    addToHistory 
-  } = useEditorStore();
+  const tools = useObservable(editorState$.tools);
+  const selection = useObservable(editorState$.selection);
 
   const handleColorChange = useCallback((color: string) => {
     const mainLayer = document.getElementById('mainLayer');
@@ -96,7 +92,8 @@ export default function ColorPicker() {
 
     // Update store and elements
     if (activeColor === 'fill') {
-      setFillColor(color);
+      editorState$.tools.fillColor.set(color);
+      const selectedElements = selection.selectedElements.get();
       selectedElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -104,7 +101,8 @@ export default function ColorPicker() {
         }
       });
     } else {
-      setStrokeColor(color);
+      editorState$.tools.strokeColor.set(color);
+      const selectedElements = selection.selectedElements.get();
       selectedElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -114,8 +112,8 @@ export default function ColorPicker() {
     }
 
     // Add to history after color change
-    addToHistory();
-  }, [activeColor, setFillColor, setStrokeColor, selectedElements, addToHistory]);
+    // History removed - using React Together
+  }, [activeColor, selection.selectedElements]);
 
   return (
     <>
@@ -129,7 +127,7 @@ export default function ColorPicker() {
             }}
             className={`absolute inset-0 w-6 h-6 border-2 bg-transparent transition-all cursor-pointer
               ${activeColor === 'stroke' ? 'z-20' : 'z-10'}`}
-            style={{ borderColor: strokeColor }}
+            style={{ borderColor: tools.strokeColor.get() }}
           />
           {/* Fill Square */}
           <button
@@ -139,7 +137,7 @@ export default function ColorPicker() {
             }}
             className={`absolute left-2 top-2 w-6 h-6 transition-all cursor-pointer
               ${activeColor === 'fill' ? 'z-20' : 'z-10'}`}
-            style={{ backgroundColor: fillColor }}
+            style={{ backgroundColor: tools.fillColor.get() }}
           />
         </div>
       </div>
@@ -148,7 +146,7 @@ export default function ColorPicker() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onColorSelect={handleColorChange}
-        initialColor={activeColor === 'fill' ? fillColor : strokeColor}
+        initialColor={activeColor === 'fill' ? tools.fillColor.get() : tools.strokeColor.get()}
       />
     </>
   );

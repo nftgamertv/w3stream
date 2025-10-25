@@ -119,11 +119,11 @@ export function createPathFromPoints(points: Point[], closed = false): string {
 export function extractPointsFromPath(pathData: string): Point[] {
   const points: Point[] = [];
   const commands = pathData.match(/[MLZ][^MLZ]*/g) || [];
-  
-  commands.forEach(command => {
+
+  commands.forEach((command: string) => {
     const type = command[0];
     const coords = command.slice(1).trim();
-    
+
     if (type === 'M' || type === 'L') {
       const [x, y] = coords.split(/[,\s]+/).map(Number);
       if (!isNaN(x) && !isNaN(y)) {
@@ -131,7 +131,7 @@ export function extractPointsFromPath(pathData: string): Point[] {
       }
     }
   });
-  
+
   return points;
 }
 

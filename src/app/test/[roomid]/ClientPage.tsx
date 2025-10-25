@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from "@/utils/supabaseClients/client";
 import { usePageDataQuery } from '@/hooks/usePageDataQuery'
 import { getCookie } from "cookies-next";
-import {  Client } from  '../[...puckPath]/client'
+import {  Client } from  '@/[...puckPath]/client'
 
 // Local fallback Client component to avoid importing from a dynamic route path.
 // Replace this with a real shared component import (e.g. import Client from '@/components/Client') when you have a proper component file.
