@@ -436,7 +436,7 @@ const Toolbar: React.FC = () => {
 
 
                  <div
-              className="absolute left-0 top-0 z-20"
+              className="left-0 top-0 z-20"
               onClick={() => setActiveColorPicker('fill')}
             >
               <ColorPicker

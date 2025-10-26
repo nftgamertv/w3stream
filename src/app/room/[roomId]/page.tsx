@@ -19,6 +19,7 @@ export default function RoomPage({
   const [roomId, setRoomId] = useState<string>("")
   const [isValidated, setIsValidated] = useState(false)
   const [roomType, setRoomType] = useState<RoomType | null>(null)
+  const [enableAIPrompt, setEnableAIPrompt] = useState<boolean>(false)
 
   useEffect(() => {
     const validateAndRedirect = async () => {
@@ -26,20 +27,22 @@ export default function RoomPage({
       const currentRoomId = resolvedParams.roomId
       setRoomId(currentRoomId)
 
-      // Fetch room type from Supabase
+      // Fetch room type and AI prompt setting from Supabase
       const supabase = createClient()
       const { data: roomData, error } = await supabase
         .from('w3s_rooms')
-        .select('room_type')
+        .select('room_type, enable_ai_prompt')
         .eq('room_id', currentRoomId)
         .single()
 
       if (error) {
-        console.error('Error fetching room type:', error)
+        console.error('Error fetching room data:', error)
         // Default to collaborative if we can't fetch
         setRoomType('collaborative')
+        setEnableAIPrompt(false)
       } else {
         setRoomType(roomData.room_type as RoomType)
+        setEnableAIPrompt(roomData.enable_ai_prompt || false)
       }
 
       // Check if user has gone through prejoin (required params: name, video, audio)
@@ -96,6 +99,7 @@ export default function RoomPage({
           roomId={roomId}
           participantName={participantName}
           initialSettings={initialSettings}
+          enableAIPrompt={enableAIPrompt}
         />
       ) : (
         <PresentationRoom

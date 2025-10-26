@@ -11,7 +11,24 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 // Custom hooks for Canvas functionality
-const useCanvasEvents = () => {
+interface UseCanvasEventsParams {
+  collaboration?: {
+    isConnected: boolean;
+    deleteElement: (elementId: string) => void;
+  };
+  penPoints: Point[];
+  setPenPoints: React.Dispatch<React.SetStateAction<Point[]>>;
+  currentPolygonPath: string | null;
+  setCurrentPolygonPath: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+const useCanvasEvents = ({
+  collaboration,
+  penPoints,
+  setPenPoints,
+  currentPolygonPath,
+  setCurrentPolygonPath,
+}: UseCanvasEventsParams) => {
   const viewport = useObservable(editorState$.viewport);
   const tools = useObservable(editorState$.tools);
   const selection = useObservable(editorState$.selection);
@@ -30,13 +47,32 @@ const useCanvasEvents = () => {
       selectedElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.remove();
+
+        // Sync deletion to collaboration
+        if (collaboration && collaboration.isConnected) {
+          collaboration.deleteElement(id);
+        }
       });
       editorState$.selection.selectedElements.set([]);
       return;
     }
 
-    // Clear selection
+    // Clear selection OR cancel pen tool
     if (e.key === 'Escape') {
+      // Cancel pen tool if active
+      if (penPoints.length > 0) {
+        // Remove preview path
+        if (currentPolygonPath) {
+          const previewPath = document.getElementById(currentPolygonPath);
+          if (previewPath) previewPath.remove();
+        }
+        setPenPoints([]);
+        setCurrentPolygonPath(null);
+        console.log('🎨 Pen tool cancelled');
+        return;
+      }
+
+      // Otherwise clear selection
       editorState$.selection.selectedElements.set([]);
       editorState$.selection.selectedAnchors.set([]);
       const mainLayer = document.getElementById('mainLayer');
@@ -64,7 +100,7 @@ const useCanvasEvents = () => {
       e.preventDefault();
       editorState$.tools.activeToolId.set(toolShortcuts[e.key.toLowerCase()] as ToolId);
     }
-  }, [selection.selectedElements]);
+  }, [selection.selectedElements, collaboration, penPoints, setPenPoints, currentPolygonPath, setCurrentPolygonPath]);
 
   return { handleKeyboard };
 };
@@ -310,6 +346,7 @@ interface CanvasProps {
     myId?: string;
     createElement: (element: any) => void;
     updateElement: (elementId: string, updates: any) => void;
+    deleteElement: (elementId: string) => void;
     activeUsers: any[];
   };
   onDrawingStart?: () => void;
@@ -327,7 +364,6 @@ const Canvas: React.FC<CanvasProps> = ({
   const selection = useObservable(editorState$.selection);
   const background = useObservable(editorState$.background);
 
-  const { handleKeyboard } = useCanvasEvents();
   const {
     drawingState,
     setDrawingState,
@@ -336,6 +372,14 @@ const Canvas: React.FC<CanvasProps> = ({
     currentPolygonPath,
     setCurrentPolygonPath,
   } = useDrawingState();
+
+  const { handleKeyboard } = useCanvasEvents({
+    collaboration,
+    penPoints,
+    setPenPoints,
+    currentPolygonPath,
+    setCurrentPolygonPath,
+  });
 
   const {
     backgroundContent,
@@ -633,8 +677,7 @@ const Canvas: React.FC<CanvasProps> = ({
   }, [
     canvasRef, background.isEditingBackground, tools, createCanvasEvent,
     setDrawingState, penPoints, setPenPoints,
-    currentPolygonPath, setCurrentPolygonPath, collaboration, 
-    // collaboration, 
+    currentPolygonPath, setCurrentPolygonPath, collaboration,
     onDrawingStart
   ]);
 
@@ -759,10 +802,9 @@ const Canvas: React.FC<CanvasProps> = ({
       }
     }
   }, [
-    drawingState, canvasRef, background.isEditingBackground, getMousePosition, 
-    tools.activeToolId, selection.selectedElements, penPoints, currentPolygonPath, 
-    translatePath, 
-    // collaboration
+    drawingState, canvasRef, background.isEditingBackground, getMousePosition,
+    tools.activeToolId, selection.selectedElements, penPoints, currentPolygonPath,
+    translatePath, collaboration
   ]);
 
   const handleMouseUp = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
@@ -770,6 +812,45 @@ const Canvas: React.FC<CanvasProps> = ({
 
     const activeToolId = tools.activeToolId.get();
     if (activeToolId !== 'pen') {
+      // If we were dragging elements, sync their final positions to collaboration state
+      const selectedElements = selection.selectedElements.get();
+      if (activeToolId === 'select' && drawingState.dragOffset && selectedElements.length > 0 && collaboration && collaboration.isConnected) {
+        selectedElements.forEach(id => {
+          const element = document.getElementById(id);
+          if (!element) return;
+
+          // Capture current DOM attributes and sync them
+          const attributes: Record<string, string> = {};
+
+          if (element instanceof SVGRectElement) {
+            attributes.x = element.getAttribute('x') || '0';
+            attributes.y = element.getAttribute('y') || '0';
+            attributes.width = element.getAttribute('width') || '0';
+            attributes.height = element.getAttribute('height') || '0';
+            attributes.fill = element.getAttribute('fill') || '';
+            attributes.stroke = element.getAttribute('stroke') || '';
+          } else if (element instanceof SVGEllipseElement) {
+            attributes.cx = element.getAttribute('cx') || '0';
+            attributes.cy = element.getAttribute('cy') || '0';
+            attributes.rx = element.getAttribute('rx') || '0';
+            attributes.ry = element.getAttribute('ry') || '0';
+            attributes.fill = element.getAttribute('fill') || '';
+            attributes.stroke = element.getAttribute('stroke') || '';
+          } else if (element instanceof SVGPathElement) {
+            attributes.d = element.getAttribute('d') || '';
+            attributes.fill = element.getAttribute('fill') || '';
+            attributes.stroke = element.getAttribute('stroke') || '';
+            attributes['stroke-width'] = element.getAttribute('stroke-width') || '';
+            attributes['stroke-linecap'] = element.getAttribute('stroke-linecap') || '';
+            attributes['stroke-linejoin'] = element.getAttribute('stroke-linejoin') || '';
+          }
+
+          // Update collaboration state with current DOM state
+          collaboration.updateElement(id, { attributes });
+          console.log('🔄 Synced dragged element to collaboration:', id);
+        });
+      }
+
       setDrawingState({
         isDrawing: false,
         startPoint: null,
@@ -778,12 +859,8 @@ const Canvas: React.FC<CanvasProps> = ({
       });
       onDrawingEnd?.(); // Notify that user stopped drawing
       console.log('🎨 Drawing ended with tool:', activeToolId);
-
-      // History removed - using React Together for sync
     }
-  }, [drawingState.isDrawing, tools.activeToolId, setDrawingState,
-    // collaboration,
-    onDrawingEnd]);
+  }, [drawingState.isDrawing, drawingState.dragOffset, tools.activeToolId, selection.selectedElements, collaboration, setDrawingState, onDrawingEnd]);
 
   // Sync collaborative elements
   // useEffect(() => {
@@ -917,10 +994,10 @@ const Canvas: React.FC<CanvasProps> = ({
         <Button
           style={{ letterSpacing: '1.5px' }}
           className={`w-full right-4 h-12 mx-auto uppercase flex flex-col items-center justify-center 
-            cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-[#2a2b2f] to-[#1a1b1e] p-[1px] 
+            cursor-pointer overflow-hidden rounded-xl 
             transition-all duration-300 hover:from-[#3a3b3f] hover:to-[#2a2b2e] btnTool sel absolute -bottom-20 left-0
             bg-[#1e1f23] shadow-[inset_0px_2px_4px_rgba(255,255,255,0.1),inset_0px_-2px_4px_rgba(0,0,0,0.2),0_12px_25px_-8px_rgba(0,0,0,0.9)] 
-            before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-br before:from-transparent 
+            before:absolute before:inset-0 before:rounded-xl before:from-transparent 
             before:to-black/20 before:opacity-0 before:transition-opacity before:duration-300 
             group-hover:shadow-[inset_0px_2px_4px_rgba(255,255,255,0.15),0_16px_30px_-10px_rgba(0,0,0,0.9)] 
             group-hover:before:opacity-100 active:backdrop-saturate-150`}

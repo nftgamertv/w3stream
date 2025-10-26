@@ -1,6 +1,6 @@
 "use client"
 import { Cursors } from "react-together"
-import { useEffect, useLayoutEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useNicknames } from "react-together"
 import {
@@ -16,7 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertCircle } from "lucide-react"
 import SVGEditor from "./SvgEditor"
-
+import  {AIPrompt} from "@/components/AIPrompt"
 // TODO: This component will eventually be fully customizable via Puck
 // The layout structure below is set up to be easily converted to Puck components
 
@@ -24,10 +24,27 @@ interface CollaborativeRoomProps {
   roomId: string
   participantName: string
   initialSettings: { video: boolean; audio: boolean }
+  enableAIPrompt?: boolean
+  svgEditorUrl?: string
 }
 
-function CollaborativeRoomContent({ roomId, participantName }: { roomId: string; participantName: string }) {
+function CollaborativeRoomContent({
+  roomId,
+  participantName,
+  enableAIPrompt = false,
+  svgEditorUrl
+}: {
+  roomId: string;
+  participantName: string;
+  enableAIPrompt?: boolean;
+  svgEditorUrl?: string;
+}) {
   const [, setNickname] = useNicknames()
+  // Default SVG URL if none provided and AI prompt is disabled
+  const defaultSvgUrl = "https://vgwzhgureposlvnxoiaj.supabase.co/storage/v1/object/public/svgs/generated/w3s.svg"
+  const [svgUrl, setSvgUrl] = useState<string | null>(
+    svgEditorUrl || (!enableAIPrompt ? defaultSvgUrl : null)
+  )
 
   // Use useLayoutEffect to set nickname synchronously before paint
   // This ensures the nickname is set before Cursors component fully initializes
@@ -38,10 +55,23 @@ function CollaborativeRoomContent({ roomId, participantName }: { roomId: string;
     }
   }, [participantName, setNickname])
 
+  // Handle SVG generation callback
+  const handleSvgGenerated = useCallback((url: string) => {
+    console.log("[CollaborativeRoom] SVG generated:", url)
+    setSvgUrl(url)
+  }, [])
+
   return (
     <div className="flex flex-col h-full relative">
       <Cursors />
-
+      {enableAIPrompt && (
+        <AIPrompt
+          user={participantName}
+          promptCount={0}
+          prompts={0}
+          onSvgGenerated={handleSvgGenerated}
+        />
+      )}
       {/* TODO: Puck Component - HeaderSection */}
       <RoomHeader roomId={roomId} layout="grid" onLayoutChange={() => {}} />
 
@@ -50,7 +80,7 @@ function CollaborativeRoomContent({ roomId, participantName }: { roomId: string;
 
         {/* Main collaborative area - for now, simple placeholder */}
         <div className="  max-h-1/2">
-             <SVGEditor svgurl="https://vgwzhgureposlvnxoiaj.supabase.co/storage/v1/object/public/svgs/generated/svg_1736965617050.svg" />
+             {svgUrl && <SVGEditor svgurl={svgUrl} />}
           {/* <div className="text-center max-w-2xl p-8">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
               <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,7 +111,13 @@ function CollaborativeRoomContent({ roomId, participantName }: { roomId: string;
   )
 }
 
-export function CollaborativeRoom({ roomId, participantName, initialSettings }: CollaborativeRoomProps) {
+export function CollaborativeRoom({
+  roomId,
+  participantName,
+  initialSettings,
+  enableAIPrompt = false,
+  svgEditorUrl
+}: CollaborativeRoomProps) {
   const router = useRouter()
   const [token, setToken] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -173,7 +209,12 @@ export function CollaborativeRoom({ roomId, participantName, initialSettings }: 
         onDisconnected={handleDisconnect}
         className="flex-1 flex flex-col"
       >
-        <CollaborativeRoomContent roomId={roomId} participantName={participantName} />
+        <CollaborativeRoomContent
+          roomId={roomId}
+          participantName={participantName}
+          enableAIPrompt={enableAIPrompt}
+          svgEditorUrl={svgEditorUrl}
+        />
       </LiveKitRoom>
     </div>
   )

@@ -23,29 +23,50 @@ const TopMenu: React.FC<TopMenuProps> = ({ disabled = false }) => {
     if (disabled) return;
 
     try {
+      // Get the background and main drawing layers
+      const backgroundLayer = document.getElementById('background-layer');
       const mainLayer = document.getElementById('mainLayer');
+
       if (!mainLayer) {
         console.error('Main layer not found');
         return;
       }
 
-      // Get all SVG elements from the main layer
-      const svgElements = Array.from(mainLayer.children).map(el => el.outerHTML);
+      // Create a new SVG to combine both layers
+      const combinedSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      combinedSvg.setAttribute('width', '800');
+      combinedSvg.setAttribute('height', '800');
+      combinedSvg.setAttribute('viewBox', '0 0 800 800');
+      combinedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
-      const canvasState = {
-        elements: svgElements,
-        timestamp: new Date().toISOString()
-      };
+      // Add background layer if it exists
+      if (backgroundLayer) {
+        const backgroundGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        backgroundGroup.innerHTML = backgroundLayer.innerHTML;
+        combinedSvg.appendChild(backgroundGroup);
+      }
 
-      const dataStr = JSON.stringify(canvasState, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      // Add main drawing layer
+      const drawingGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      drawingGroup.innerHTML = mainLayer.innerHTML;
+      combinedSvg.appendChild(drawingGroup);
 
-      const exportFileDefaultName = `canvas-export-${new Date().toISOString().slice(0, 19)}.json`;
+      // Serialize the combined SVG
+      const svgString = new XMLSerializer().serializeToString(combinedSvg);
+
+      // Create a blob with the SVG content
+      const blob = new Blob([svgString], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+
+      const exportFileDefaultName = `canvas-export-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.svg`;
 
       const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('href', url);
       linkElement.setAttribute('download', exportFileDefaultName);
       linkElement.click();
+
+      // Clean up the URL object
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     } catch (error) {
       console.error('Failed to export canvas:', error);
     }
@@ -82,12 +103,12 @@ const TopMenu: React.FC<TopMenuProps> = ({ disabled = false }) => {
         </Tooltip>
 
         {/* Export Button */}
-        <Tooltip content="Export Canvas Data" position="bottom">
+        <Tooltip content="Export as SVG" position="bottom">
           <button
             className={getButtonClass(true)}
             onClick={handleExport}
             disabled={disabled}
-            aria-label="Export canvas as JSON"
+            aria-label="Export canvas as SVG"
           >
             <Download className="h-5 w-5" />
           </button>

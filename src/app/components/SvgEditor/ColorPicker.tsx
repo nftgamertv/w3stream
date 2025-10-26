@@ -116,7 +116,7 @@ export default function ColorPicker() {
   }, [activeColor, selection.selectedElements]);
 
   return (
-    <>
+    <div className='relative'>
       <div className="absolute left-4 top-4 flex items-center space-x-1">
         <div className="relative w-8 h-8">
           {/* Stroke Square */}
@@ -148,6 +148,6 @@ export default function ColorPicker() {
         onColorSelect={handleColorChange}
         initialColor={activeColor === 'fill' ? tools.fillColor.get() : tools.strokeColor.get()}
       />
-    </>
+    </div>
   );
 }

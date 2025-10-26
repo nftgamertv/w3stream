@@ -1,7 +1,7 @@
 'use client';
 
 // Modern SVG Editor - Refactored for React and real-time collaboration
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './store';
 import TopMenu from './TopMenu';
 import Toolbar from './Toolbar';
@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { sanitizeSVG, isValidSVG } from './svgUtils';
 import { useStateTogether, useMyId, useConnectedUsers } from 'react-together';
 import type { CollaborativeUser } from './types';
+import { editorState$ } from './editorState';
 
 interface SVGEditorProps {
   svgurl: string;
@@ -72,15 +73,34 @@ export default function SVGEditor({
     },
     updateElement: (elementId: string, updates: any) => {
       if (!myId) return;
-      setSvgElements(prev => ({
-        ...prev,
-        [elementId]: {
-          ...prev[elementId],
-          ...updates,
-          lastModifiedBy: myId,
-          lastModified: Date.now()
-        }
-      }));
+      setSvgElements(prev => {
+        const existingElement = prev[elementId];
+        if (!existingElement) return prev;
+
+        return {
+          ...prev,
+          [elementId]: {
+            ...existingElement,
+            ...updates,
+            // Deep merge attributes to preserve fill/stroke
+            attributes: {
+              ...existingElement.attributes,
+              ...updates.attributes
+            },
+            lastModifiedBy: myId,
+            lastModified: Date.now()
+          }
+        };
+      });
+    },
+    deleteElement: (elementId: string) => {
+      if (!myId) return;
+      setSvgElements(prev => {
+        const newElements = { ...prev };
+        delete newElements[elementId];
+        return newElements;
+      });
+      console.log('🗑️ Deleted element from sync:', elementId);
     },
     activeUsers: connectedUsers.map(user => ({
       id: user.userId,
@@ -91,6 +111,9 @@ export default function SVGEditor({
     }))
   };
 
+  // Track last sync timestamps to avoid unnecessary updates
+  const lastSyncTimestamps = useRef<Record<string, number>>({});
+
   // Sync remote elements to DOM
   useEffect(() => {
     if (!svgElements) return;
@@ -98,29 +121,54 @@ export default function SVGEditor({
     const mainLayer = document.getElementById('mainLayer');
     if (!mainLayer) return;
 
+    const syncedIds = new Set(Object.keys(svgElements));
+
+    // Remove elements that no longer exist in svgElements
+    Array.from(mainLayer.children).forEach(element => {
+      if (element.id && !syncedIds.has(element.id)) {
+        element.remove();
+        delete lastSyncTimestamps.current[element.id];
+        console.log('🗑️ Removed deleted element from DOM:', element.id);
+      }
+    });
+
+    // Add/update elements from svgElements
     Object.entries(svgElements).forEach(([id, elementData]: [string, any]) => {
       if (!elementData || !elementData.type) return;
 
       let element = document.getElementById(id);
+      const isNewElement = !element;
 
       // Only create if element doesn't exist
-      if (!element) {
+      if (isNewElement) {
         element = document.createElementNS('http://www.w3.org/2000/svg', elementData.type);
         element.id = id;
         mainLayer.appendChild(element);
         console.log('🔗 Created element from sync:', id, elementData.type);
       }
 
-      // Always update attributes to keep in sync
-      if (elementData.attributes) {
-        Object.entries(elementData.attributes).forEach(([name, value]) => {
-          if (element && value !== null && value !== undefined) {
-            element.setAttribute(name, String(value));
+      // Only update attributes if:
+      // 1. Element is new (just created), OR
+      // 2. Element was modified remotely (lastModified is newer than our last sync)
+      const lastModified = elementData.lastModified || 0;
+      const lastSync = lastSyncTimestamps.current[id] || 0;
+      const wasModifiedByOthers = elementData.lastModifiedBy && elementData.lastModifiedBy !== myId;
+
+      if (isNewElement || (wasModifiedByOthers && lastModified > lastSync)) {
+        if (elementData.attributes) {
+          Object.entries(elementData.attributes).forEach(([name, value]) => {
+            if (element && value !== null && value !== undefined) {
+              element.setAttribute(name, String(value));
+            }
+          });
+          lastSyncTimestamps.current[id] = Date.now();
+          if (!isNewElement) {
+            console.log('🔄 Updated element from remote:', id);
           }
-        });
+        }
       }
     });
-  }, [svgElements]);
+  }, [svgElements, myId]);
   
 
   // Load and validate SVG
@@ -156,6 +204,9 @@ export default function SVGEditor({
       // Sanitize SVG for security
       const sanitizedSvg = sanitizeSVG(svgText);
       setBackgroundSvg(sanitizedSvg);
+
+      // Set background SVG into editorState so Canvas can use it
+      editorState$.background.backgroundSvg.set(sanitizedSvg);
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load SVG';

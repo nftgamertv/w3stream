@@ -20,6 +20,7 @@ interface CreateRoomRequest {
   environment?: EnvironmentTemplate; // Accept both field names for backward compatibility
   category?: EnvironmentCategory;
   roomType?: RoomType;
+  enableAIPrompt?: boolean;
 }
 
 interface CreateRoomResponse {
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
     const hostName = body.hostName || 'default-host';
     const roomType = body.roomType || 'collaborative';
     const category = body.category || '3d';
+    const enableAIPrompt = body.enableAIPrompt || false;
 
     // Generate unique room ID (8 characters, URL-safe)
     const roomId = nanoid(8);
@@ -134,6 +136,7 @@ export async function POST(request: NextRequest) {
         host_name: hostName,
         environment_template: environmentTemplate,
         environment_category: category,
+        enable_ai_prompt: enableAIPrompt,
       })
       .select()
       .single();

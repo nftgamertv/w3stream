@@ -16,6 +16,7 @@ type EnvironmentTemplate =
 interface CreateRoomForm {
   environment: EnvironmentTemplate
   category: EnvironmentCategory
+  enableAIPrompt: boolean
 }
 
 interface FormErrors {
@@ -36,6 +37,7 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
   const [createForm, setCreateForm] = useState<CreateRoomForm>({
     environment: "cyber-office",
     category: "2d",
+    enableAIPrompt: false,
   })
   const [isCreating, setIsCreating] = useState(false)
   const [createErrors, setCreateErrors] = useState<FormErrors>({})
@@ -57,6 +59,7 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
           environment: createForm.environment,
           category: createForm.category,
           roomType,
+          enableAIPrompt: createForm.enableAIPrompt,
         }),
       })
 
@@ -163,6 +166,27 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
             ))}
           </div>
         </div>
+
+        {/* AI Prompt Toggle (only for collaborative rooms) */}
+        {roomType === "collaborative" && (
+          <div>
+            <label className="flex items-center justify-between p-5 rounded-lg border-2 border-[#00ffff]/20 bg-[#0a0a0f]/30 hover:bg-[#0a0a0f]/50 cursor-pointer transition-all duration-200">
+              <div>
+                <p className="font-medium text-white text-base">Enable AI Prompt Game</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Participants will submit prompts and receive random SVGs to edit
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={createForm.enableAIPrompt}
+                onChange={(e) => setCreateForm({ ...createForm, enableAIPrompt: e.target.checked })}
+                disabled={isCreating}
+                className="h-5 w-5 text-[#00ffff] border-gray-300 rounded focus:ring-[#00ffff]"
+              />
+            </label>
+          </div>
+        )}
 
         {/* Environment Selector */}
         <div>
