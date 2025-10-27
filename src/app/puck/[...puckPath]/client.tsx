@@ -2,7 +2,7 @@
 
 import type { Data } from "@measured/puck";
 import { Puck } from "@measured/puck";
-import config from "@/puck.config";
+import config from "@/config/puck.config";
 import savePage from "@/actions/savePage";
 import { useState } from "react";
 

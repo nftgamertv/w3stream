@@ -31,12 +31,12 @@ export default async function Page({
   const { puckPath = [] } = await params;
   const queryClient = getQueryClient();
   const path = `/${puckPath.join("/")}`;
-  const username = path.toLowerCase().replace('/user/', '');
+  const roomId = path.toLowerCase().replace(/^\//, '');
 
   await queryClient.prefetchQuery({
-    queryKey: [`pageData_${username}`],
+    queryKey: [`pageData_${roomId}`],
     queryFn: async () => {
-      const data = await fetchPageData(path);
+      const data = await fetchPageData(roomId);
       console.log("Fetched Page Data:", data);
       return data;
     },
