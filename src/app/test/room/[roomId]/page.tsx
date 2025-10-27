@@ -11,15 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 
-export default async function Page() {
+export default async function Page({ params }: { params: Promise<{ roomId: string }> }) {
   const queryClient = getQueryClient()
-
-  // Use a test username for this static test page
-  const testUsername = 'test';
+  const { roomId } = await params;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClientPage username={testUsername} />
+      <ClientPage roomId={roomId} />
     </HydrationBoundary>
   )
 }
