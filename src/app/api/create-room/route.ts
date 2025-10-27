@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
+import { createClient } from '@/utils/supabaseClients/server';
 
 // Type definitions
+type RoomType = "collaborative" | "presentation";
+type EnvironmentCategory = "2d" | "3d" | "mobile";
+type EnvironmentTemplate =
+  | "cyber-office"
+  | "auditorium"
+  | "creative-studio"
+  | "modern-workspace"
+  | "conference-hall"
+  | "mobile-lounge"
+  | "mobile-studio";
+
 interface CreateRoomRequest {
-  hostName: string;
+  hostName?: string;
   environmentTemplate?: string;
-  environment?: string; // Accept both field names for backward compatibility
+  environment?: EnvironmentTemplate; // Accept both field names for backward compatibility
+  category?: EnvironmentCategory;
+  roomType?: RoomType;
+  enableAIPrompt?: boolean;
 }
 
 interface CreateRoomResponse {
@@ -17,9 +32,11 @@ interface RoomMetadata {
   roomId: string;
   createdAt: string;
   hostId: string;
+  roomType: RoomType;
   config: {
     hostName: string;
-    environmentTemplate: string;
+    environmentTemplate: EnvironmentTemplate;
+    category: EnvironmentCategory;
   };
 }
 
@@ -31,12 +48,31 @@ function validateCreateRoomRequest(body: unknown): body is CreateRoomRequest {
 
   const req = body as Record<string, unknown>;
 
-  const hasHostName = typeof req.hostName === 'string' && req.hostName.trim().length > 0;
+  // Environment is required
   const hasEnvironment =
     (typeof req.environmentTemplate === 'string' && req.environmentTemplate.trim().length > 0) ||
     (typeof req.environment === 'string' && req.environment.trim().length > 0);
 
-  return hasHostName && hasEnvironment;
+  if (!hasEnvironment) {
+    return false;
+  }
+
+  // Validate roomType if provided
+  if (req.roomType !== undefined &&
+      req.roomType !== 'collaborative' &&
+      req.roomType !== 'presentation') {
+    return false;
+  }
+
+  // Validate category if provided
+  if (req.category !== undefined &&
+      req.category !== '2d' &&
+      req.category !== '3d' &&
+      req.category !== 'mobile') {
+    return false;
+  }
+
+  return true;
 }
 
 export async function POST(request: NextRequest) {
@@ -53,19 +89,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate request body
-    // if (!validateCreateRoomRequest(body)) {
-    //   return NextResponse.json(
-    //     {
-    //       error: 'Invalid request body',
-    //       details: 'Request must include hostName (non-empty string) and environment or environmentTemplate (non-empty string)',
-    //     },
-    //     { status: 400 }
-    //   );
-    // }
+    if (!validateCreateRoomRequest(body)) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request body',
+          details: 'Request must include environment or environmentTemplate (non-empty string)',
+        },
+        { status: 400 }
+      );
+    }
 
-    // // Accept either 'environment' or 'environmentTemplate'
-    // const environmentTemplate = body.environmentTemplate || body.environment || 'cyber-office';
-    // const { hostName } = body;
+    // Extract fields with defaults
+    const environmentTemplate = (body.environmentTemplate || body.environment || 'cyber-office') as EnvironmentTemplate;
+    const hostName = body.hostName || 'default-host';
+    const roomType = body.roomType || 'collaborative';
+    const category = body.category || '3d';
+    const enableAIPrompt = body.enableAIPrompt || false;
 
     // Generate unique room ID (8 characters, URL-safe)
     const roomId = nanoid(8);
@@ -78,15 +117,42 @@ export async function POST(request: NextRequest) {
       roomId,
       createdAt: new Date().toISOString(),
       hostId,
+      roomType,
       config: {
-        hostName: 'default-host', // TODO: Uncomment validation and use actual hostName
-        environmentTemplate: 'cyber-office', // TODO: Uncomment validation and use actual environmentTemplate
+        hostName,
+        environmentTemplate,
+        category,
       },
     };
 
-    // TODO: Store in Firestore when Firebase integration is added
-    // For now, we'll just log it
-    console.log('Room created:', roomMetadata);
+    // Store in Supabase
+    const supabase = await createClient();
+    const { data: roomData, error: dbError } = await supabase
+      .from('w3s_rooms')
+      .insert({
+        room_id: roomId,
+        host_id: hostId,
+        room_type: roomType,
+        host_name: hostName,
+        environment_template: environmentTemplate,
+        environment_category: category,
+        enable_ai_prompt: enableAIPrompt,
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('Error storing room in Supabase:', dbError);
+      return NextResponse.json(
+        {
+          error: 'Failed to create room',
+          details: dbError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log('Room created in Supabase:', roomData);
 
     // Generate join URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||

@@ -13,7 +13,7 @@ import {
   LazyThreeBackground,
   LazyVideoBackground,
   LazyLoginModalWrapper,
-  LazySolanaCursorEffect,
+ 
 } from "./components/LazyComponents";
 
 const geistSans = Geist({
@@ -106,7 +106,7 @@ export default function RootLayout({
             {/* Lazy-loaded background components - render after initial page load */}
             <LazyThreeBackground />
             <LazyVideoBackground />
-            <LazySolanaCursorEffect />
+   
             {children}
           </ReactQueryProvider>
         </Suspense>

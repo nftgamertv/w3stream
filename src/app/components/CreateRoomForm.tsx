@@ -16,6 +16,7 @@ type EnvironmentTemplate =
 interface CreateRoomForm {
   environment: EnvironmentTemplate
   category: EnvironmentCategory
+  enableAIPrompt: boolean
 }
 
 interface FormErrors {
@@ -25,15 +26,18 @@ interface FormErrors {
 
 interface CreateRoomFormProps {
   onSuccess?: () => void
+  roomType?: "collaborative" | "presentation"
+  onBack?: () => void
 }
 
-export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
+export default function CreateRoomForm({ onSuccess, roomType = "collaborative", onBack }: CreateRoomFormProps) {
   const router = useRouter()
 
   // Create Room State
   const [createForm, setCreateForm] = useState<CreateRoomForm>({
     environment: "cyber-office",
     category: "2d",
+    enableAIPrompt: false,
   })
   const [isCreating, setIsCreating] = useState(false)
   const [createErrors, setCreateErrors] = useState<FormErrors>({})
@@ -54,6 +58,8 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
         body: JSON.stringify({
           environment: createForm.environment,
           category: createForm.category,
+          roomType,
+          enableAIPrompt: createForm.enableAIPrompt,
         }),
       })
 
@@ -106,14 +112,31 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
     <div className="p-8">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="w-10 h-10 rounded-lg bg-[#0a0a0f]/50 border border-[#00ffff]/20 hover:border-[#00ffff]/40 text-gray-400 hover:text-white transition-all duration-200 flex items-center justify-center flex-shrink-0"
+            aria-label="Go back"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00ffff] to-[#00aaff] flex items-center justify-center flex-shrink-0">
           <svg className="w-6 h-6 text-[#0a0a0f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">Create New Room</h2>
-          <p className="text-gray-400 text-sm mt-1">Start a new collaboration session and invite your team</p>
+          <h2 className="text-2xl font-bold text-white">
+            Create New {roomType === "presentation" ? "Presentation" : "Collaborative"} Room
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">
+            {roomType === "presentation"
+              ? "Set up a presentation environment for broadcasting to your audience"
+              : "Start a new collaboration session and invite your team"}
+          </p>
         </div>
       </div>
 
@@ -143,6 +166,27 @@ export default function CreateRoomForm({ onSuccess }: CreateRoomFormProps) {
             ))}
           </div>
         </div>
+
+        {/* AI Prompt Toggle (only for collaborative rooms) */}
+        {roomType === "collaborative" && (
+          <div>
+            <label className="flex items-center justify-between p-5 rounded-lg border-2 border-[#00ffff]/20 bg-[#0a0a0f]/30 hover:bg-[#0a0a0f]/50 cursor-pointer transition-all duration-200">
+              <div>
+                <p className="font-medium text-white text-base">Enable AI Prompt Game</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Participants will submit prompts and receive random SVGs to edit
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={createForm.enableAIPrompt}
+                onChange={(e) => setCreateForm({ ...createForm, enableAIPrompt: e.target.checked })}
+                disabled={isCreating}
+                className="h-5 w-5 text-[#00ffff] border-gray-300 rounded focus:ring-[#00ffff]"
+              />
+            </label>
+          </div>
+        )}
 
         {/* Environment Selector */}
         <div>

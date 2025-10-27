@@ -12,7 +12,12 @@
       "Bash(npm run dev:*)",
       "Bash(timeout:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(pnpm build:*)",
+      "Bash(tasklist:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

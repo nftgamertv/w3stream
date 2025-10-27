@@ -27,6 +27,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const roomName = searchParams.get("roomName") ?? ""
     const participantName = searchParams.get("participantName") ?? ""
+    const participantId = searchParams.get("participantId") ?? "" // Unique ID from client
     const checkHost = searchParams.get("checkHost") === "true"
     const creatorFlag = searchParams.get("creator") === "1"
     const hostSecretParam = searchParams.get("hostSecret") || ""
@@ -35,6 +36,7 @@ export async function GET(req: Request) {
     const missing: string[] = []
     if (!roomName) missing.push("roomName")
     if (!participantName) missing.push("participantName")
+    if (!participantId) missing.push("participantId")
 
     const envMissing =
       !process.env.LIVEKIT_API_KEY ||
@@ -54,7 +56,9 @@ export async function GET(req: Request) {
       )
     }
 
-    const identity = participantName
+    // Use participantId as the unique identity to prevent duplicate identity conflicts
+    // participantName is used only for display purposes
+    const identity = participantId
 
     // Current persisted host, if any
     const persistedHost = await getRoomHostIdentity(roomName)
