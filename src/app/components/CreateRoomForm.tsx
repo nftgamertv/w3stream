@@ -151,6 +151,7 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
                 type="button"
                 onClick={() => {
                   setCreateForm({
+                    ...createForm,
                     category,
                     environment: environments[category][0].value,
                   })
