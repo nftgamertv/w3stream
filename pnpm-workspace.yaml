@@ -1,5 +1,0 @@
-onlyBuiltDependencies:
-  - esbuild
-  - node-datachannel
-  - sharp
-  - unrs-resolver

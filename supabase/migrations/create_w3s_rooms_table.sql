@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS w3s_rooms (
   host_name VARCHAR(255) NOT NULL DEFAULT 'default-host',
   environment_template VARCHAR(50) NOT NULL,
   environment_category VARCHAR(10) NOT NULL CHECK (environment_category IN ('2d', '3d', 'mobile')),
+  enable_ai_prompt BOOLEAN NOT NULL DEFAULT false,
+  enable_svg_editor BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   is_active BOOLEAN NOT NULL DEFAULT true

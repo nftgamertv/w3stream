@@ -25,6 +25,7 @@ interface CollaborativeRoomProps {
   participantName: string
   initialSettings: { video: boolean; audio: boolean }
   enableAIPrompt?: boolean
+  enableSVGEditor?: boolean
   svgEditorUrl?: string
 }
 
@@ -32,18 +33,20 @@ function CollaborativeRoomContent({
   roomId,
   participantName,
   enableAIPrompt = false,
+  enableSVGEditor = false,
   svgEditorUrl
 }: {
   roomId: string;
   participantName: string;
   enableAIPrompt?: boolean;
+  enableSVGEditor?: boolean;
   svgEditorUrl?: string;
 }) {
   const [, setNickname] = useNicknames()
-  // Default SVG URL if none provided and AI prompt is disabled
+  // Default SVG URL if none provided, SVG editor is enabled, and AI prompt is disabled
   const defaultSvgUrl = "https://vgwzhgureposlvnxoiaj.supabase.co/storage/v1/object/public/svgs/generated/w3s.svg"
   const [svgUrl, setSvgUrl] = useState<string | null>(
-    svgEditorUrl || (!enableAIPrompt ? defaultSvgUrl : null)
+    svgEditorUrl || (enableSVGEditor && !enableAIPrompt ? defaultSvgUrl : null)
   )
 
   // Use useLayoutEffect to set nickname synchronously before paint
@@ -80,7 +83,7 @@ function CollaborativeRoomContent({
 
         {/* Main collaborative area - for now, simple placeholder */}
         <div className="  max-h-1/2">
-             {svgUrl && <SVGEditor svgurl={svgUrl} />}
+             {enableSVGEditor && svgUrl && <SVGEditor svgurl={svgUrl} />}
           {/* <div className="text-center max-w-2xl p-8">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
               <svg className="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,6 +119,7 @@ export function CollaborativeRoom({
   participantName,
   initialSettings,
   enableAIPrompt = false,
+  enableSVGEditor = false,
   svgEditorUrl
 }: CollaborativeRoomProps) {
   const router = useRouter()
@@ -213,6 +217,7 @@ export function CollaborativeRoom({
           roomId={roomId}
           participantName={participantName}
           enableAIPrompt={enableAIPrompt}
+          enableSVGEditor={enableSVGEditor}
           svgEditorUrl={svgEditorUrl}
         />
       </LiveKitRoom>

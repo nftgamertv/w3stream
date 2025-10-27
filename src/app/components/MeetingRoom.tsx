@@ -178,7 +178,7 @@ function SpotlightLayoutView() {
       {carousel.length > 0 && (
         <div className="h-32 flex gap-4 overflow-x-auto pb-2">
           {carousel.map((p) => (
-            <div key={p.identity} className="w-48 flex-shrink-0 overflow-hidden rounded-lg bg-black/20">
+            <div key={p.identity} className="w-48 overflow-hidden rounded-lg bg-black/20">
               <TileWithControls participant={p} />
             </div>
           ))}

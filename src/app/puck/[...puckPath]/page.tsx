@@ -1,44 +1,37 @@
-/**
- * This file implements a *magic* catch-all route that renders the Puck editor.
- *
- * This route exposes /puck/[...puckPath], but is disabled by middleware.ts. The middleware
- * then rewrites all URL requests ending in `/edit` to this route, allowing you to visit any
- * page in your application and add /edit to the end to spin up a Puck editor.
- *
- * This approach enables public pages to be statically rendered whilst the /puck route can
- * remain dynamic.
- *
- * NB this route is public, and you will need to add authentication
- */
+import '@measured/puck/puck.css'
+import './puck.css'
 
-import "@measured/puck/puck.css";
-import { Client } from "./client";
-import { Metadata } from "next";
-import { getPage } from "@/lib/get-page";
-import "./puck.css";
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ puckPath: string[] }>;
-}): Promise<Metadata> {
-  const { puckPath = [] } = await params;
-  const path = `/${puckPath.join("/")}`;
+import React from 'react'
+import type { Metadata } from 'next'
 
-  return {
-    title: "Puck: " + path,
-  };
+import LivekitRoomWrapper from '@/providers/LivekitRoomWrapper'
+import { Client } from './client'
+import { getPage } from '@/lib/get-page'
+
+export const dynamic = 'force-dynamic'
+
+// export async function generateMetadata(
+//   // keep this a plain object — NOT a Promise
+//   { params }: { params: { puckPath?: string[] } }
+// ): Promise<Metadata> {
+//   const path = `/${(params.puckPath ?? []).join('/')}`
+//   return { title: `Puck: ${path}` }
+// }
+
+// TEMPORARY: use `any` to break the bad Promise inference coming from elsewhere.
+export default async function Page(props: any) {
+  const params = (props?.params ?? {}) as { puckPath?: string[] }
+  const searchParams = (props?.searchParams ?? {}) as { room_id?: string; participant_name?: string }
+
+  const path = `/${(params.puckPath ?? []).join('/')}`
+  const roomId = searchParams.room_id ?? 'default-room'
+  const participantName = searchParams.participant_name ?? 'Guest'
+
+  const data = await getPage(path)
+
+  return (
+    <LivekitRoomWrapper roomId={roomId} participantName={participantName}>
+      <Client path={path} data={data ?? {}} />
+    </LivekitRoomWrapper>
+  )
 }
-
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ puckPath: string[] }>;
-}) {
-  const { puckPath = [] } = await params;
-  const path = `/${puckPath.join("/")}`;
-  const data = await getPage(path);
-
-  return <Client path={path} data={data || {}} />;
-}
-
-export const dynamic = "force-dynamic";

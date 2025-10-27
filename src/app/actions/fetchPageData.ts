@@ -1,21 +1,25 @@
-// fetchPageData.ts
 'use server';
 import { createClient } from '../utils/supabaseClients/server';
 
-export const fetchPageData = async (name: string) => {
-  const username = name?.toLowerCase().replace('/user/', '');
+export const fetchPageData = async (roomId: string) => {
+  const cleanRoomId = roomId?.replace(/^\//, '');
 
   const supabase = await createClient();
   const { data: page, error } = await supabase
     .from('w3s_pages')
     .select('data')
-    .eq('username', username)
+    .eq('room_id', cleanRoomId)
     .single();
 
   if (error) {
-    console.log(`No page found for ${username}`);
-    return null;
+    console.error(`Error fetching page data for roomId "${cleanRoomId}":`, error.message);
+    throw new Error(`No page found in database for roomId: ${cleanRoomId}. Please create a page first or check the roomId.`);
   }
 
-  return page?.data || null;
+  if (!page?.data) {
+    throw new Error(`Page exists for roomId "${cleanRoomId}" but has no data.`);
+  }
+
+  console.log(`Successfully fetched page data for roomId: ${cleanRoomId}`);
+  return page.data;
 };

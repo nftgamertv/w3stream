@@ -8,11 +8,15 @@ import { dehydrate } from '@tanstack/react-query';
 import ClientPage from './ClientPage';
 import { fetchPageData } from '../actions/fetchPageData';
 
+type Props = {
+  params: Promise<{ puckPath?: string[] }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ puckPath: string[] }>;
-}): Promise<Metadata> {
+  searchParams,
+}: Props): Promise<Metadata> {
   const { puckPath = [] } = await params;
   const path = `/${puckPath.join("/")}`;
   const data: { root?: { props?: { title?: string } } } = await fetchPageData(path)
@@ -23,20 +27,16 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ puckPath: string[] }>;
-}) {
+export default async function Page({ params, searchParams }: Props) {
   const { puckPath = [] } = await params;
   const queryClient = getQueryClient();
   const path = `/${puckPath.join("/")}`;
-  const username = path.toLowerCase().replace('/user/', '');
+  const roomId = path.replace(/^\//, '');
 
   await queryClient.prefetchQuery({
-    queryKey: [`pageData_${username}`],
+    queryKey: [`pageData_${roomId}`],
     queryFn: async () => {
-      const data = await fetchPageData(path);
+      const data = await fetchPageData(roomId);
       console.log("Fetched Page Data:", data);
       return data;
     },

@@ -3,9 +3,9 @@ import { createClient } from "../utils/supabaseClients/server";
 
 export default async function savePage({params}){
     const { path, data } = params;
-    const username = path.toLowerCase().replace('/user/', '');
+    const room_id = path.replace('/test/room/', '');
 
-    console.log(username, 'username');
+    console.log(room_id, 'room_id');
     console.log(data, 'page data');
 
     const supabase = await createClient();
@@ -16,11 +16,11 @@ export default async function savePage({params}){
             .from('w3s_pages')
             .upsert(
                 {
-                    username,
+                    room_id,
                     data
                 },
                 {
-                    onConflict: 'username',
+                    onConflict: 'room_id',
                     ignoreDuplicates: false
                 }
             )

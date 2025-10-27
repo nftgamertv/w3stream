@@ -17,6 +17,7 @@ interface CreateRoomForm {
   environment: EnvironmentTemplate
   category: EnvironmentCategory
   enableAIPrompt: boolean
+  enableSVGEditor: boolean
 }
 
 interface FormErrors {
@@ -38,6 +39,7 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
     environment: "cyber-office",
     category: "2d",
     enableAIPrompt: false,
+    enableSVGEditor: false,
   })
   const [isCreating, setIsCreating] = useState(false)
   const [createErrors, setCreateErrors] = useState<FormErrors>({})
@@ -60,6 +62,7 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
           category: createForm.category,
           roomType,
           enableAIPrompt: createForm.enableAIPrompt,
+          enableSVGEditor: createForm.enableSVGEditor,
         }),
       })
 
@@ -168,9 +171,9 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
           </div>
         </div>
 
-        {/* AI Prompt Toggle (only for collaborative rooms) */}
+        {/* Feature Toggles (only for collaborative rooms) */}
         {roomType === "collaborative" && (
-          <div>
+          <div className="space-y-3">
             <label className="flex items-center justify-between p-5 rounded-lg border-2 border-[#00ffff]/20 bg-[#0a0a0f]/30 hover:bg-[#0a0a0f]/50 cursor-pointer transition-all duration-200">
               <div>
                 <p className="font-medium text-white text-base">Enable AI Prompt Game</p>
@@ -182,6 +185,22 @@ export default function CreateRoomForm({ onSuccess, roomType = "collaborative", 
                 type="checkbox"
                 checked={createForm.enableAIPrompt}
                 onChange={(e) => setCreateForm({ ...createForm, enableAIPrompt: e.target.checked })}
+                disabled={isCreating}
+                className="h-5 w-5 text-[#00ffff] border-gray-300 rounded focus:ring-[#00ffff]"
+              />
+            </label>
+
+            <label className="flex items-center justify-between p-5 rounded-lg border-2 border-[#00ffff]/20 bg-[#0a0a0f]/30 hover:bg-[#0a0a0f]/50 cursor-pointer transition-all duration-200">
+              <div>
+                <p className="font-medium text-white text-base">Enable SVG Editor</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Collaborative SVG editing canvas for real-time design collaboration
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={createForm.enableSVGEditor}
+                onChange={(e) => setCreateForm({ ...createForm, enableSVGEditor: e.target.checked })}
                 disabled={isCreating}
                 className="h-5 w-5 text-[#00ffff] border-gray-300 rounded focus:ring-[#00ffff]"
               />

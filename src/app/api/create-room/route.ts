@@ -21,6 +21,7 @@ interface CreateRoomRequest {
   category?: EnvironmentCategory;
   roomType?: RoomType;
   enableAIPrompt?: boolean;
+  enableSVGEditor?: boolean;
 }
 
 interface CreateRoomResponse {
@@ -105,6 +106,7 @@ export async function POST(request: NextRequest) {
     const roomType = body.roomType || 'collaborative';
     const category = body.category || '3d';
     const enableAIPrompt = body.enableAIPrompt || false;
+    const enableSVGEditor = body.enableSVGEditor || false;
 
     // Generate unique room ID (8 characters, URL-safe)
     const roomId = nanoid(8);
@@ -137,6 +139,7 @@ export async function POST(request: NextRequest) {
         environment_template: environmentTemplate,
         environment_category: category,
         enable_ai_prompt: enableAIPrompt,
+        enable_svg_editor: enableSVGEditor,
       })
       .select()
       .single();
