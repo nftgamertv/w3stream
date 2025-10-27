@@ -1,7 +1,7 @@
 "use client";
 
 import { Render } from "@measured/puck";
-import config from "@/puck.config";
+import config from "@/config/puck.config";
 
 interface ClientProps {
   data: any;
