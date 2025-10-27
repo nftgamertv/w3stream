@@ -11,20 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 
-export default async function Page({ params }: { params: Promise<{ roomId: string }> }) {
+export default async function Page() {
   const queryClient = getQueryClient()
-  const { roomId } = await params;
 
-  const initialSettings = {
-    video: videoEnabled,
-    audio: audioEnabled,
-  }
+  // Use a test username for this static test page
+  const testUsername = 'test';
 
-  // Render different room components based on room type
-  // Both wrapped with ReactTogether for shared state (needed for chat and cursors)
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClientPage roomId={roomId} />
+      <ClientPage username={testUsername} />
     </HydrationBoundary>
   )
 }

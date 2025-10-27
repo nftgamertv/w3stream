@@ -15,7 +15,9 @@
       "Bash(findstr:*)",
       "Bash(mv:*)",
       "Bash(rm:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(tasklist:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []
