@@ -3,9 +3,12 @@ import { createClient } from "../utils/supabaseClients/server";
 
 export default async function savePage({params}){
     const { path, data } = params;
-    const room_id = path.replace('/test/room/', '');
 
-    console.log(room_id, 'room_id');
+    // Extract room_id from path - handle various formats
+    let room_id = path.replace(/^\//, ''); // Remove leading slash
+    room_id = room_id.replace(/^(test\/room\/|user\/|room\/)/, ''); // Remove common prefixes
+
+    console.log(room_id, 'room_id (cleaned)');
     console.log(data, 'page data');
 
     const supabase = await createClient();

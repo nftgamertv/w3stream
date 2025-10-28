@@ -18,7 +18,8 @@
       "Bash(pnpm build:*)",
       "Bash(tasklist:*)",
       "Bash(npx eslint:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

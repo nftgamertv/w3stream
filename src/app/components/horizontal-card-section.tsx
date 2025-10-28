@@ -34,7 +34,7 @@ export function HorizontalCardSection({ title, items }: HorizontalCardSectionPro
               <Card className="relative overflow-hidden rounded-xl border border-slate-700 bg-slate-800/50 shadow-lg backdrop-blur-xs">
                 {item.imageUrl && (
                   <Image
-                    src={item.imageUrl || "/placeholder.svg"}
+                    src={item.imageUrl  }
                     alt={item.title}
                     fill
                     className="absolute inset-0 object-cover -z-20" // Image at the very back

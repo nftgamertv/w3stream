@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createClient } from '@/utils/supabaseClients/server';
+import { defaultRoomData } from '@/config/defaultRoomData';
 
 // Type definitions
 type RoomType = "collaborative" | "presentation";
@@ -21,7 +22,6 @@ interface CreateRoomRequest {
   category?: EnvironmentCategory;
   roomType?: RoomType;
   enableAIPrompt?: boolean;
-  enableSVGEditor?: boolean;
 }
 
 interface CreateRoomResponse {
@@ -106,7 +106,6 @@ export async function POST(request: NextRequest) {
     const roomType = body.roomType || 'collaborative';
     const category = body.category || '3d';
     const enableAIPrompt = body.enableAIPrompt || false;
-    const enableSVGEditor = body.enableSVGEditor || false;
 
     // Generate unique room ID (8 characters, URL-safe)
     const roomId = nanoid(8);
@@ -139,7 +138,6 @@ export async function POST(request: NextRequest) {
         environment_template: environmentTemplate,
         environment_category: category,
         enable_ai_prompt: enableAIPrompt,
-        enable_svg_editor: enableSVGEditor,
       })
       .select()
       .single();
@@ -157,11 +155,52 @@ export async function POST(request: NextRequest) {
 
     console.log('Room created in Supabase:', roomData);
 
+    // Create default page data for the room
+    const pageData = {
+      ...defaultRoomData,
+      root: {
+        ...defaultRoomData.root,
+        props: {
+          ...defaultRoomData.root.props,
+          title: `Room ${roomId}`,
+        }
+      },
+      content: defaultRoomData.content.map(item => {
+        // Update RoomHeader with actual roomId
+        if (item.type === 'RoomHeader') {
+          return {
+            ...item,
+            props: {
+              ...item.props,
+              roomId: roomId,
+            }
+          };
+        }
+        return item;
+      })
+    };
+
+    // Insert page data into w3s_pages
+    const { error: pageError } = await supabase
+      .from('w3s_pages')
+      .insert({
+        room_id: roomId,
+        data: null,
+      });
+
+    if (pageError) {
+      console.error('Error creating page data:', pageError);
+      // Don't fail the room creation if page data fails, just log it
+      console.warn('Room created but page data creation failed - will use defaults');
+    } else {
+      console.log('Page data created successfully for room:', roomId);
+    }
+
     // Generate join URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ||
                     (request.headers.get('host')
                       ? `${request.headers.get('x-forwarded-proto') || 'http'}://${request.headers.get('host')}`
-                      : 'http://localhost:3000');
+                      : 'http://localhost:4444');
 
     const joinUrl = `${baseUrl}/room/${roomId}`;
 

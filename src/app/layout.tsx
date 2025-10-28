@@ -15,6 +15,7 @@ import {
   LazyLoginModalWrapper,
  
 } from "./components/LazyComponents";
+import { SolanaProvider } from "./providers/SolanaProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -106,8 +107,8 @@ export default function RootLayout({
             {/* Lazy-loaded background components - render after initial page load */}
             <LazyThreeBackground />
             <LazyVideoBackground />
-   
-            {children}
+            <SolanaProvider>{children}</SolanaProvider> 
+    
           </ReactQueryProvider>
         </Suspense>
 

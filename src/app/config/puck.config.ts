@@ -12,6 +12,11 @@ import { ConnectionQualityIndicatorConfig } from '@/components/livekit-puck/Conn
 import { ParticipantNameConfig } from '@/components/livekit-puck/ParticipantName';
 import { RoomNameConfig } from '@/components/livekit-puck/RoomName';
 import { SVGEditorConfig } from '@/components/livekit-puck/SVGEditor';
+import { RoomHeaderConfig } from '@/components/livekit-puck/RoomHeader';
+import { VideoConferenceLayoutConfig } from '@/components/livekit-puck/VideoConferenceLayout';
+import { BackroomPanelConfig } from '@/components/livekit-puck/BackroomPanel';
+import { ChatDrawerConfig } from '@/components/livekit-puck/ChatDrawer';
+import { StageSubscriptionManagerConfig } from '@/components/livekit-puck/StageSubscriptionManager';
 
 export const livekitPuckConfig: Config = {
   components: {
@@ -28,6 +33,11 @@ export const livekitPuckConfig: Config = {
     ParticipantName: ParticipantNameConfig,
     RoomName: RoomNameConfig,
     SVGEditor: SVGEditorConfig,
+    RoomHeader: RoomHeaderConfig,
+    VideoConferenceLayout: VideoConferenceLayoutConfig,
+    BackroomPanel: BackroomPanelConfig,
+    ChatDrawer: ChatDrawerConfig,
+    StageSubscriptionManager: StageSubscriptionManagerConfig,
   },
   categories: {
     media: {
@@ -46,13 +56,18 @@ export const livekitPuckConfig: Config = {
       defaultExpanded: true,
     },
     layouts: {
-      components: ['GridLayout'],
+      components: ['GridLayout', 'VideoConferenceLayout'],
       title: 'Layouts',
       defaultExpanded: true,
     },
     communication: {
-      components: ['Chat'],
+      components: ['Chat', 'ChatDrawer'],
       title: 'Communication',
+      defaultExpanded: true,
+    },
+    room: {
+      components: ['RoomHeader', 'BackroomPanel', 'StageSubscriptionManager'],
+      title: 'Room Management',
       defaultExpanded: true,
     },
     status: {

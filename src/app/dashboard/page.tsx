@@ -85,7 +85,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-green-500",
       gradientTo: "to-blue-500",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
     {
       icon: Rocket,
@@ -95,7 +95,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-orange-500",
       gradientTo: "to-red-500",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
     {
       icon: Zap,
@@ -105,7 +105,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-yellow-500",
       gradientTo: "to-orange-500",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
   ]
   const games = [
@@ -117,7 +117,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-red-600",
       gradientTo: "to-purple-600",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
     {
       icon: Award,
@@ -127,7 +127,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-blue-600",
       gradientTo: "to-cyan-600",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
     {
       icon: Gamepad,
@@ -137,7 +137,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-green-600",
       gradientTo: "to-lime-600",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
     {
       icon: Award,
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-purple-600",
       gradientTo: "to-pink-600",
-      imageUrl: "/placeholder.svg?height=400&width=600",
+
     },
   ]
 

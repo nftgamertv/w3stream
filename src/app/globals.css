@@ -1,7 +1,8 @@
 /* ============================================
    TAILWIND IMPORTS
    ============================================ */
-@import "tailwindcss";
+@import 'tailwindcss';
+@import '@wallet-ui/tailwind/index.css';
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

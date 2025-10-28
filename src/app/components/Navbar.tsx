@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import {SidebarTrigger}  from "@/components/ui/sidebar"
 import { userOptions } from '@/queries/users'
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar'
 import {
@@ -17,7 +16,11 @@ import { LogOut, User } from 'lucide-react'
 import { createClient } from '@/utils/supabaseClients/client'
 import { useRouter } from 'next/navigation'
 
-export const Navbar = () => {
+interface NavbarProps {
+  leftContent?: React.ReactNode
+}
+
+export const Navbar = ({ leftContent }: NavbarProps = {}) => {
   const { data: user } = useSuspenseQuery(userOptions)
   const router = useRouter()
   console.log(user, "navbar user")
@@ -32,11 +35,7 @@ export const Navbar = () => {
     <div className="w-full">
             <header className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
-                    <SidebarTrigger className="md:hidden" />
-                    <div>
-                   
-  
-                    </div>
+                    {leftContent}
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="relative">

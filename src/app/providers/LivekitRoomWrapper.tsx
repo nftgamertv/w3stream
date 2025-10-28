@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { LiveKitRoom } from "@livekit/components-react"
+import { RoomContext } from "@livekit/components-react"
+import { Room } from "livekit-client"
 import { LIVEKIT_CONFIG } from "@/lib/livekit-config"
 import "@livekit/components-styles"
 
@@ -16,6 +17,7 @@ export default function LivekitRoomWrapper({
   roomId,
   participantName = "User"
 }: LivekitRoomWrapperProps) {
+  const [room] = useState(() => new Room({}))
   const [token, setToken] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string>("")
@@ -59,45 +61,42 @@ export default function LivekitRoomWrapper({
     }
   }, [roomId, participantName])
 
-  if (isLoading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Connecting to LiveKit...</p>
-        </div>
-      </div>
-    )
-  }
+  // Handle room connection lifecycle
+  useEffect(() => {
+    if (!token || error) return
 
-  if (error) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-center p-4">
-          <p className="text-red-500 mb-2">LiveKit Connection Error</p>
-          <p className="text-sm text-muted-foreground">{error}</p>
-        </div>
-      </div>
-    )
-  }
+    const connectRoom = async () => {
+      try {
+        await room.connect(LIVEKIT_CONFIG.wsUrl, token)
+        console.log('Connected to LiveKit room:', roomId)
+      } catch (err) {
+        console.error('Error connecting to room:', err)
+        setError(err instanceof Error ? err.message : 'Failed to connect to room')
+      }
+    }
 
-  if (!token) {
-    return null
-  }
+    connectRoom()
 
+    return () => {
+      room.disconnect()
+    }
+  }, [room, token, error, roomId])
+
+  // Always render RoomContext.Provider, even during loading/error states
+  // This ensures RoomContext is available for Puck components
   return (
-    <LiveKitRoom
-      token={token}
-      serverUrl={LIVEKIT_CONFIG.wsUrl}
-      connect={true}
-      video={false}
-      audio={false}
-      className="h-full w-full"
-      options={{
-        // Room connection options can be configured here if needed
-      }}
-    >
-      {children}
-    </LiveKitRoom>
+    <RoomContext.Provider value={room}>
+      <div className="h-full w-full">
+        {error && (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-center p-4">
+              <p className="text-red-500 mb-2">LiveKit Connection Error</p>
+              <p className="text-sm text-muted-foreground">{error}</p>
+            </div>
+          </div>
+        ) }
+  {children}
+      </div>
+    </RoomContext.Provider>
   )
 }

@@ -1,11 +1,16 @@
 'use client';
 
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { HydrationBoundary, QueryClientProvider, QueryClient, type DehydratedState } from '@tanstack/react-query';
 import { Client } from './client';
 import { usePageDataQuery } from '@/hooks/usePageDataQuery';
-import { ClientReactTogetherWrapper } from '@/providers/ClientReactTogetherWrapper';
 import LivekitRoomWrapper from '@/providers/LivekitRoomWrapper';
+
+const ClientReactTogetherWrapper = dynamic(
+  () => import('@/providers/ClientReactTogetherWrapper').then(mod => mod.ClientReactTogetherWrapper),
+  { ssr: false }
+);
 
 interface ClientPageProps {
   dehydratedState: DehydratedState;
@@ -52,11 +57,11 @@ export default function ClientPage({ dehydratedState, path }: ClientPageProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={dehydratedState}>
-        <LivekitRoomWrapper roomId={roomId} participantName={participantName}>
+
           <ClientReactTogetherWrapper>
             <PageContent path={path} />
           </ClientReactTogetherWrapper>
-        </LivekitRoomWrapper>
+   
       </HydrationBoundary>
     </QueryClientProvider>
   );

@@ -1,5 +1,11 @@
 import React from 'react'
-import { ClientReactTogetherWrapper } from '@/providers/ClientReactTogetherWrapper'
+import dynamic from 'next/dynamic'
+import SideDrawer from '@/components/SideDrawer'
+
+const ClientReactTogetherWrapper = dynamic(
+  () => import('@/providers/ClientReactTogetherWrapper').then(mod => mod.ClientReactTogetherWrapper),
+  { ssr: false }
+)
 
 export default function RoomLayout({
   children,
@@ -9,6 +15,7 @@ export default function RoomLayout({
   return (
     <div className="h-screen w-screen">
       <ClientReactTogetherWrapper>
+        <SideDrawer />
         {children}
       </ClientReactTogetherWrapper>
     </div>

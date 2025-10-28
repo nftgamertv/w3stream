@@ -19,6 +19,12 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const { puckPath = [] } = await params;
   const path = `/${puckPath.join("/")}`;
+
+  // Filter out Next.js static assets
+  if (path.startsWith('/_next') || path.includes('.map') || path.match(/\.(css|js|json|ico|png|jpg|svg|woff|woff2)$/)) {
+    return { title: 'Static Asset' };
+  }
+
   const data: { root?: { props?: { title?: string } } } = await fetchPageData(path)
   console.log("Fetched Data for Metadata:", data);
 
@@ -29,8 +35,14 @@ export async function generateMetadata({
 
 export default async function Page({ params, searchParams }: Props) {
   const { puckPath = [] } = await params;
-  const queryClient = getQueryClient();
   const path = `/${puckPath.join("/")}`;
+
+  // Filter out Next.js static assets - just return null silently
+  if (path.startsWith('/_next') || path.includes('.map') || path.match(/\.(css|js|json|ico|png|jpg|svg|woff|woff2)$/)) {
+    return null;
+  }
+
+  const queryClient = getQueryClient();
   const roomId = path.replace(/^\//, '');
 
   await queryClient.prefetchQuery({

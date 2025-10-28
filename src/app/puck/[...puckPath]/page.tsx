@@ -2,30 +2,37 @@ import '@measured/puck/puck.css'
 import './puck.css'
 
 import React from 'react'
-import type { Metadata } from 'next'
-
 import LivekitRoomWrapper from '@/providers/LivekitRoomWrapper'
 import { Client } from './client'
 import { getPage } from '@/lib/get-page'
 
 export const dynamic = 'force-dynamic'
 
-// export async function generateMetadata(
-//   // keep this a plain object — NOT a Promise
-//   { params }: { params: { puckPath?: string[] } }
-// ): Promise<Metadata> {
-//   const path = `/${(params.puckPath ?? []).join('/')}`
-//   return { title: `Puck: ${path}` }
-// }
+type RouteParams = { puckPath?: string[] }
+type Search = { room_id?: string; participant_name?: string }
 
-// TEMPORARY: use `any` to break the bad Promise inference coming from elsewhere.
-export default async function Page(props: any) {
-  const params = (props?.params ?? {}) as { puckPath?: string[] }
-  const searchParams = (props?.searchParams ?? {}) as { room_id?: string; participant_name?: string }
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  // In Next 15 App Router, these can be Promises in some dynamic cases.
+  params: Promise<RouteParams> | RouteParams
+  searchParams: Promise<Search> | Search
+}) {
+  // Normalize to objects (support both promised and plain cases)
+  const resolvedParams: RouteParams =
+    typeof (params as any)?.then === 'function' ? await (params as Promise<RouteParams>) : (params as RouteParams)
 
-  const path = `/${(params.puckPath ?? []).join('/')}`
-  const roomId = searchParams.room_id ?? 'default-room'
-  const participantName = searchParams.participant_name ?? 'Guest'
+  const resolvedSearch: Search =
+    typeof (searchParams as any)?.then === 'function'
+      ? await (searchParams as Promise<Search>)
+      : (searchParams as Search)
+
+  const puckPath = resolvedParams.puckPath ?? []
+  const path = `/${puckPath.join('/')}`
+
+  const roomId = resolvedSearch.room_id ?? 'default-room'
+  const participantName = resolvedSearch.participant_name ?? 'Guest'
 
   const data = await getPage(path)
 
