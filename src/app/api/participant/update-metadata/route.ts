@@ -25,6 +25,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, updated });
   } catch (err: any) {
+    console.error('[update-metadata] Error:', err);
+    console.error('[update-metadata] Error message:', err?.message);
+    console.error('[update-metadata] Error stack:', err?.stack);
     return NextResponse.json(
       { error: err?.message || "Failed to update participant metadata" },
       { status: 500 }
