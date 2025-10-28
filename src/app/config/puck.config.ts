@@ -14,6 +14,7 @@ import { RoomNameConfig } from '@/components/livekit-puck/RoomName';
 import { SVGEditorConfig } from '@/components/livekit-puck/SVGEditor';
 import { RoomHeaderConfig } from '@/components/livekit-puck/RoomHeader';
 import { VideoConferenceLayoutConfig } from '@/components/livekit-puck/VideoConferenceLayout';
+import { RoomShellConfig } from '@/components/livekit-puck/RoomShell';
 import { BackroomPanelConfig } from '@/components/livekit-puck/BackroomPanel';
 import { ChatDrawerConfig } from '@/components/livekit-puck/ChatDrawer';
 import { StageSubscriptionManagerConfig } from '@/components/livekit-puck/StageSubscriptionManager';
@@ -35,6 +36,7 @@ export const livekitPuckConfig: Config = {
     SVGEditor: SVGEditorConfig,
     RoomHeader: RoomHeaderConfig,
     VideoConferenceLayout: VideoConferenceLayoutConfig,
+    RoomShell: RoomShellConfig,
     BackroomPanel: BackroomPanelConfig,
     ChatDrawer: ChatDrawerConfig,
     StageSubscriptionManager: StageSubscriptionManagerConfig,
@@ -56,7 +58,7 @@ export const livekitPuckConfig: Config = {
       defaultExpanded: true,
     },
     layouts: {
-      components: ['GridLayout', 'VideoConferenceLayout'],
+      components: ['RoomShell', 'GridLayout', 'VideoConferenceLayout'],
       title: 'Layouts',
       defaultExpanded: true,
     },
