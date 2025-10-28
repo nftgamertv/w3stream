@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { RoomContext } from "@livekit/components-react"
 import { Room } from "livekit-client"
 import { LIVEKIT_CONFIG } from "@/lib/livekit-config"
 import "@livekit/components-styles"
+import { observable } from "@legendapp/state"
+import { useObservable, useSelector, useMount, useObserve } from "@legendapp/state/react"
 
 interface LivekitRoomWrapperProps {
   children: React.ReactNode
@@ -18,15 +20,20 @@ export default function LivekitRoomWrapper({
   participantName = "User"
 }: LivekitRoomWrapperProps) {
   const [room] = useState(() => new Room({}))
-  const [token, setToken] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string>("")
+  const state$ = useObservable({
+    token: "",
+    isLoading: true,
+    error: ""
+  })
 
-  useEffect(() => {
+  // Fetch token on mount
+  useMount(() => {
     const fetchToken = async () => {
       try {
-        setIsLoading(true)
-        setError("")
+        state$.isLoading.set(true)
+        state$.error.set("")
+
+        console.log('[LivekitRoomWrapper] Fetching token for roomId:', roomId, 'participantName:', participantName)
 
         // Fetch token from the API
         const response = await fetch('/api/livekit-token', {
@@ -47,51 +54,73 @@ export default function LivekitRoomWrapper({
         }
 
         const data = await response.json()
-        setToken(data.token)
+        state$.token.set(data.token)
       } catch (err) {
         console.error('Error fetching LiveKit token:', err)
-        setError(err instanceof Error ? err.message : 'Failed to connect to LiveKit')
+        state$.error.set(err instanceof Error ? err.message : 'Failed to connect to LiveKit')
       } finally {
-        setIsLoading(false)
+        state$.isLoading.set(false)
       }
     }
 
     if (roomId) {
       fetchToken()
     }
-  }, [roomId, participantName])
+  })
 
-  // Handle room connection lifecycle
-  useEffect(() => {
-    if (!token || error) return
+  // Handle room connection lifecycle - observe token changes
+  useObserve(() => {
+    const token = state$.token.get()
+    const error = state$.error.get()
+
+    console.log('[LivekitRoomWrapper] Connection observer running. Token:', !!token, 'Error:', error)
+
+    if (!token || error) {
+      console.log('[LivekitRoomWrapper] Skipping connection - no token or has error')
+      return
+    }
+
+    let isSubscribed = true
 
     const connectRoom = async () => {
       try {
+        if (!isSubscribed) return
+        console.log('[LivekitRoomWrapper] Attempting to connect to LiveKit...')
         await room.connect(LIVEKIT_CONFIG.wsUrl, token)
-        console.log('Connected to LiveKit room:', roomId)
+        if (!isSubscribed) return
+        console.log('[LivekitRoomWrapper] Connected to LiveKit room:', roomId)
+        console.log('[LivekitRoomWrapper] Room.name after connect:', room.name)
+        console.log('[LivekitRoomWrapper] Room.state:', room.state)
       } catch (err) {
-        console.error('Error connecting to room:', err)
-        setError(err instanceof Error ? err.message : 'Failed to connect to room')
+        console.error('[LivekitRoomWrapper] Error connecting to room:', err)
+        if (isSubscribed) {
+          state$.error.set(err instanceof Error ? err.message : 'Failed to connect to room')
+        }
       }
     }
 
     connectRoom()
 
     return () => {
+      isSubscribed = false
+      console.log('[LivekitRoomWrapper] Disconnecting from room')
       room.disconnect()
     }
-  }, [room, token, error, roomId])
+  })
+
+  // Get reactive error value for rendering
+  const errorMessage = useSelector(() => state$.error.get())
 
   // Always render RoomContext.Provider, even during loading/error states
   // This ensures RoomContext is available for Puck components
   return (
     <RoomContext.Provider value={room}>
       <div className="h-full w-full">
-        {error && (
+        {errorMessage && (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center p-4">
               <p className="text-red-500 mb-2">LiveKit Connection Error</p>
-              <p className="text-sm text-muted-foreground">{error}</p>
+              <p className="text-sm text-muted-foreground">{errorMessage}</p>
             </div>
           </div>
         ) }

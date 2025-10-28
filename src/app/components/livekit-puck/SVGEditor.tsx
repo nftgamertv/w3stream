@@ -58,7 +58,7 @@ export const SVGEditorConfig: ComponentConfig<SVGEditorProps> = {
     },
   },
   defaultProps: {
-    svgUrl: '',
+    svgUrl: 'https://vgwzhgureposlvnxoiaj.supabase.co/storage/v1/object/public/svgs/generated/w3s.svg',
     width: 800,
     height: 800,
     collaborative: false,

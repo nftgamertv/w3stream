@@ -1,0 +1,42 @@
+[v0] Participants update (counter: 0): [{…}]
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:68 [v0] Stage participants: 0
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:69 [v0] Backstage participants: 1
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:76 [LivekitRoomWrapper] Connection observer running. Token: true Error: 
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:88 [LivekitRoomWrapper] Attempting to connect to LiveKit...
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:91 [LivekitRoomWrapper] Connected to LiveKit room: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:92 [LivekitRoomWrapper] Room.name after connect: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:93 [LivekitRoomWrapper] Room.state: connected
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:91 [LivekitRoomWrapper] Connected to LiveKit room: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:92 [LivekitRoomWrapper] Room.name after connect: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\providers\LivekitRoomWrapper.tsx:93 [LivekitRoomWrapper] Room.state: connected
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:59 [v0] Participants update (counter: 0): [{…}]
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:68 [v0] Stage participants: 0
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:69 [v0] Backstage participants: 1
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:74 [v0] ===== MOVE TO STAGE START =====
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:75 [v0] Participant identity: User
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:76 [v0] Participant name: 
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:77 [v0] Current metadata: {"name":"User","role":"guest","color":"#52B788","joinedAt":"2025-10-28T21:30:11.526Z"}
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:84 [v0] New metadata to send: {"name":"User","role":"guest","color":"#52B788","joinedAt":"2025-10-28T21:30:11.526Z","onStage":true}
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:85 [v0] Room name: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:59 [v0] Participants update (counter: 0): [{…}]
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:68 [v0] Stage participants: 0
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:69 [v0] Backstage participants: 1
+C:\Users\trent\Desktop\w3stream\src\app\room\[roomId]\ClientPage.tsx:47 ClientPage rendering with data: {root: {…}, zones: {…}, content: Array(8)}
+C:\Users\trent\Desktop\w3stream\src\app\room\[roomId]\ClientPage.tsx:47 ClientPage rendering with data: {root: {…}, zones: {…}, content: Array(8)}
+C:\Users\trent\Desktop\w3stream\src\app\[...puckPath]\client.tsx:13 Client component received data: {root: {…}, zones: {…}, content: Array(8)}
+C:\Users\trent\Desktop\w3stream\src\app\[...puckPath]\client.tsx:22 Client component pathname: /room/SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\[...puckPath]\client.tsx:23 Client component using roomId: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\[...puckPath]\client.tsx:13 Client component received data: {root: {…}, zones: {…}, content: Array(8)}
+C:\Users\trent\Desktop\w3stream\src\app\[...puckPath]\client.tsx:22 Client component pathname: /room/SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\[...puckPath]\client.tsx:23 Client component using roomId: SypWr_Io
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:97 [v0] API response status: 200
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:59 [v0] Participants update (counter: 0): [{…}]
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:68 [v0] Stage participants: 1
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:69 [v0] Backstage participants: 0
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:106 [v0] API success response: {ok: true, updated: {…}}
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:110 [v0] After 500ms delay, participant metadata: {"name":"User","role":"guest","color":"#52B788","joinedAt":"2025-10-28T21:30:11.526Z","onStage":true}
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:111 [v0] ===== MOVE TO STAGE END =====
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:59 [v0] Participants update (counter: 1): [{…}]
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:68 [v0] Stage participants: 1
+C:\Users\trent\Desktop\w3stream\src\app\components\BackroomPanel.tsx:69 [v0] Backstage participants: 0
+4SypWr_Io?name=Trent+…=82523ea24bb9491…:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received

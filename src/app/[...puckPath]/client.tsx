@@ -13,10 +13,14 @@ export const Client: React.FC<ClientProps> = ({ data }) => {
   console.log('Client component received data:', data);
 
   // Extract roomId from URL path
+  // pathname will be like "/room/TsMWoxue" or just "/TsMWoxue"
   const pathname = usePathname();
-  const roomId = pathname?.replace(/^\//, '') || 'default-room';
+  const pathParts = pathname?.split('/').filter(Boolean) || [];
+  // If path is /room/roomId, get the last part. Otherwise get the first part.
+  const roomId = pathParts.length > 1 ? pathParts[pathParts.length - 1] : (pathParts[0] || 'default-room');
 
-  console.log('Client component using roomId from path:', roomId);
+  console.log('Client component pathname:', pathname);
+  console.log('Client component using roomId:', roomId);
 
   if (!data) {
     console.error('Client component: No data provided');

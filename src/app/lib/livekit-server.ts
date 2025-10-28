@@ -134,6 +134,7 @@ export async function replaceParticipantMetadata(
   participantIdentity: string,
   metadata: Record<string, unknown>
 ) {
+  console.log('[replaceParticipantMetadata] Starting update:', { roomName, participantIdentity, metadata });
   const roomService = getRoomService();
 
   // Retry logic for when room is being created
@@ -142,11 +143,15 @@ export async function replaceParticipantMetadata(
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
+      console.log(`[replaceParticipantMetadata] Attempt ${attempt + 1}/${maxRetries}`);
       await roomService.updateParticipant(roomName, participantIdentity, {
         metadata: JSON.stringify(metadata),
       });
+      console.log('[replaceParticipantMetadata] Success!');
       return metadata;
     } catch (error: any) {
+      console.error('[replaceParticipantMetadata] Error on attempt', attempt + 1, ':', error);
+      console.error('[replaceParticipantMetadata] Error message:', error?.message);
       const isRoomNotFound = error?.message?.includes("requested room does not exist");
 
       if (isRoomNotFound && attempt < maxRetries - 1) {
@@ -157,6 +162,7 @@ export async function replaceParticipantMetadata(
       }
 
       // Either not a room-not-found error, or we've exhausted retries
+      console.error('[replaceParticipantMetadata] Throwing error after all retries');
       throw error;
     }
   }
