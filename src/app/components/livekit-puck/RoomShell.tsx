@@ -76,7 +76,16 @@ export const RoomShell: React.FC<RoomShellProps & { slots?: RoomShellSlots }> = 
   );
 };
 
-export const RoomShellConfig: ComponentConfig<RoomShellProps> = {
+type SlotConfig = {
+  label: string;
+  allow?: string[];
+  disallow?: string[];
+  single?: boolean;
+};
+
+const roomShellConfig: ComponentConfig<RoomShellProps> & {
+  slots: Record<keyof RoomShellSlots, SlotConfig>;
+} = {
   label: 'Room Shell',
   fields: {
     background: {
@@ -129,5 +138,7 @@ export const RoomShellConfig: ComponentConfig<RoomShellProps> = {
   },
   render: (props) => <RoomShell {...props} />,
 };
+
+export const RoomShellConfig = roomShellConfig;
 
 export default RoomShell;

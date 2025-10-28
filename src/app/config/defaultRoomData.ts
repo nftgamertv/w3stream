@@ -4,7 +4,7 @@ import { Data } from '@measured/puck';
  * Default Puck configuration matching the RoomContent layout from MeetingRoom
  * This replicates the structure from RoomContent (lines 320-344 in MeetingRoom.tsx)
  */
-export const defaultRoomData: Data = {
+const defaultRoomDataRaw = {
   root: {
     props: {
       title: 'Video Conference Room'
@@ -83,5 +83,7 @@ export const defaultRoomData: Data = {
   ],
   zones: {}
 };
+
+export const defaultRoomData = defaultRoomDataRaw as unknown as Data;
 
 export default defaultRoomData;

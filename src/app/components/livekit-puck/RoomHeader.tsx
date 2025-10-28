@@ -127,7 +127,16 @@ export const RoomHeader: React.FC<RoomHeaderRenderProps> = ({
   );
 };
 
-export const RoomHeaderConfig: ComponentConfig<RoomHeaderProps> = {
+type SlotConfig = {
+  label: string;
+  allow?: string[];
+  disallow?: string[];
+  single?: boolean;
+};
+
+const roomHeaderConfig: ComponentConfig<RoomHeaderProps> & {
+  slots: { actions: SlotConfig };
+} = {
   label: 'Room Header',
   fields: {
     roomId: { type: 'text', label: 'Room ID' },
@@ -147,3 +156,5 @@ export const RoomHeaderConfig: ComponentConfig<RoomHeaderProps> = {
   },
   render: (props) => <RoomHeader {...props} />,
 };
+
+export const RoomHeaderConfig = roomHeaderConfig;
