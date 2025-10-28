@@ -17,7 +17,14 @@
       "Bash(rm:*)",
       "Bash(pnpm build:*)",
       "Bash(tasklist:*)",
+<<<<<<< Updated upstream
       "Bash(npx eslint:*)"
+=======
+      "Bash(npx eslint:*)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "WebSearch"
+>>>>>>> Stashed changes
     ],
     "deny": [],
     "ask": []

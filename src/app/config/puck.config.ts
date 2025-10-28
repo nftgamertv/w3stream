@@ -11,6 +11,19 @@ import { RoomAudioRendererConfig } from '@/components/livekit-puck/RoomAudioRend
 import { ConnectionQualityIndicatorConfig } from '@/components/livekit-puck/ConnectionQualityIndicator';
 import { ParticipantNameConfig } from '@/components/livekit-puck/ParticipantName';
 import { RoomNameConfig } from '@/components/livekit-puck/RoomName';
+<<<<<<< Updated upstream
+=======
+import { SVGEditorConfig } from '@/components/livekit-puck/SVGEditor';
+import { RoomHeaderConfig } from '@/components/livekit-puck/RoomHeader';
+import { VideoConferenceLayoutConfig } from '@/components/livekit-puck/VideoConferenceLayout';
+import { BackroomPanelConfig } from '@/components/livekit-puck/BackroomPanel';
+import { ChatDrawerConfig } from '@/components/livekit-puck/ChatDrawer';
+import { StageSubscriptionManagerConfig } from '@/components/livekit-puck/StageSubscriptionManager';
+import { SidebarLayoutConfig } from '@/components/livekit-puck/SidebarLayout';
+import { SpotlightLayoutConfig } from '@/components/livekit-puck/SpotlightLayout';
+import { PictureInPictureLayoutConfig } from '@/components/livekit-puck/PictureInPictureLayout';
+import { FlexLayoutConfig } from '@/components/livekit-puck/FlexLayout';
+>>>>>>> Stashed changes
 
 export const livekitPuckConfig: Config = {
   components: {
@@ -21,6 +34,10 @@ export const livekitPuckConfig: Config = {
     TrackToggle: TrackToggleConfig,
     ParticipantTile: ParticipantTileConfig,
     GridLayout: GridLayoutConfig,
+    SidebarLayout: SidebarLayoutConfig,
+    SpotlightLayout: SpotlightLayoutConfig,
+    PictureInPictureLayout: PictureInPictureLayoutConfig,
+    FlexLayout: FlexLayoutConfig,
     Chat: ChatConfig,
     RoomAudioRenderer: RoomAudioRendererConfig,
     ConnectionQualityIndicator: ConnectionQualityIndicatorConfig,
@@ -44,7 +61,18 @@ export const livekitPuckConfig: Config = {
       defaultExpanded: true,
     },
     layouts: {
+<<<<<<< Updated upstream
       components: ['GridLayout'],
+=======
+      components: [
+        'GridLayout',
+        'SidebarLayout',
+        'SpotlightLayout',
+        'PictureInPictureLayout',
+        'VideoConferenceLayout',
+        'FlexLayout',
+      ],
+>>>>>>> Stashed changes
       title: 'Layouts',
       defaultExpanded: true,
     },

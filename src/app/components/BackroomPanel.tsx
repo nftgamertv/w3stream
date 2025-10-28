@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import { useParticipants, useRoomContext } from "@livekit/components-react"
@@ -12,14 +14,24 @@ function isOnStage(participant: LocalParticipant | RemoteParticipant): boolean {
   return metadata.onStage === true
 }
 
-export function BackroomPanel() {
+interface BackroomPanelProps {
+  roomName?: string
+}
+
+export function BackroomPanel({ roomName: roomNameProp }: BackroomPanelProps = {}) {
   const participants = useParticipants()
   const room = useRoomContext()
   const [isExpanded, setIsExpanded] = useState(true)
   const [updatingParticipants, setUpdatingParticipants] = useState<Set<string>>(new Set())
   const [metadataUpdateCounter, setMetadataUpdateCounter] = useState(0)
 
+  // Use prop if provided, otherwise fall back to room.name
+  const roomName = roomNameProp || room?.name || ''
+
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   useEffect(() => {
+    if (!room) return
+
     const handleMetadataChanged = () => {
       console.log("[v0] Participant metadata changed, forcing re-render")
       setMetadataUpdateCounter((prev) => prev + 1)
@@ -69,6 +81,12 @@ export function BackroomPanel() {
     console.log("[v0] Backstage participants:", backroomParticipants.length)
   }, [participants, metadataUpdateCounter, stageParticipants, backroomParticipants])
 
+  // Don't render if we don't have a room name yet (AFTER all hooks)
+  if (!roomName) {
+    console.log('[v0] BackroomPanel: Waiting for room name...', { hasRoom: !!room, roomState: room?.state, propProvided: !!roomNameProp })
+    return null
+  }
+
   const moveToStage = async (participant: RemoteParticipant) => {
     try {
       console.log("[v0] ===== MOVE TO STAGE START =====")
@@ -82,13 +100,13 @@ export function BackroomPanel() {
       const newMetadata = { ...currentMetadata, onStage: true }
 
       console.log("[v0] New metadata to send:", JSON.stringify(newMetadata))
-      console.log("[v0] Room name:", room.name)
+      console.log("[v0] Room name:", roomName)
 
       const response = await fetch("/api/participant/update-metadata", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          roomName: room.name,
+          roomName: roomName,
           participantIdentity: participant.identity,
           metadata: newMetadata,
         }),
@@ -135,13 +153,13 @@ export function BackroomPanel() {
       const newMetadata = { ...currentMetadata, onStage: false }
 
       console.log("[v0] New metadata to send:", JSON.stringify(newMetadata))
-      console.log("[v0] Room name:", room.name)
+      console.log("[v0] Room name:", roomName)
 
       const response = await fetch("/api/participant/update-metadata", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          roomName: room.name,
+          roomName: roomName,
           participantIdentity: participant.identity,
           metadata: newMetadata,
         }),

@@ -308,7 +308,7 @@ function PresentationRoomContent({ roomId, participantName, layout, onLayoutChan
 
       {/* TODO: Puck Component - PresentationControls */}
       <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel />}
+        {isUserHost && <BackroomPanel roomName={roomId} />}
         <div className="flex items-center gap-2"><SelfStageToggle /></div>
         <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
       </div>

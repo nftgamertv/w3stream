@@ -1,8 +1,15 @@
 import React from 'react'
+<<<<<<< Updated upstream
 import { ClientReactTogetherWrapper } from "@/providers/ClientReactTogetherWrapper"
 import LivekitRoomWrapper from '@/providers/LivekitRoomWrapper'
 
 export default async function RoomLayout({
+=======
+import { ClientReactTogetherWrapper } from '@/providers/ClientReactTogetherWrapper'
+import SideDrawer from '@/components/SideDrawer'
+
+export default function RoomLayout({
+>>>>>>> Stashed changes
   children,
   searchParams
 }: {

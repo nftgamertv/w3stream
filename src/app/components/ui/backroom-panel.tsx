@@ -13,11 +13,20 @@ function isOnStage(participant: RemoteParticipant): boolean {
   return metadata.onStage === true
 }
 
-export function BackroomPanel() {
+interface BackroomPanelProps {
+  roomName?: string
+}
+
+export function BackroomPanel({ roomName: roomNameProp }: BackroomPanelProps = {}) {
   const room = useRoomContext()
   const [backstageParticipants, setBackstageParticipants] = useState<RemoteParticipant[]>([])
 
+  // Use prop if provided, otherwise fall back to room.name
+  const roomName = roomNameProp || room?.name
+
   useEffect(() => {
+    if (!room) return
+
     const updateBackstage = () => {
       const participants = Array.from(room.remoteParticipants.values()).filter((p) => !isOnStage(p))
       setBackstageParticipants(participants)
@@ -30,6 +39,11 @@ export function BackroomPanel() {
   }, [room])
 
   const addToStage = async (participant: RemoteParticipant) => {
+    if (!roomName) {
+      console.error("[v0] Cannot add participant to stage: room name not available")
+      return
+    }
+
     try {
       const currentMetadata = participant.metadata ? JSON.parse(participant.metadata) : {}
       const newMetadata = { ...currentMetadata, onStage: true }
@@ -38,7 +52,7 @@ export function BackroomPanel() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          roomName: room.name,
+          roomName: roomName,
           participantIdentity: participant.identity,
           metadata: newMetadata,
         }),

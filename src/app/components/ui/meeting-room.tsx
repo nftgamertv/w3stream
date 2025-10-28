@@ -375,7 +375,7 @@ function RoomContent({ roomId, participantName, layout, onLayoutChange, isUserHo
         </div>
       </div>
       <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-40 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel />}
+        {isUserHost && <BackroomPanel roomName={roomId} />}
         <div className="flex-1 flex items-center justify-center">
           <ControlBar variation="verbose" />
         </div>
