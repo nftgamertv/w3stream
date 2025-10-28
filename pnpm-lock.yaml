@@ -149,6 +149,9 @@ importers:
       '@wallet-ui/react':
         specifier: ^2.0.0
         version: 2.0.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3))(@solana/signers@3.0.3(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3))(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+      '@wallet-ui/tailwind':
+        specifier: ^2.0.0
+        version: 2.0.0(tailwindcss@4.1.16)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2964,6 +2967,12 @@ packages:
     peerDependencies:
       '@solana/signers': 2.3.0
       react: '>=18'
+
+  '@wallet-ui/tailwind@2.0.0':
+    resolution: {integrity: sha512-gIUVbZO33QmjVPgC0NaY2kWuXxgaBS/DA4F8BjCsGAlS9a5OQi56oi+DzGlL1jkCEk6G4I25kaT+LAmWmrh3Jw==}
+    engines: {node: '>=20.18.0'}
+    peerDependencies:
+      tailwindcss: ^4.1.5
 
   '@webgpu/types@0.1.66':
     resolution: {integrity: sha512-YA2hLrwLpDsRueNDXIMqN9NTzD6bCDkuXbOSe0heS+f8YE8usA6Gbv1prj81pzVHrbaAma7zObnIC+I6/sXJgA==}
@@ -9526,6 +9535,10 @@ snapshots:
       - fastestsmallesttextencoderdecoder
       - react-dom
       - typescript
+
+  '@wallet-ui/tailwind@2.0.0(tailwindcss@4.1.16)':
+    dependencies:
+      tailwindcss: 4.1.16
 
   '@webgpu/types@0.1.66': {}
 

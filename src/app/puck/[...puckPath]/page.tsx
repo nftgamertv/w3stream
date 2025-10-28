@@ -15,24 +15,16 @@ export default async function Page({
   params,
   searchParams,
 }: {
-  // In Next 15 App Router, these can be Promises in some dynamic cases.
-  params: Promise<RouteParams> | RouteParams
-  searchParams: Promise<Search> | Search
+  params: Promise<RouteParams>
+  searchParams: Promise<Search>
 }) {
-  // Normalize to objects (support both promised and plain cases)
-  const resolvedParams: RouteParams =
-    typeof (params as any)?.then === 'function' ? await (params as Promise<RouteParams>) : (params as RouteParams)
+  // Await the dynamic APIs per Next 15 typing
+  const { puckPath = [] } = await params
+  const { room_id, participant_name } = await searchParams
 
-  const resolvedSearch: Search =
-    typeof (searchParams as any)?.then === 'function'
-      ? await (searchParams as Promise<Search>)
-      : (searchParams as Search)
-
-  const puckPath = resolvedParams.puckPath ?? []
   const path = `/${puckPath.join('/')}`
-
-  const roomId = resolvedSearch.room_id ?? 'default-room'
-  const participantName = resolvedSearch.participant_name ?? 'Guest'
+  const roomId = room_id ?? 'default-room'
+  const participantName = participant_name ?? 'Guest'
 
   const data = await getPage(path)
 
