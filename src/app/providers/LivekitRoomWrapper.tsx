@@ -23,12 +23,19 @@ export default function LivekitRoomWrapper({
   const state$ = useObservable({
     token: "",
     isLoading: true,
-    error: ""
+    error: "",
+    tokenFetched: false
   })
 
   // Fetch token on mount
   useMount(() => {
     const fetchToken = async () => {
+      // Prevent duplicate token fetches (React Strict Mode double-mount)
+      if (state$.tokenFetched.peek()) {
+        console.log('[LivekitRoomWrapper] Token already fetched, skipping')
+        return
+      }
+
       try {
         state$.isLoading.set(true)
         state$.error.set("")
@@ -55,6 +62,7 @@ export default function LivekitRoomWrapper({
 
         const data = await response.json()
         state$.token.set(data.token)
+        state$.tokenFetched.set(true)
       } catch (err) {
         console.error('Error fetching LiveKit token:', err)
         state$.error.set(err instanceof Error ? err.message : 'Failed to connect to LiveKit')
@@ -85,6 +93,13 @@ export default function LivekitRoomWrapper({
     const connectRoom = async () => {
       try {
         if (!isSubscribed) return
+
+        // Check if already connected to prevent duplicate connections
+        if (room.state === 'connected' || room.state === 'connecting') {
+          console.log('[LivekitRoomWrapper] Already connected/connecting, skipping connection. State:', room.state)
+          return
+        }
+
         console.log('[LivekitRoomWrapper] Attempting to connect to LiveKit...')
         await room.connect(LIVEKIT_CONFIG.wsUrl, token)
         if (!isSubscribed) return
