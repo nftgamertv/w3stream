@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react"
 import { useParticipants, useRoomContext, ParticipantTile as LKParticipantTile } from "@livekit/components-react"
 import type { TrackReference } from "@livekit/components-react"
 import { Track, type LocalParticipant, type RemoteParticipant, ParticipantEvent, RoomEvent } from "livekit-client"
-import { Button } from "@/components/ui/button"
 import { Users, UserPlus, Loader2 } from "lucide-react"
 
 function isOnStage(participant: LocalParticipant | RemoteParticipant): boolean {
@@ -106,53 +105,63 @@ export function BackroomPanel() {
   }
 
   return (
-    <div className="pointer-events-auto absolute bottom-[9rem] left-8 z-[120] flex max-w-[32rem] flex-col gap-3">
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white/70 backdrop-blur">
-        <Users className="h-3.5 w-3.5" />
-        Backstage
-        <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80">
-          {backstageParticipants.length}
+    <div className="pointer-events-auto absolute bottom-24 left-10 z-[120] flex max-w-[34rem] flex-col gap-2 text-white">
+      <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
+          <Users className="h-4 w-4" />
+        </span>
+        <span className="flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-3 py-1 backdrop-blur">
+          Backstage
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80">
+            {backstageParticipants.length}
+          </span>
         </span>
       </div>
 
       {backstageParticipants.length === 0 ? (
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/60 px-5 py-4 text-sm text-white/60 backdrop-blur-xl">
-          <Users className="h-5 w-5 text-white/40" />
-          <span>No participants waiting backstage.</span>
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 text-xs text-white/60 backdrop-blur-xl">
+          <Users className="h-4 w-4 text-white/40" />
+          <span>Backstage is clear.</span>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-2 pr-2">
+        <div className="flex gap-3 overflow-x-auto pb-2 pr-4">
           {backstageParticipants.map((participant) => {
             const trackRef = getPreferredTrackRef(participant)
+            const isPending = updatingParticipants.has(participant.identity)
+
             return (
               <div
                 key={participant.identity}
-                className="group relative aspect-video w-48 flex-shrink-0 overflow-hidden rounded-2xl border border-white/12 bg-white/5 shadow-xl shadow-black/40 backdrop-blur-xl"
+                className="group relative aspect-video w-40 flex-shrink-0 overflow-hidden rounded-2xl border border-white/12 bg-white/5 shadow-xl shadow-black/50 backdrop-blur-xl"
               >
                 {trackRef ? (
                   <LKParticipantTile className="h-full w-full" trackRef={trackRef} />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-black/50 text-xs text-white/50">
+                  <div className="flex h-full w-full items-center justify-center bg-black/60 text-[11px] text-white/60">
                     Waiting for video
                   </div>
                 )}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between px-4 py-3 text-xs text-white">
-                  <span className="truncate font-medium">
-                    {participant.name || "Guest"}
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/65 via-black/20 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between px-3 pb-2 text-[11px]">
+                  <span className="max-w-[70%] truncate font-medium">
+                    {participant.name || 'Guest'}
                   </span>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 text-[9px] uppercase tracking-wide">
                     Waiting
                   </span>
                 </div>
-                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center px-4 py-4">
-                  <Button
-                    size="sm"
-                    onClick={() => moveToStage(participant as RemoteParticipant)}
-                    disabled={updatingParticipants.has(participant.identity)}
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-white/90 text-xs font-semibold text-black shadow-lg shadow-white/30 hover:bg-white"
-                  >
-                    {updatingParticipants.has(participant.identity) ? (
+
+                <button
+                  type="button"
+                  onClick={() => moveToStage(participant as RemoteParticipant)}
+                  disabled={isPending}
+                  className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-black transition-opacity duration-200"
+                >
+                  <span className="pointer-events-none absolute inset-0 rounded-2xl border border-white/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                  <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[11px] font-semibold text-black shadow-lg shadow-white/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 disabled:opacity-90">
+                    {isPending ? (
                       <>
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         Adding…
@@ -163,8 +172,8 @@ export function BackroomPanel() {
                         Add to stage
                       </>
                     )}
-                  </Button>
-                </div>
+                  </span>
+                </button>
               </div>
             )
           })}
