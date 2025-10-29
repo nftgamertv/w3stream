@@ -45,7 +45,7 @@ export function ChatDrawer({ participantName, isHost = false }: ChatDrawerProps)
   return (
     <>
       {/* Chat Toggle Button with Badge */}
-      <div className={cn("fixed bottom-24 z-[110]", isHost ? "right-[22rem]" : "right-6")}>
+      <div className={cn("pointer-events-auto fixed bottom-28 z-[110]", isHost ? "right-[22rem]" : "right-6")}>
         <div className="relative">
           <Button
             onClick={() => setIsOpen(true)}
