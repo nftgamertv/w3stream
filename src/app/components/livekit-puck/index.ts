@@ -11,6 +11,7 @@ export * from './TrackToggle';
 
 // Layout Components
 export * from './GridLayout';
+export * from './RoomShell';
 
 // Communication Components
 export * from './Chat';

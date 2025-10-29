@@ -331,7 +331,7 @@ function RoomContent({ roomId, participantName, roomType, layout, onLayoutChange
         </div>
       </div>
       <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel />}
+        {isUserHost && <BackroomPanel isHostOverride={isUserHost} />}
         <div className="flex items-center gap-2"><SelfStageToggle /></div>
         <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
       </div>

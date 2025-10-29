@@ -8,12 +8,16 @@ import { Badge } from "@/components/ui/badge"
 import { UserPlus, Users } from "lucide-react"
 import type { RemoteParticipant } from "livekit-client"
 
+interface BackroomPanelProps {
+  isHostOverride?: boolean
+}
+
 function isOnStage(participant: RemoteParticipant): boolean {
   const metadata = participant.metadata ? JSON.parse(participant.metadata) : {}
   return metadata.onStage === true
 }
 
-export function BackroomPanel() {
+export function BackroomPanel({ isHostOverride }: BackroomPanelProps = {}) {
   const room = useRoomContext()
   const [backstageParticipants, setBackstageParticipants] = useState<RemoteParticipant[]>([])
 
@@ -28,6 +32,14 @@ export function BackroomPanel() {
     const interval = setInterval(updateBackstage, 1000)
     return () => clearInterval(interval)
   }, [room])
+
+  const localMetadata = room.localParticipant.metadata ? JSON.parse(room.localParticipant.metadata) : {}
+  const computedIsHost = Boolean(localMetadata?.isHost ?? localMetadata?.role === "host")
+  const isHost = typeof isHostOverride === "boolean" ? isHostOverride : computedIsHost
+
+  if (!isHost) {
+    return null
+  }
 
   const addToStage = async (participant: RemoteParticipant) => {
     try {

@@ -6,7 +6,6 @@ import { useNicknames } from "react-together"
 import {
   LiveKitRoom,
   ParticipantTile,
-  ControlBar,
   useTracks,
   useLocalParticipant,
   useRoomContext,
@@ -31,6 +30,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, Users, UserMinus } from "lucide-react"
 import StageSubscriptionManager from "@/components/StageSubscriptionManager"
+import { RoomShell } from "@/components/livekit-puck/RoomShell"
+import { ControlBar as MediaControlBar } from "@/components/livekit-puck/ControlBar"
 
 // TODO: This component will eventually be fully customizable via Puck
 // The layout structure below is set up to be easily converted to Puck components
@@ -294,29 +295,36 @@ function PresentationRoomContent({ roomId, participantName, layout, onLayoutChan
     <HostControlsContext.Provider value={hostControlsValue}>
       <Cursors />
       <NicknameInitializer participantName={participantName} />
-
-      {/* TODO: Puck Component - PresentationHeader */}
-      <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
-
-      {/* TODO: Puck Component - PresentationStage */}
-      <div className="flex-1 overflow-hidden flex relative">
-        <div className="flex-1 relative z-10 pointer-events-auto">
-          <SpotlightLayoutView />
-          {!isUserHost && <WaitingRoomOverlay />}
-        </div>
-      </div>
-
-      {/* TODO: Puck Component - PresentationControls */}
-      <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel />}
-        <div className="flex items-center gap-2"><SelfStageToggle /></div>
-        <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
-      </div>
+      <RoomShell
+        background="nebula"
+        slots={{
+          topBar: <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />,
+          stage: (
+            <div className="relative flex h-full w-full flex-col">
+              <SpotlightLayoutView />
+              {!isUserHost && <WaitingRoomOverlay />}
+            </div>
+          ),
+          footer: (
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-2">
+                <SelfStageToggle />
+              </div>
+              <MediaControlBar />
+            </div>
+          ),
+          overlays: (
+            <>
+              {isUserHost && <BackroomPanel isHostOverride={isUserHost} />}
+              <ChatDrawer participantName={participantName} isHost={isUserHost} />
+            </>
+          ),
+        }}
+      />
 
       <StageSubscriptionManager />
       <SelectiveAudioRenderer />
       <MetadataListener />
-      <ChatDrawer participantName={participantName} isHost={isUserHost} />
     </HostControlsContext.Provider>
   )
 }
