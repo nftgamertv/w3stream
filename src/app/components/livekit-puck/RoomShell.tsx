@@ -31,8 +31,9 @@ export const RoomShell: React.FC<RoomShellProps & { slots?: RoomShellSlots }> = 
   slots,
 }) => {
   const stageContent = slots?.stage ?? (
-    <div className="flex h-full items-center justify-center text-sm text-white/50">
-      Add a stage component to the Room Shell.
+    <div className="flex h-full flex-col gap-4 p-6">
+      <div className="flex-1 overflow-hidden rounded-3xl border border-white/10 bg-black/30 shadow-inner shadow-black/40" />
+      <div className="min-h-[200px] rounded-3xl border border-dashed border-white/15 bg-black/20" />
     </div>
   );
 
@@ -42,13 +43,13 @@ export const RoomShell: React.FC<RoomShellProps & { slots?: RoomShellSlots }> = 
 
       <div className={cn('relative flex flex-1 overflow-hidden', withPadding && 'px-6 pb-6')}>
         {slots?.leftRail && (
-          <aside className="hidden xl:flex w-64 flex-shrink-0 flex-col gap-4 border-r border-white/10 bg-black/40 px-4 py-6 backdrop-blur-xl">
+          <aside className="hidden lg:flex w-64 flex-shrink-0 flex-col gap-4 border-r border-white/10 bg-black/40 px-4 py-6 backdrop-blur-xl">
             {slots.leftRail}
           </aside>
         )}
 
         <main className="relative flex-1 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
           </div>
@@ -57,7 +58,7 @@ export const RoomShell: React.FC<RoomShellProps & { slots?: RoomShellSlots }> = 
               {stageContent}
             </div>
           </div>
-          {slots?.overlays && <div className="pointer-events-none absolute inset-0">{slots.overlays}</div>}
+          {slots?.overlays && <div className="absolute inset-0">{slots.overlays}</div>}
         </main>
 
         {slots?.rightRail && (

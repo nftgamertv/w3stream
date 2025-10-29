@@ -226,6 +226,52 @@ function CollaborativeStageLayout({ layout }: { layout: LayoutType }) {
   )
 }
 
+function BackstageRail() {
+  const room = useRoomContext()
+  const participants = useParticipants()
+  const backstage = participants.filter((participant) => !isOnStage(participant))
+  const hasOthers = backstage.some((participant) => participant.identity !== room.localParticipant.identity)
+
+  if (!hasOthers) {
+    return (
+      <div className="flex h-full flex-col gap-4 text-white/70">
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-[0.24em] text-white/50">Backstage</h3>
+          <p className="mt-1 text-sm text-white/60">
+            Participants waiting backstage will appear here once they join.
+          </p>
+        </div>
+        <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/30 px-4 text-center text-xs text-white/50">
+          Nobody is waiting backstage right now
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-full flex-col gap-4 text-white">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-[0.24em] text-white/50">Backstage</h3>
+        <p className="mt-1 text-sm text-white/60">Drag and drop or promote a participant to bring them on stage.</p>
+      </div>
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1">
+        {backstage.map((participant) => {
+          if (participant.identity === room.localParticipant.identity) return null
+          const trackRef = getPreferredTrackRef(participant)
+          return (
+            <div
+              key={participant.identity}
+              className="relative aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-lg shadow-black/40"
+            >
+              <ParticipantTile className="h-full w-full" trackRef={trackRef} />
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function SelectiveAudioRenderer() {
   const tracks = useTracks([{ source: Track.Source.Microphone, withPlaceholder: false }], { onlySubscribed: false })
   return (
@@ -446,6 +492,7 @@ function CollaborativeRoomContent({
         background="nebula"
         slots={{
           topBar: <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />,
+          leftRail: <BackstageRail />,
           stage: (
             <div className="relative flex h-full w-full flex-col gap-6">
               <div className="relative flex-1 overflow-hidden rounded-3xl border border-white/12 bg-black/35 shadow-2xl shadow-black/60">
