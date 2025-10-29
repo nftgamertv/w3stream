@@ -5,11 +5,13 @@ import { BackroomPanel as BackroomPanelComponent } from "@/components/BackroomPa
 
 export interface BackroomPanelProps {
   enabled?: boolean;
+  forceHost?: boolean | null;
 }
 
-export const BackroomPanel: React.FC<BackroomPanelProps> = ({ enabled = true }) => {
+export const BackroomPanel: React.FC<BackroomPanelProps> = ({ enabled = true, forceHost }) => {
   if (!enabled) return null;
-  return <BackroomPanelComponent />;
+  const override = forceHost === null ? undefined : forceHost;
+  return <BackroomPanelComponent isHostOverride={override} />;
 };
 
 export const BackroomPanelConfig: ComponentConfig<BackroomPanelProps> = {
@@ -23,9 +25,19 @@ export const BackroomPanelConfig: ComponentConfig<BackroomPanelProps> = {
         { label: 'No', value: false },
       ],
     },
+    forceHost: {
+      type: 'radio',
+      label: 'Force Host View',
+      options: [
+        { label: 'Auto', value: null },
+        { label: 'Show', value: true },
+        { label: 'Hide', value: false },
+      ],
+    },
   },
   defaultProps: {
     enabled: true,
+    forceHost: null,
   },
   render: (props) => <BackroomPanel {...props} />,
 };
