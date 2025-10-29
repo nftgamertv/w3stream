@@ -57,13 +57,12 @@ export const SVGEditorComponent: React.FC<SVGEditorProps> = ({
   );
 
   return (
-    <div className="flex h-full w-full items-center justify-center px-4 py-6">
-      <div className="flex h-full w-full max-w-7xl flex-col gap-6 lg:flex-row">
-        <div className="hidden w-64 flex-shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-xl lg:flex">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-white/60">Stage Preview</h3>
-          {stageParticipants.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-xs text-white/60">
-              No one on stage
+    <div className="absolute top-4 left-0 flex h-auto  ">
+ 
+       <>
+       {stageParticipants.length === 0 ? (
+            <div className=" ">
+   
             </div>
           ) : (
             stageParticipants.map((participant) => {
@@ -79,31 +78,18 @@ export const SVGEditorComponent: React.FC<SVGEditorProps> = ({
               );
             })
           )}
-        </div>
+      </>
 
-        <div className="flex flex-1 items-center justify-center">
-          <div
-            className={cn(
-              'relative flex w-full max-w-4xl flex-col items-center overflow-hidden rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl shadow-black/40 backdrop-blur-2xl',
-              className,
-            )}
-          >
-            <div
-              className="relative w-full max-w-full overflow-hidden rounded-2xl bg-black/30"
-              style={{
-                width: Math.min(width, 1280),
-                maxWidth: '100%',
-                minHeight: Math.min(height, 900),
-              }}
-            >
+       
               <div className="relative mx-auto flex w-full max-w-full items-center justify-center overflow-hidden">
-                <SVGEditor svgurl={svgUrl} className="h-full w-full" collaborative={collaborative} />
+                <div className="flex flex-row">
+<div className={cn("relative", className)} >                <SVGEditor svgurl={svgUrl} className="h-full w-full" collaborative={collaborative} /></div>
+      <div className="w-96 h-96 bg-red-500 "  id="canvasSubmit"  />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+ 
+ 
   );
 };
 
