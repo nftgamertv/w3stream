@@ -315,7 +315,7 @@ function PresentationRoomContent({ roomId, participantName, layout, onLayoutChan
           ),
           overlays: (
             <>
-              {isUserHost && <BackroomPanel isHostOverride={isUserHost} />}
+              {isUserHost && <BackroomPanel />}
               <ChatDrawer participantName={participantName} isHost={isUserHost} />
             </>
           ),

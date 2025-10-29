@@ -467,7 +467,7 @@ function CollaborativeRoomContent({
           ),
           overlays: (
             <>
-              {isUserHost && <BackroomPanel isHostOverride={isUserHost} />}
+              {isUserHost && <BackroomPanel />}
               <ChatDrawer participantName={participantName} isHost={isUserHost} />
             </>
           ),

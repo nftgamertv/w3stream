@@ -6,10 +6,6 @@ import type { TrackReference } from "@livekit/components-react"
 import { Track, type LocalParticipant, type RemoteParticipant, ParticipantEvent, RoomEvent } from "livekit-client"
 import { Users, UserPlus, Loader2 } from "lucide-react"
 
-export interface BackroomPanelProps {
-  isHostOverride?: boolean
-}
-
 function isOnStage(participant: LocalParticipant | RemoteParticipant): boolean {
   const metadata = participant.metadata ? JSON.parse(participant.metadata) : {}
   return metadata.onStage === true
@@ -27,7 +23,7 @@ function getPreferredTrackRef(participant: LocalParticipant | RemoteParticipant)
   return undefined
 }
 
-export function BackroomPanel({ isHostOverride }: BackroomPanelProps = {}) {
+export function BackroomPanel() {
   let room
   try {
     room = useRoomContext()
@@ -58,8 +54,7 @@ export function BackroomPanel({ isHostOverride }: BackroomPanelProps = {}) {
   }, [room])
 
   const localMetadata = room.localParticipant.metadata ? JSON.parse(room.localParticipant.metadata) : {}
-  const computedIsHost = Boolean(localMetadata?.isHost ?? localMetadata?.role === "host")
-  const isHost = typeof isHostOverride === "boolean" ? isHostOverride : computedIsHost
+  const isHost = Boolean(localMetadata?.isHost ?? localMetadata?.role === "host")
 
   const backstageParticipants = useMemo(
     () =>
