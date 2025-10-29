@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './store';
 import { editorState$ } from './editorState';
@@ -9,6 +11,7 @@ import { gsap } from 'gsap';
 import { createClient } from '@/utils/supabaseClients/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { createPortal } from 'react-dom';
 
 // Custom hooks for Canvas functionality
 interface UseCanvasEventsParams {
@@ -400,7 +403,10 @@ const Canvas: React.FC<CanvasProps> = ({
     point.y = event.clientY;
     return point.matrixTransform(CTM.inverse());
   }, []);
-
+  const [isClient, setIsClient] = useState(false);
+useEffect(() => {
+   setIsClient(true) 
+},[])
   // Path translation utility
   const translatePath = useCallback((pathD: string, dx: number, dy: number): string => {
     return pathD.replace(/([0-9]+(?:\.[0-9]*)?)[,\\s]([0-9]+(?:\.[0-9]*)?)/g, (_, x, y) => {
@@ -989,9 +995,7 @@ const Canvas: React.FC<CanvasProps> = ({
           <defs />
           <g id="mainLayer" />
         </svg>
-
-        {/* Submit Button */}
-        <Button
+{isClient && createPortal(        <Button
           style={{ letterSpacing: '1.5px' }}
           className={`w-full right-4 h-12 mx-auto uppercase flex flex-col items-center justify-center 
             cursor-pointer overflow-hidden rounded-xl 
@@ -1005,7 +1009,9 @@ const Canvas: React.FC<CanvasProps> = ({
           disabled={loading}
         >
           {loading ? 'Submitting...' : 'Submit'}
-        </Button>
+        </Button>, document.getElementById('canvasSubmit'))}
+        {/* Submit Button */}
+
       </div>
     </div>
   );
