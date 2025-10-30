@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NoAccessPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center p-4">
@@ -34,12 +36,12 @@ export default function NoAccessPage() {
           </p>
         </div>
         <div className="pt-4">
-          <a
+          <Link
             href="/"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-full hover:from-cyan-500/20 hover:to-purple-500/20 transition-all duration-300"
+            className="inline-block px-6 py-3 z-50 isolate bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/30 rounded-full hover:from-cyan-500/20 hover:to-purple-500/20 transition-all duration-300"
           >
             Return Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -84,7 +84,7 @@ export const SVGEditorComponent: React.FC<SVGEditorProps> = ({
               <div className="relative mx-auto flex w-full max-w-full items-center justify-center overflow-hidden">
                 <div className="flex flex-row">
 <div className={cn("relative", className)} >                <SVGEditor svgurl={svgUrl} className="h-full w-full" collaborative={collaborative} /></div>
-      <div className="w-96 h-96 bg-red-500 "  id="canvasSubmit"  />
+      <div className="absolute right-4 top-4"  id="canvasSubmit"  />
                 </div>
               </div>
             </div>

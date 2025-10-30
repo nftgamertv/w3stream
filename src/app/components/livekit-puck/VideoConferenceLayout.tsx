@@ -4,6 +4,7 @@ import type { ComponentConfig } from '@measured/puck';
 import { useParticipants, useTracks, useRoomContext, ParticipantTile as LKParticipantTile } from "@livekit/components-react";
 import { Track, type LocalParticipant, type RemoteParticipant } from "livekit-client";
 import type { TrackReference } from "@livekit/components-react";
+import { BackroomPanel as BackroomPanelComponent } from '@/components/BackroomPanel';
 
 export interface VideoConferenceLayoutProps {
   defaultLayout?: "grid" | "sidebar" | "spotlight";
@@ -63,7 +64,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
   // Grid Layout
   if (layout === "grid") {
     return (
-      <div className="flex items-center justify-center h-full p-6">
+      <div className="flex items-center justify-center relative min-h-[700px] p-4">
         <div className="w-full max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
             {stagePeople.map((p) => (
@@ -72,6 +73,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
               </div>
             ))}
           </div>
+          <BackroomPanelComponent />
         </div>
       </div>
     );
@@ -97,6 +99,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
               <LKParticipantTile className="h-full w-full" trackRef={getPreferredTrackRef(screenSharer)} />
             </div>
           </div>
+          <BackroomPanelComponent />
         </div>
       );
     }
@@ -122,6 +125,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
             </div>
           )}
         </div>
+        <BackroomPanelComponent />
       </div>
     );
   }
@@ -151,6 +155,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
             ))}
           </div>
         )}
+        <BackroomPanelComponent />
       </div>
     );
   }

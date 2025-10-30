@@ -17,7 +17,7 @@ export default function RoomLayout({
   return (
     <div className="h-screen w-screen">
       <ClientReactTogetherWrapper>
-        <SideDrawer />
+        {/* <SideDrawer /> */}
         {children}
       </ClientReactTogetherWrapper>
     </div>

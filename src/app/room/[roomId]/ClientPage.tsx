@@ -1,7 +1,10 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { usePageDataQuery } from '@/hooks/usePageDataQuery'
+import { useRoomSettings } from '@/hooks/useRoomSettings'
 import { Client } from '@/[...puckPath]/client'
+import { AIPrompt } from '@/components/AIPrompt'
+import { createClient } from '@/utils/supabaseClients/client'
 
 interface ClientPageProps {
   roomId: string;
@@ -9,6 +12,30 @@ interface ClientPageProps {
 
 export function ClientPage({ roomId }: ClientPageProps) {
   const { data: pageData, isLoading, error } = usePageDataQuery(roomId);
+  const { data: roomSettings, isLoading: isLoadingSettings } = useRoomSettings(roomId);
+  const [user, setUser] = useState<any>(null);
+  const [promptCount, setPromptCount] = useState(0);
+
+  // Fetch user data when component mounts
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      // Fetch user's prompt count if user exists
+      if (user) {
+        const { count } = await supabase
+          .from('generated_prompts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+
+        setPromptCount(count || 0);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // Handle loading and error states
   if (isLoading) {
@@ -45,7 +72,26 @@ export function ClientPage({ roomId }: ClientPageProps) {
   }
 
   console.log('ClientPage rendering with data:', pageData);
+  console.log('Room settings:', roomSettings);
 
-  // Render Client component with fetched data
-  return <Client data={pageData} />;
+  // Callback to handle SVG generation
+  const handleSvgGenerated = (svgUrl: string) => {
+    console.log('SVG generated:', svgUrl);
+    // You can add additional logic here to update the page or state
+  };
+
+  // Render Client component with fetched data and AIPrompt if enabled
+  return (
+    <>
+      <Client data={pageData} />
+      {roomSettings?.enable_ai_prompt && user && (
+        <AIPrompt
+          user={user}
+          promptCount={promptCount}
+          prompts={4}
+          onSvgGenerated={handleSvgGenerated}
+        />
+      )}
+    </>
+  );
 }

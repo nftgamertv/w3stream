@@ -19,7 +19,8 @@
       "Bash(tasklist:*)",
       "Bash(npx eslint:*)",
       "Bash(dir:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []
