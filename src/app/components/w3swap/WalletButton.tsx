@@ -12,9 +12,13 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { useState } from "react"
-import type { UiWallet, UiWalletAccount } from "@wallet-standard/react"
 // BaseModalControl type from useBaseModal return type
 type BaseModalControl = ReturnType<typeof useBaseModal>
+
+// Infer types from the hooks - get wallet and account types from useWalletUi
+type WalletUiReturn = ReturnType<typeof useWalletUi>
+type UiWallet = NonNullable<WalletUiReturn['wallets']>[number]
+type UiWalletAccount = NonNullable<WalletUiReturn['account']>
 
 export default function WalletButton() {
   const { connected, account, wallet, wallets, connect, disconnect } = useWalletUi()
