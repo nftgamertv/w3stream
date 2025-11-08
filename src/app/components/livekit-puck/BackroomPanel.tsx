@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import type { ComponentConfig } from '@measured/puck';
-import { BackroomPanel as BackroomPanelComponent } from "@/components/BackroomPanel";
+import { BackroomPanel as BackroomPanelComponent } from "@/components/ui/backroom-panel";
 
 export interface BackroomPanelProps {
   enabled?: boolean;
