@@ -791,6 +791,16 @@ body::before {
 }
 
 /* ============================================
+   UTILITIES
+   ============================================ */
+
+@layer utilities {
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-cyan-500 to-purple-500 bg-clip-text text-transparent;
+  }
+}
+
+/* ============================================
    BUTTONS
    ============================================ */
 
