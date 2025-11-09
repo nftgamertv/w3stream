@@ -18,6 +18,7 @@ import { RoomShellConfig } from '@/components/livekit-puck/RoomShell';
 import { BackroomPanelConfig } from '@/components/livekit-puck/BackroomPanel';
 import { ChatDrawerConfig } from '@/components/livekit-puck/ChatDrawer';
 import { StageSubscriptionManagerConfig } from '@/components/livekit-puck/StageSubscriptionManager';
+import { SelfStageToggleConfig } from '@/components/livekit-puck/SelfStageToggle';
 
 export const livekitPuckConfig: Config = {
   components: {
@@ -40,6 +41,7 @@ export const livekitPuckConfig: Config = {
     BackroomPanel: BackroomPanelConfig,
     ChatDrawer: ChatDrawerConfig,
     StageSubscriptionManager: StageSubscriptionManagerConfig,
+    SelfStageToggle: SelfStageToggleConfig,
   },
   categories: {
     media: {
@@ -68,7 +70,7 @@ export const livekitPuckConfig: Config = {
       defaultExpanded: true,
     },
     room: {
-      components: ['RoomHeader', 'BackroomPanel', 'StageSubscriptionManager'],
+      components: ['RoomHeader', 'BackroomPanel', 'StageSubscriptionManager', 'SelfStageToggle'],
       title: 'Room Management',
       defaultExpanded: true,
     },

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/utils/supabaseClients/client"
 import { WaitingPhase } from "./phases/WaitingPhase"
 import { PromptPhase } from "./phases/PromptPhase"
 import { PhrasePhase } from "./phases/PhrasePhase"
@@ -38,7 +38,7 @@ export function GameRoom({ roomId, playerId, playerName, livekitParticipants = [
         },
         (payload) => {
           console.log("[v0] Game session updated:", payload)
-          if (payload.new) {
+          if (payload.new && typeof payload.new === 'object' && 'phase' in payload.new && 'round' in payload.new) {
             setSession(payload.new)
             setPhase(payload.new.phase)
             setRound(payload.new.round)

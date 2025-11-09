@@ -81,7 +81,7 @@ export function RoomHeader({ roomId, layout, onLayoutChange }: RoomHeaderProps) 
           ) : (
             <>
               <Copy className="w-4 h-4" />
-              Copy Link
+              Copy  
             </>
           )}
         </Button>

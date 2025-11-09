@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react"
 import { gsap } from "gsap"
-import { Video, Mic, Users, Radio, Headphones } from "lucide-react"
+import { Video, Mic, Users, Radio, Headphones, GroupIcon, Cuboid} from "lucide-react"
  import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 interface StudioPreviewIconsProps {
   studioType: "music" | "podcast" | "webinar"
@@ -19,14 +19,14 @@ const studioConfig = {
     secondaryIcon: Headphones,
   },
   podcast: {
-    icon: Mic,
+    icon: GroupIcon,
     gradient: "from-purple-400 via-pink-500 to-red-500",
     bgGradient: "from-purple-500/20 via-pink-500/10 to-red-500/20",
     pulseColor: "shadow-purple-500/50",
     secondaryIcon: Radio,
   },
   webinar: {
-    icon: Users,
+    icon: Cuboid,
     gradient: "from-emerald-400 via-cyan-500 to-blue-500",
     bgGradient: "from-emerald-500/20 via-cyan-500/10 to-blue-500/20",
     pulseColor: "shadow-emerald-500/50",

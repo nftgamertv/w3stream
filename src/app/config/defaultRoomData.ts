@@ -17,6 +17,7 @@ const defaultRoomDataRaw = {
         id: 'RoomShell-1',
         background: 'nebula',
         withPadding: false,
+        showCursors: true, // Enable cursors for collaborative rooms by default
       },
       slots: {
         topBar: [
@@ -41,6 +42,12 @@ const defaultRoomDataRaw = {
         ],
         footer: [
           {
+            type: 'SelfStageToggle',
+            props: {
+              id: 'SelfStageToggle-1',
+            },
+          },
+          {
             type: 'ControlBar',
             props: {
               id: 'ControlBar-1',
@@ -48,13 +55,6 @@ const defaultRoomDataRaw = {
           },
         ],
         overlays: [
-          {
-            type: 'BackroomPanel',
-            props: {
-              id: 'BackroomPanel-1',
-              enabled: true,
-            },
-          },
           {
             type: 'ChatDrawer',
             props: {

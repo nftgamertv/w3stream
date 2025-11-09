@@ -73,7 +73,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
               </div>
             ))}
           </div>
-          <BackroomPanelComponent />
+          {/* <BackroomPanelComponent /> */}
         </div>
       </div>
     );
@@ -99,7 +99,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
               <LKParticipantTile className="h-full w-full" trackRef={getPreferredTrackRef(screenSharer)} />
             </div>
           </div>
-          <BackroomPanelComponent />
+          {/* <BackroomPanelComponent /> */}
         </div>
       );
     }
@@ -125,7 +125,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
             </div>
           )}
         </div>
-        <BackroomPanelComponent />
+        {/* <BackroomPanelComponent /> */}
       </div>
     );
   }
@@ -155,7 +155,7 @@ const VideoConferenceLayoutInner: React.FC<VideoConferenceLayoutProps> = ({
             ))}
           </div>
         )}
-        <BackroomPanelComponent />
+        {/* <BackroomPanelComponent /> */}
       </div>
     );
   }

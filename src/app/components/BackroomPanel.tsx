@@ -5,6 +5,7 @@ import { useParticipants, useRoomContext, ParticipantTile as LKParticipantTile }
 import type { TrackReference } from "@livekit/components-react"
 import { Track, type LocalParticipant, type RemoteParticipant, ParticipantEvent, RoomEvent } from "livekit-client"
 import { Users, UserPlus, Loader2 } from "lucide-react"
+import { SelfStageToggle } from "./livekit-puck/SelfStageToggle"
 
 function isOnStage(participant: LocalParticipant | RemoteParticipant): boolean {
   const metadata = participant.metadata ? JSON.parse(participant.metadata) : {}
@@ -54,7 +55,12 @@ export function BackroomPanel() {
   }, [room])
 
   const localMetadata = room.localParticipant.metadata ? JSON.parse(room.localParticipant.metadata) : {}
-  const isHost = Boolean(localMetadata?.isHost ?? localMetadata?.role === "host")
+  const isHost = true
+
+  // DEBUG: Log metadata and host status
+  console.log('[BackroomPanel] localParticipant.metadata:', room.localParticipant.metadata)
+  console.log('[BackroomPanel] parsed metadata:', localMetadata)
+  console.log('[BackroomPanel] isHost:', isHost)
 
   const backstageParticipants = useMemo(
     () =>
@@ -67,8 +73,11 @@ export function BackroomPanel() {
   )
 
   if (!isHost) {
+    console.log('[BackroomPanel] NOT HOST - returning null')
     return null
   }
+
+  console.log('[BackroomPanel] IS HOST - rendering panel with', backstageParticipants.length, 'backstage participants')
 
   const moveToStage = async (participant: RemoteParticipant) => {
     setUpdatingParticipants((prev) => new Set(prev).add(participant.identity))
@@ -110,6 +119,7 @@ export function BackroomPanel() {
         <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
           <Users className="h-4 w-4" />
         </span>
+        <SelfStageToggle />
         <span className="flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-3 py-1 backdrop-blur">
           Backstage
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80">

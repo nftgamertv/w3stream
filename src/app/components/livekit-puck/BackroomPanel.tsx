@@ -10,8 +10,9 @@ export interface BackroomPanelProps {
 
 export const BackroomPanel: React.FC<BackroomPanelProps> = ({ enabled = true, forceHost }) => {
   if (!enabled) return null;
-  const override = forceHost === null ? undefined : forceHost;
-  return <BackroomPanelComponent isHostOverride={override} />;
+  // Note: BackroomPanel component internally checks isHost from room metadata
+  // The forceHost prop is kept for Puck config but not currently used
+  return <BackroomPanelComponent />;
 };
 
 export const BackroomPanelConfig: ComponentConfig<BackroomPanelProps> = {

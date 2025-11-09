@@ -151,6 +151,10 @@ label {
   color: #F0FDFa !important;
 }
 
+[class^="_Header_"], [class^="_Heading--"], h2 {
+    color: #F0FDFa !important;
+}
+
 input,   [class^="_Input-input_"]  {
     background-color:  var(--blue-1) !important; 
     color: #F0FDFa !important;

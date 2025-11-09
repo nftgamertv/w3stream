@@ -25,49 +25,49 @@ interface NavbarProps {
   className?: string
 }
 
-const UserMenu = () => {
-  const { data: user } = useSuspenseQuery(userOptions)
-  const router = useRouter()
+// const UserMenu = () => {
+//   const { data: user } = useSuspenseQuery(userOptions)
+//   const router = useRouter()
 
-  const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+//   const handleLogout = async () => {
+//     const supabase = createClient()
+//     await supabase.auth.signOut()
+//     router.push('/')
+//   }
 
-  return (
-    <div className="relative">
-      <div className="absolute inset-0 bg-linear-to-r from-cyan-500/20 to-purple-500/20 rounded-full blur-xl" />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="relative flex items-center gap-3 rounded-full border border-cyan-500/30 bg-linear-to-r from-cyan-500/10 to-purple-500/10 px-5 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-cyan-500/20 hover:to-purple-500/20">
-            <Avatar className="inline-block h-8 w-8 overflow-hidden rounded-full">
-              <AvatarImage src={user?.user_metadata?.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
-              <AvatarFallback>{user?.user_metadata?.full_name?.[0] || 'U'}</AvatarFallback>
-            </Avatar>
-            <span className="truncate">{user?.user_metadata?.full_name || 'User'}</span>
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 border-slate-800 bg-slate-900">
-          <DropdownMenuLabel className="text-slate-200">My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-slate-800" />
-          <DropdownMenuItem className="text-slate-300 focus:bg-slate-800 focus:text-slate-100">
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-slate-800" />
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="cursor-pointer text-red-400 focus:bg-slate-800 focus:text-red-300"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  )
-}
+//   return (
+//     <div className="relative">
+//       <div className="absolute inset-0 bg-linear-to-r from-cyan-500/20 to-purple-500/20 rounded-full blur-xl" />
+//       <DropdownMenu>
+//         <DropdownMenuTrigger asChild>
+//           <button className="relative flex items-center gap-3 rounded-full border border-cyan-500/30 bg-linear-to-r from-cyan-500/10 to-purple-500/10 px-5 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-cyan-500/20 hover:to-purple-500/20">
+//             <Avatar className="inline-block h-8 w-8 overflow-hidden rounded-full">
+//               <AvatarImage src={user?.user_metadata?.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
+//               <AvatarFallback>{user?.user_metadata?.full_name?.[0] || 'U'}</AvatarFallback>
+//             </Avatar>
+//             <span className="truncate">{user?.user_metadata?.full_name || 'User'}</span>
+//           </button>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent align="end" className="w-56 border-slate-800 bg-slate-900">
+//           <DropdownMenuLabel className="text-slate-200">My Account</DropdownMenuLabel>
+//           <DropdownMenuSeparator className="bg-slate-800" />
+//           <DropdownMenuItem className="text-slate-300 focus:bg-slate-800 focus:text-slate-100">
+//             <User className="mr-2 h-4 w-4" />
+//             <span>Profile</span>
+//           </DropdownMenuItem>
+//           <DropdownMenuSeparator className="bg-slate-800" />
+//           <DropdownMenuItem
+//             onClick={handleLogout}
+//             className="cursor-pointer text-red-400 focus:bg-slate-800 focus:text-red-300"
+//           >
+//             <LogOut className="mr-2 h-4 w-4" />
+//             <span>Log out</span>
+//           </DropdownMenuItem>
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+//     </div>
+//   )
+// }
 
 export const Navbar = ({
   leftContent,
@@ -91,7 +91,7 @@ export const Navbar = ({
       </div>
       <div className="ml-auto flex items-center justify-end gap-4">
         {rightContent}
-        {showUserMenu && <UserMenu />}
+        {/* {showUserMenu && <UserMenu />} */}
       </div>
     </header>
   )

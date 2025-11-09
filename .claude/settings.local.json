@@ -20,7 +20,10 @@
       "Bash(npx eslint:*)",
       "Bash(dir:*)",
       "Bash(curl:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(powershell -Command \"Get-Content backstage.html.txt | Select-String -Pattern ''lk-room|livekit|control-bar'' | Select-Object -First 5\")",
+      "WebFetch(domain:puckeditor.com)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []

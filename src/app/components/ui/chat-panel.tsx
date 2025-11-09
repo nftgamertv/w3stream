@@ -43,7 +43,7 @@ export function ChatPanel({ participantName, isHost }: ChatPanelProps) {
           sender: data.sender,
           message: data.message,
           timestamp: Date.now(),
-          isHost: data.isHost || false,
+          isHost: true
         }
         setMessages((prev) => [...prev, newMessage])
 

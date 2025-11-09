@@ -19,7 +19,7 @@ interface ChatDrawerProps {
   isHost?: boolean
 }
 
-export function ChatDrawer({ participantName, isHost = false }: ChatDrawerProps) {
+export function ChatDrawer({ participantName,  isHost = true }: ChatDrawerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 

@@ -8,9 +8,10 @@ import Toolbar from './Toolbar';
 import Canvas from './Canvas';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { sanitizeSVG, isValidSVG } from './svgUtils';
-import { useStateTogether, useMyId, useConnectedUsers } from 'react-together';
+import { useStateTogether, useMyId, useConnectedUsers, Cursors } from 'react-together';
 import type { CollaborativeUser } from './types';
 import { editorState$ } from './editorState';
+import { useSearchParams } from 'next/navigation';
 
 interface SVGEditorProps {
   svgurl: string;
@@ -25,8 +26,86 @@ interface SVGEditorProps {
   onCollaboratorLeft?: (user: CollaborativeUser) => void;
 }
 
-export default function SVGEditor({ 
-  svgurl, 
+// Error Boundary to catch ReactTogether context errors
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ReactTogetherErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    if (error.message.includes('Multisynq') || error.message.includes('ReactTogether')) {
+      console.warn('[SVGEditor] ReactTogether context not available, running in non-collaborative mode');
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+// Collaborative version using ReactTogether hooks
+function SVGEditorCollaborative(props: SVGEditorProps) {
+  // These hooks will throw if context is not available
+  const myId = useMyId();
+  const connectedUsers = useConnectedUsers();
+  const [svgElements, setSvgElements] = useStateTogether<Record<string, any>>('svg-elements', {});
+
+  // Note: Nickname is now set at the ClientPage level using NicknameInitializer
+  // This ensures it's set early in the component tree before any child components mount
+
+  return (
+    <SVGEditorInner
+      {...props}
+      myId={myId}
+      connectedUsers={connectedUsers}
+      svgElements={svgElements}
+      setSvgElements={setSvgElements}
+      hasContext={true}
+    />
+  );
+}
+
+// Non-collaborative version without ReactTogether
+function SVGEditorNonCollaborative(props: SVGEditorProps) {
+  return (
+    <SVGEditorInner
+      {...props}
+      myId={null}
+      connectedUsers={[]}
+      svgElements={{}}
+      setSvgElements={() => {}}
+      hasContext={false}
+    />
+  );
+}
+
+interface SVGEditorInnerProps extends SVGEditorProps {
+  myId: string | null;
+  connectedUsers: any[];
+  svgElements: Record<string, any>;
+  setSvgElements: (value: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void;
+  hasContext: boolean;
+}
+
+function SVGEditorInner({
+  svgurl,
   className = '',
   collaborative = false,
   sessionId,
@@ -35,16 +114,16 @@ export default function SVGEditor({
   onDrawingStart,
   onDrawingEnd,
   onCollaboratorJoined,
-  onCollaboratorLeft
-}: SVGEditorProps) {
+  onCollaboratorLeft,
+  myId,
+  connectedUsers,
+  svgElements,
+  setSvgElements,
+  hasContext
+}: SVGEditorInnerProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [backgroundSvg, setBackgroundSvg] = useState<string | null>(null);
-
-  // Use app-level React Together hooks directly
-  const myId = useMyId();
-  const connectedUsers = useConnectedUsers();
-  const [svgElements, setSvgElements] = useStateTogether<Record<string, any>>('svg-elements', {});
 
   // Generate stable color from user ID
   const getUserColor = useCallback((userId: string) => {
@@ -308,9 +387,20 @@ export default function SVGEditor({
             onDrawingStart={onDrawingStart}
             onDrawingEnd={onDrawingEnd}
           />
+          {/* ReactTogether Cursors - only render if context is available */}
+          {collaborative && hasContext && <Cursors />}
         </div>
       </div>
     </div>
+  );
+}
+
+// Default export with Error Boundary to handle missing ReactTogether context
+export default function SVGEditor(props: SVGEditorProps) {
+  return (
+    <ReactTogetherErrorBoundary fallback={<SVGEditorNonCollaborative {...props} />}>
+      <SVGEditorCollaborative {...props} />
+    </ReactTogetherErrorBoundary>
   );
 }
 

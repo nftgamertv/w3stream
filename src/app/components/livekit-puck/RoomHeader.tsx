@@ -1,10 +1,26 @@
+// app/components/RoomHeader.tsx
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import type { ComponentConfig } from '@measured/puck';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Grid3x3, Sidebar, Maximize2, Copy, Check, Users } from "lucide-react";
+import { Grid3x3, Sidebar, Maximize2, Copy, Check, Users, Edit3 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+
+const getRoomIdFromPath = (pathname: string): string | null => {
+  const m = pathname.match(/\/room\/([^/]+)(?:\/edit)?/);
+  return m ? m[1] : null;
+};
+
+const createEditLinkFromLocation = (roomId?: string) => {
+  if (typeof window === 'undefined') return '';
+  const url = new URL(window.location.href);
+  const id = roomId || getRoomIdFromPath(url.pathname);
+  if (!id) return '';
+  url.pathname = `/room/${id}/edit`;
+  return url.toString();
+};
 
 export interface RoomHeaderProps {
   roomId?: string;
@@ -15,21 +31,22 @@ export interface RoomHeaderProps {
 
 type LayoutType = "grid" | "sidebar" | "spotlight";
 
-interface RoomHeaderRenderProps extends RoomHeaderProps {
-  slots?: {
-    actions?: React.ReactNode;
-  };
-}
-
-export const RoomHeader: React.FC<RoomHeaderRenderProps> = ({
+export const RoomHeader: React.FC<RoomHeaderProps> = ({
   roomId = "Room",
   showLayoutControls = true,
   showCopyLink = true,
   showUserMenu = true,
-  slots,
 }) => {
-  const [copied, setCopied] = useState(false);
   const [layout, setLayout] = useState<LayoutType>("grid");
+  const [copied, setCopied] = useState(false);
+  const [editLink, setEditLink] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const id = roomId === "Room" ? getRoomIdFromPath(window.location.pathname) ?? roomId : roomId;
+      setEditLink(createEditLinkFromLocation(id));
+    }
+  }, [roomId]);
 
   const handleCopyLink = async () => {
     if (typeof window === 'undefined') return;
@@ -48,41 +65,32 @@ export const RoomHeader: React.FC<RoomHeaderRenderProps> = ({
 
   const layoutControls = showLayoutControls ? (
     <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-1 py-1 text-sm shadow-inner backdrop-blur">
-      <Button
-        size="sm"
-        variant={layout === "grid" ? "secondary" : "ghost"}
-        onClick={() => handleLayoutChange("grid")}
-        className="h-8 rounded-full px-3 text-xs"
-        title="Grid layout"
-      >
-        <Grid3x3 className="h-4 w-4" />
-      </Button>
-      <Button
-        size="sm"
-        variant={layout === "sidebar" ? "secondary" : "ghost"}
-        onClick={() => handleLayoutChange("sidebar")}
-        className="h-8 rounded-full px-3 text-xs"
-        title="Sidebar layout"
-      >
-        <Sidebar className="h-4 w-4" />
-      </Button>
-      <Button
-        size="sm"
-        variant={layout === "spotlight" ? "secondary" : "ghost"}
-        onClick={() => handleLayoutChange("spotlight")}
-        className="h-8 rounded-full px-3 text-xs"
-        title="Spotlight layout"
-      >
-        <Maximize2 className="h-4 w-4" />
-      </Button>
+      {["grid", "sidebar", "spotlight"].map((type) => (
+        <Button
+          key={type}
+          size="sm"
+          variant={layout === type ? "secondary" : "ghost"}
+          onClick={() => handleLayoutChange(type as LayoutType)}
+          className="h-8 rounded-full px-3 text-xs capitalize"
+          title={`${type} layout`}
+        >
+          {type === "grid" && <Grid3x3 className="h-4 w-4" />}
+          {type === "sidebar" && <Sidebar className="h-4 w-4" />}
+          {type === "spotlight" && <Maximize2 className="h-4 w-4" />}
+        </Button>
+      ))}
     </div>
   ) : null;
 
-  const rightControls = !showCopyLink && !slots?.actions ? null : (
+  const rightControls = (
     <div className="flex items-center gap-2">
-      {slots?.actions}
       {showCopyLink && (
-        <Button size="sm" variant="outline" onClick={handleCopyLink} className="h-9 gap-2 rounded-full border-white/20 bg-white/5 text-xs">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleCopyLink}
+          className="h-9 gap-2 rounded-full border-white/20 bg-white/5 text-xs"
+        >
           {copied ? (
             <>
               <Check className="h-4 w-4" />
@@ -95,6 +103,18 @@ export const RoomHeader: React.FC<RoomHeaderRenderProps> = ({
             </>
           )}
         </Button>
+      )}
+      {editLink && (
+        <Link href={editLink} >
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-9 gap-2 rounded-full border-white/20 bg-white/5 text-xs"
+          >
+            <Edit3 className="h-4 w-4" />
+            Edit Page
+          </Button>
+        </Link>
       )}
     </div>
   );
@@ -127,16 +147,7 @@ export const RoomHeader: React.FC<RoomHeaderRenderProps> = ({
   );
 };
 
-type SlotConfig = {
-  label: string;
-  allow?: string[];
-  disallow?: string[];
-  single?: boolean;
-};
-
-const roomHeaderConfig: ComponentConfig<RoomHeaderProps> & {
-  slots: { actions: SlotConfig };
-} = {
+export const RoomHeaderConfig: ComponentConfig<RoomHeaderProps> = {
   label: 'Room Header',
   fields: {
     roomId: { type: 'text', label: 'Room ID' },
@@ -149,12 +160,5 @@ const roomHeaderConfig: ComponentConfig<RoomHeaderProps> & {
     showCopyLink: true,
     showUserMenu: true,
   },
-  slots: {
-    actions: {
-      label: 'Right Actions',
-    },
-  },
   render: (props) => <RoomHeader {...props} />,
 };
-
-export const RoomHeaderConfig = roomHeaderConfig;

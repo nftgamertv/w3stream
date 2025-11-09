@@ -1,0 +1,14 @@
+
+> w3stream@0.1.0 build
+> next build
+
+   ▲ Next.js 15.4.2
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+uncaughtException [Error: EPERM: operation not permitted, open 'C:\Users\trent\Desktop\w3stream\.next\trace'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'open',
+  path: 'C:\\Users\\trent\\Desktop\\w3stream\\.next\\trace'
+}

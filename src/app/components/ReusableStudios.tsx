@@ -10,8 +10,8 @@ import { StudioPreviewIcons } from "@/components/StudioPreviewIcons"
 import CreateRoomModal   from "@/components/CreateRoomModal"
 const studios = [
   {
-    name: "Jam Session",
-    lastCreated: "Feb 28, 11:58 PM",
+    name: "Meeting Room 1",
+    lastCreated: "Oct 28, 11:58 PM",
     viewers: 4,
     status: "View",
     upcoming: "-",
@@ -19,16 +19,16 @@ const studios = [
     theme: "neon",
   },
   {
-    name: "The AI Show",
-    lastCreated: "Jan 3, 02:34 AM",
+    name: "Collab Room 1",
+    lastCreated: "Oct 30, 02:34 AM",
     viewers: 0,
-    status: "-",
-    upcoming: "Testing... is this thing on? Check, check...",
+   upcoming: "-",
+     status: "-",
     type: "podcast" as const,
     theme: "tech",
   },
   {
-    name: "Crypto Chat",
+    name: "3D Room Alpha",
     lastCreated: "-",
     viewers: 0,
     status: "-",
@@ -58,7 +58,7 @@ export function ReusableStudios() {
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between">
-    
+               <h2 className="text-2xl font-bold text-white my-8">{`Your Rooms`}</h2>
          
      
          <CreateRoomModal />
@@ -66,6 +66,7 @@ export function ReusableStudios() {
 
       {/* Icon Preview Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  
         {studios.map((studio, index) => (
           <div key={`preview-${studio.name}`} className="relative group cursor-pointer bg-slate-900 rounded-2xl overflow-hidden shadow-lg transition-transform transform hover:scale-105">
             <div className="absolute inset-0 bg-linear-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl from-cyan-500/20 to-purple-500/20"></div>

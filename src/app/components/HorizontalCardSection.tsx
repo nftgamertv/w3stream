@@ -17,6 +17,7 @@ interface HorizontalCardSectionProps {
     gradientTo: string
     imageUrl?: string // Added optional imageUrl
     status?: "concept" | "in development" | "testing" | "live"
+    cost?: string
   }[]
 }
 
@@ -50,10 +51,44 @@ export function HorizontalCardSection({ title, items }: HorizontalCardSectionPro
                       : `bg-linear-to-br ${item.gradientFrom} ${item.gradientTo} opacity-30 blur-xl`, // Fallback gradient for no image
                   )}
                 />
-                <CardContent className="relative z-0 flex flex-col p-6">
-           <img src={item.imageUrl} alt={item.title} className="w-24 h-12 relative z-10" />
+                <CardContent className="relative z-0 flex flex-col p-6 min-h-52">
+                  <img src={item.imageUrl || "/placeholder.svg"} alt={item.title} className="w-24 h-12 relative z-10" />
+                  <Badge
+                    variant="outline"
+                    className="absolute top-4 right-4 text-[10px] px-4 py-1 flex items-center gap-1"
+                  >
+                    {item.cost === "paid" && (
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 397.7 311.7"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="inline-block"
+                      >
+                        <defs>
+                          <linearGradient id="solanaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style={{ stopColor: "#00FFA3", stopOpacity: 1 }} />
+                            <stop offset="100%" style={{ stopColor: "#DC1FFF", stopOpacity: 1 }} />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          fill="url(#solanaGradient)"
+                          d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z"
+                        />
+                        <path
+                          fill="url(#solanaGradient)"
+                          d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z"
+                        />
+                        <path
+                          fill="url(#solanaGradient)"
+                          d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z"
+                        />
+                      </svg>
+                    )}
+                    {item.cost}
+                  </Badge>
                   <h3 className="mt-4 text-xl font-semibold text-white">{item.title}</h3>
-                  <p className="mt-2 text-slate-400 text-sm">{item.description}</p>
+                  <p className="mt-2 text-slate-400 text-sm text-balance">{item.description}</p>
                   <div className="flex justify-between items-center">
                     <a
                       href={item.buttonLink}
@@ -62,11 +97,20 @@ export function HorizontalCardSection({ title, items }: HorizontalCardSectionPro
                       {item.buttonText}
                     </a>
                     <span className="absolute bottom-4 right-8">
-                    {item.status && (
-                      <Badge variant="outline" className="text-[10px] px-4py-1">
-                        {item.status}
-                      </Badge>
-                    )}
+                      {item.status && (
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] px-4 py-1
+                      ${item.status === "live" ? "bg-green-600" : ""}${
+                        item.status === "testing" ? "bg-orange-700 text-yellow-300" : ""
+                      }${item.status === "in development" ? "bg-blue-700 text-blue-200" : ""}${
+                        item.status === "concept" ? "bg-gray-800 text-gray-100" : ""
+                      }
+                      `}
+                        >
+                          {item.status}
+                        </Badge>
+                      )}
                     </span>
                   </div>
                 </CardContent>

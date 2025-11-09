@@ -3,10 +3,38 @@
 import React from 'react';
 import type { ComponentConfig } from '@measured/puck';
 import { cn } from '@/lib/utils';
+import { Cursors } from 'react-together';
+
+/* -------- Error Boundary for ReactTogether components -------- */
+class ReactTogetherErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.warn("[RoomShell] ReactTogether context not available for Cursors:", error.message);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null; // Don't render cursors if context is missing
+    }
+    return this.props.children;
+  }
+}
 
 export interface RoomShellProps {
   background?: 'nebula' | 'slate' | 'plain';
   withPadding?: boolean;
+  showCursors?: boolean; // Enable collaborative cursors (only for collaborative rooms)
 }
 
 interface RoomShellSlots {
@@ -28,6 +56,7 @@ const backgroundClassMap: Record<NonNullable<RoomShellProps['background']>, stri
 export const RoomShell: React.FC<RoomShellProps & { slots?: RoomShellSlots }> = ({
   background = 'nebula',
   withPadding = false,
+  showCursors = false,
   slots,
 }) => {
   const stageContent = slots?.stage ?? (
@@ -58,6 +87,16 @@ export const RoomShell: React.FC<RoomShellProps & { slots?: RoomShellSlots }> = 
               {stageContent}
             </div>
           </div>
+          {/* Global collaborative cursors overlay - only show in collaborative rooms */}
+          {showCursors ? (
+            <div className="absolute inset-0 pointer-events-none">
+              <ReactTogetherErrorBoundary>
+                <Cursors />
+              </ReactTogetherErrorBoundary>
+            </div>
+          ) : (
+            console.log('[RoomShell] Cursors disabled - showCursors:', showCursors)
+          )}
           {slots?.overlays && <div className="absolute inset-0">{slots.overlays}</div>}
         </main>
 
@@ -106,10 +145,19 @@ const roomShellConfig: ComponentConfig<RoomShellProps> & {
         { label: 'Spacious', value: true },
       ],
     },
+    showCursors: {
+      type: 'radio',
+      label: 'Show Collaborative Cursors',
+      options: [
+        { label: 'Enabled', value: true },
+        { label: 'Disabled', value: false },
+      ],
+    },
   },
   defaultProps: {
     background: 'nebula',
     withPadding: false,
+    showCursors: false,
   },
   slots: {
     topBar: {
@@ -134,7 +182,7 @@ const roomShellConfig: ComponentConfig<RoomShellProps> & {
     },
     overlays: {
       label: 'Overlay Layer',
-      allow: ['BackroomPanel', 'ChatDrawer', 'StageSubscriptionManager', 'RoomAudioRenderer'],
+      allow: [ 'ChatDrawer', 'StageSubscriptionManager', 'RoomAudioRenderer'],
     },
   },
   render: (props) => <RoomShell {...props} />,

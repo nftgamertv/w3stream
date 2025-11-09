@@ -182,6 +182,16 @@ export async function POST(request: NextRequest) {
                 }
               };
             }
+            // Update RoomShell to enable cursors for collaborative rooms
+            if (item.type === 'RoomShell' && roomType === 'collaborative') {
+              return {
+                ...item,
+                props: {
+                  ...item.props,
+                  showCursors: true,
+                }
+              };
+            }
             return item;
           }),
           // Add SVGEditor component

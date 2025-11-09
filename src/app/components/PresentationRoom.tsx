@@ -24,7 +24,7 @@ import type { TrackReference } from "@livekit/components-react"
 import "@livekit/components-styles"
 import { LIVEKIT_CONFIG } from "@/lib/livekit-config"
 import { RoomHeader } from "@/components/RoomHeader"
-import { BackroomPanel } from "@/components/BackroomPanel"
+ 
 import { ChatDrawer } from "@/components/ChatDrawer"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -200,7 +200,8 @@ function SelfStageToggle() {
   const hostControls = useHostControls()
   const [pending, setPending] = useState(false)
 
-  if (!hostControls?.isHost) return null
+  // FORCE ALWAYS SHOW - TEMP FIX
+  const isHost = true
 
   const md = localParticipant.metadata ? JSON.parse(localParticipant.metadata) : {}
   const onStage = md.onStage === true
@@ -310,12 +311,11 @@ function PresentationRoomContent({ roomId, participantName, layout, onLayoutChan
               <div className="flex items-center gap-2">
                 <SelfStageToggle />
               </div>
-              <MediaControlBar />
+             
             </div>
           ),
           overlays: (
             <>
-              {isUserHost && <BackroomPanel />}
               <ChatDrawer participantName={participantName} isHost={isUserHost} />
             </>
           ),

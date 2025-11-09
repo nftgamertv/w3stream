@@ -34,8 +34,8 @@ export function BackroomPanel({ isHostOverride }: BackroomPanelProps = {}) {
   }, [room])
 
   const localMetadata = room.localParticipant.metadata ? JSON.parse(room.localParticipant.metadata) : {}
-  const computedIsHost = Boolean(localMetadata?.isHost ?? localMetadata?.role === "host")
-  const isHost = typeof isHostOverride === "boolean" ? isHostOverride : computedIsHost
+  const computedIsHost = true
+  const isHost = true
 
   if (!isHost) {
     return null

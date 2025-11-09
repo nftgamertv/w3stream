@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/utils/supabaseClients/client"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 

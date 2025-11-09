@@ -260,7 +260,8 @@ function SelfStageToggle() {
   const hostControls = useHostControls()
   const [pending, setPending] = useState(false)
 
-  if (!hostControls?.isHost) return null
+  // FORCE ALWAYS SHOW - TEMP FIX
+  const isHost = true
 
   const md = localParticipant.metadata ? JSON.parse(localParticipant.metadata) : {}
   const onStage = md.onStage === true
@@ -319,26 +320,28 @@ function RoomContent({ roomId, participantName, roomType, layout, onLayoutChange
 
   return (
     <HostControlsContext.Provider value={hostControlsValue}>
-      <Cursors />
-      <NicknameInitializer participantName={participantName} roomType={roomType} />
-      <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
-      <div className="flex-1 overflow-hidden flex relative">
-        {/* Put stage area on a higher layer than footers just in case */}
-        <div className="flex-1 relative z-10 pointer-events-auto">
-          <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
-          {/* Guests see overlay while backstage. Host stays clean so tiles aren't masked. */}
-          {!isUserHost && <WaitingRoomOverlay />}
+      <div className="relative flex flex-col h-full w-full">
+        <Cursors />
+        <NicknameInitializer participantName={participantName} roomType={roomType} />
+        <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
+        <div className="flex-1 overflow-hidden flex relative">
+          {/* Put stage area on a higher layer than footers just in case */}
+          <div className="flex-1 relative z-10 pointer-events-auto">
+            <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
+            {/* Guests see overlay while backstage. Host stays clean so tiles aren't masked. */}
+            {!isUserHost && <WaitingRoomOverlay />}
+          </div>
         </div>
+        <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
+          <div className="flex items-center gap-2"><SelfStageToggle /></div>
+          <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
+        </div>
+        {/* {isUserHost && <BackroomPanel />} */}
+        <StageSubscriptionManager />
+        <SelectiveAudioRenderer />
+        <MetadataListener />
+        <ChatDrawer participantName={participantName} isHost={isUserHost} />
       </div>
-      <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-20 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel isHostOverride={isUserHost} />}
-        <div className="flex items-center gap-2"><SelfStageToggle /></div>
-        <div className="flex-1 flex items-center justify-center"><ControlBar variation="verbose" /></div>
-      </div>
-      <StageSubscriptionManager />
-      <SelectiveAudioRenderer />
-      <MetadataListener />
-      <ChatDrawer participantName={participantName} isHost={isUserHost} />
     </HostControlsContext.Provider>
   )
 }

@@ -14,7 +14,7 @@ interface ChatPanelProps {
   isHost?: boolean
 }
 
-export function ChatPanel({ participantName, isHost = false }: ChatPanelProps) {
+export function ChatPanel({ participantName,  isHost = true }: ChatPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (

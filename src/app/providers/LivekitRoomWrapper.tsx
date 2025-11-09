@@ -42,17 +42,31 @@ export default function LivekitRoomWrapper({
 
         console.log('[LivekitRoomWrapper] Fetching token for roomId:', roomId, 'participantName:', participantName)
 
-        // Fetch token from the API
-        const response = await fetch('/api/livekit-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            roomId: roomId,
-            participantName: participantName,
-            role: 'guest',
-          }),
+        // Generate stable participant ID for this browser session
+        // Use a global participant ID that persists across all rooms
+        let participantId = sessionStorage.getItem('participant-id')
+        if (!participantId) {
+          participantId = `${participantName}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+          sessionStorage.setItem('participant-id', participantId)
+          console.log('[LivekitRoomWrapper] Created new participant ID:', participantId)
+        } else {
+          console.log('[LivekitRoomWrapper] Using existing participant ID:', participantId)
+        }
+
+        // Check if user should be host (from URL params)
+        const urlParams = new URLSearchParams(window.location.search)
+        const claimHost = urlParams.get("role") === "host" || urlParams.get("creator") === "1" || urlParams.get("host") === "1"
+
+        console.log('[LivekitRoomWrapper] URL params:', Object.fromEntries(urlParams))
+        console.log('[LivekitRoomWrapper] claimHost:', claimHost)
+        console.log('[LivekitRoomWrapper] participantId:', participantId)
+
+        // Fetch token from the API using the correct endpoint
+        const tokenUrl = `/api/token?roomName=${encodeURIComponent(roomId)}&participantName=${encodeURIComponent(participantName)}&participantId=${encodeURIComponent(participantId)}${claimHost ? "&creator=1" : ""}`
+        console.log('[LivekitRoomWrapper] Token URL:', tokenUrl)
+
+        const response = await fetch(tokenUrl, {
+          method: 'GET',
         })
 
         if (!response.ok) {

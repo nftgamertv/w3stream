@@ -69,32 +69,39 @@ export default function DashboardPage() {
     {
       icon: Puzzle,
       title: "CHTBXX",
-      description: "Twitch chat text-to-speech with unique character voices for immersive streaming.",
+      description: "Twitch chat text-to-speech with unique character video lipsyn. In-app purchases may be required.",
       buttonText: "Learn More",
       buttonLink: "#",
       gradientFrom: "from-pink-500",
       gradientTo: "to-purple-500",
       imageUrl: "/images/chtbxx_logo_white.png",
       status: "testing",
+        cost: "paid"
     },
     {
       icon: Headphones,
-      title: "Premium Audio",
-      description: "Access high-fidelity audio codecs and advanced sound processing.",
+      title: "Hide My EnvVars",
+      description: "A Vision AI that detects and blurs environment variables in your stream.",
       buttonText: "Explore",
       buttonLink: "#",
       gradientFrom: "from-green-500",
       gradientTo: "to-blue-500",
+      imageUrl: "/images/hidemyenvvars.png",
+         status: "concept",
+           cost: "free"
 
     },
     {
       icon: Rocket,
       title: "Stream Boost",
-      description: "Increase your stream's reach with promotional tools and analytics.",
+      description: "Increase your stream's reach with AI generated promotional tools and analytics.",
       buttonText: "Activate",
       buttonLink: "#",
       gradientFrom: "from-orange-500",
       gradientTo: "to-red-500",
+        imageUrl: "/images/streamboost.png",
+       status: "concept",
+         cost: "paid"
 
     },
     {
@@ -111,33 +118,39 @@ export default function DashboardPage() {
   const games = [
     {
       icon: Gamepad,
-      title: "Cyberpunk 2077",
-      description: "Dive into the dystopian future of Night City.",
+      title: "TWNGO",
+      description: "Classic Bingo! with an AI twist. Twitch Extension Required. In-app purchases may be required to play.",
       buttonText: "Play Now",
       buttonLink: "#",
       gradientFrom: "from-red-600",
       gradientTo: "to-purple-600",
-
+      status: "in development" as const,
+       imageUrl: "/images/twngo.png",
+      cost: "paid"
     },
     {
       icon: Award,
-      title: "Valorant",
-      description: "Master tactical gunplay and agent abilities.",
+      title: "D-Gen Art",
+      description: "Think Mad Libbs meets AI ArtGen meets Video Lip Sync. Hilarity ensues.",
       buttonText: "Play Now",
       buttonLink: "#",
       gradientFrom: "from-blue-600",
       gradientTo: "to-cyan-600",
-
+      status: "in development" as const,
+        imageUrl: "/images/dgenart.png",
+      cost: "Free"
     },
     {
       icon: Gamepad,
-      title: "Apex Legends",
-      description: "Compete in the ultimate battle royale experience.",
+      title: "Cee-LO",
+      description: "Come throw some dice on the corner of K&A in Philly! In-app purchases may be required to play.",
       buttonText: "Play Now",
       buttonLink: "#",
       gradientFrom: "from-green-600",
       gradientTo: "to-lime-600",
-
+      status: "in development" as const,
+              imageUrl: "/images/ceelo.png",
+      cost: "paid"
     },
     {
       icon: Award,
@@ -147,7 +160,8 @@ export default function DashboardPage() {
       buttonLink: "#",
       gradientFrom: "from-purple-600",
       gradientTo: "to-pink-600",
-
+      status: "live" as const,
+      cost: "Free"
     },
   ]
 

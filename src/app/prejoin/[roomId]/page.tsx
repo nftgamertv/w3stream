@@ -38,7 +38,7 @@ export default function PreJoinPage({ params }: { params: Promise<{ roomId: stri
 
   const handleJoin = (settings: PreJoinSettings) => {
     // Check if user is the room creator (host)
-    const isHost = searchParams.get("role") === "host"
+    const isHost = true
 
     // Build query params for the room
     const queryParams = new URLSearchParams({

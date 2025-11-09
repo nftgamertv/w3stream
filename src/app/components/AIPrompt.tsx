@@ -60,23 +60,25 @@ export function AIPrompt({
         const result = await generateSvg(formData, user.id)
 
         if (result.success && result.data?.svg) {
-          toast.success('Prompt submitted! Fetching your SVG...')
+          toast.success('Prompt submitted! SVG generated successfully!')
 
-          // Now fetch a random SVG from the bucket (for now, later we'll implement proper distribution)
-          const randomSvgResult = await getRandomSvg()
+          // Construct the full Supabase URL from the path returned
+          const supabase = createClient()
+          const { data: { publicUrl } } = supabase
+            .storage
+            .from('svgs')
+            .getPublicUrl(result.data.svg)
 
-          if (randomSvgResult.success && randomSvgResult.svgUrl) {
-            // Call the callback to pass the SVG URL to the parent component
-            if (onSvgGenerated) {
-              onSvgGenerated(randomSvgResult.svgUrl)
-            }
+          console.log('Generated SVG URL:', publicUrl)
 
-            // Close the modal
-            setIsModalOpen(false)
-            toast.success('SVG loaded successfully!')
-          } else {
-            throw new Error(randomSvgResult.error || 'Failed to fetch SVG')
+          // Call the callback to pass the ACTUAL generated SVG URL to the parent component
+          if (onSvgGenerated) {
+            onSvgGenerated(publicUrl)
           }
+
+          // Close the modal
+          setIsModalOpen(false)
+          toast.success('Your SVG has been loaded!')
         } else {
           throw new Error(result.error || 'Failed to generate image')
         }

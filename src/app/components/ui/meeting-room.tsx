@@ -367,23 +367,25 @@ function RoomContent({ roomId, participantName, layout, onLayoutChange, isUserHo
 
   return (
     <HostControlsContext.Provider value={hostControlsValue}>
-      <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
-      <div className="flex-1 overflow-hidden flex relative">
-        <div className="flex-1 relative z-0 pointer-events-auto">
-          <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
-          {!isUserHost && <WaitingRoomOverlay />}
+      <div className="relative flex flex-col h-full w-full">
+        <RoomHeader roomId={roomId} layout={layout} onLayoutChange={onLayoutChange} />
+        <div className="flex-1 overflow-hidden flex relative">
+          <div className="flex-1 relative z-0 pointer-events-auto">
+            <VideoConferenceLayout layout={layout} onLayoutChange={onLayoutChange} />
+            {!isUserHost && <WaitingRoomOverlay />}
+          </div>
         </div>
-      </div>
-      <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-40 pointer-events-auto flex items-stretch">
-        {isUserHost && <BackroomPanel isHostOverride={isUserHost} />}
-        <div className="flex-1 flex items-center justify-center">
-          <ControlBar variation="verbose" />
+        <div className="border-t border-border/30 bg-background/95 backdrop-blur-sm relative z-40 pointer-events-auto flex items-stretch">
+          <div className="flex-1 flex items-center justify-center">
+            <ControlBar variation="verbose" />
+          </div>
         </div>
+        {/* {isUserHost && <BackroomPanel />} */}
+        <StageSubscriptionManager />
+        <SelectiveAudioRenderer />
+        <MetadataListener />
+        <ChatPanel participantName={participantName} isHost={isUserHost} />
       </div>
-      <StageSubscriptionManager />
-      <SelectiveAudioRenderer />
-      <MetadataListener />
-      <ChatPanel participantName={participantName} isHost={isUserHost} />
     </HostControlsContext.Provider>
   )
 }

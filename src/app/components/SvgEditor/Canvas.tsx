@@ -995,7 +995,7 @@ useEffect(() => {
           <defs />
           <g id="mainLayer" />
         </svg>
-{isClient && createPortal(        <Button
+{/* {isClient && createPortal(        <Button
           style={{ letterSpacing: '1.5px' }}
           className={`w-full right-4 h-12 mx-auto uppercase flex flex-col items-center justify-center 
             cursor-pointer overflow-hidden rounded-xl 
@@ -1009,7 +1009,7 @@ useEffect(() => {
           disabled={loading}
         >
           {loading ? 'Submitting...' : 'Submit'}
-        </Button>, document.getElementById('canvasSubmit'))}
+        </Button>, document.getElementById('canvasSubmit'))} */}
         {/* Submit Button */}
 
       </div>
