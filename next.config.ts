@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
       config.devtool = false;
     }
 
+    // Fix for crypto module in client-side code
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+      };
+    }
+
     return config;
   },
   images: {

@@ -6,7 +6,9 @@ import type { ComponentConfig } from '@measured/puck';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Monitor, MonitorOff, Gamepad2 } from "lucide-react"
-
+import { createPortal } from 'react-dom';
+import { CosmicModal } from '../ui/cosmic-modal';
+import ShimmerButton from '../ui/shimmer-button';
 export interface ControlBarProps {
   showLeaveButton?: boolean;
   showScreenShare?: boolean;
@@ -34,6 +36,7 @@ const MediaToggle: React.FC<MediaToggleProps> = ({
   disabled,
 }) => {
   const IconComponent = active ? ActiveIcon : InactiveIcon;
+
   return (
     <button
       type="button"
@@ -65,11 +68,12 @@ export function ControlBar({ onToggleChat, isChatOpen, onToggleGame, isGameOpen 
   const { localParticipant } = useLocalParticipant()
   const room = useRoomContext()
   const router = useRouter()
-
+  const [isOpen, setIsOpen] = useState(false) 
   const [isMicEnabled, setIsMicEnabled] = useState(true)
   const [isCameraEnabled, setIsCameraEnabled] = useState(true)
   const [isScreenSharing, setIsScreenSharing] = useState(false)
-
+ 
+ 
   const toggleMicrophone = async () => {
     if (localParticipant) {
       const enabled = !isMicEnabled
@@ -106,6 +110,9 @@ export function ControlBar({ onToggleChat, isChatOpen, onToggleGame, isGameOpen 
   return (
     <div className="relative z-50 border-t border-white/10 bg-black/60 backdrop-blur-xl">
       <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 p-4">
+ 
+        <div id="cosmicModal"></div>
+    
         {/* Microphone Toggle */}
         <Button
           onClick={toggleMicrophone}

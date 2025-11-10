@@ -3,6 +3,7 @@ import type React from "react";
 
 import { headers } from "next/headers";
 import { Suspense } from "react";
+import Script from "next/script";
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "@livekit/components-styles";
@@ -13,7 +14,7 @@ import {
   LazyThreeBackground,
   LazyVideoBackground,
   LazyLoginModalWrapper,
- 
+  LazyCosmicModalWrapper,
 } from "./components/LazyComponents";
 import { SolanaProvider } from "./providers/SolanaProvider";
 
@@ -114,6 +115,13 @@ export default function RootLayout({
 
         {/* Lazy-loaded modal wrapper - only loads when needed */}
         <LazyLoginModalWrapper />
+        <LazyCosmicModalWrapper />
+
+        {/* ElevenLabs ConvAI Widget Script - loads once for the entire app */}
+        <Script
+          src="https://unpkg.com/@elevenlabs/convai-widget-embed"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

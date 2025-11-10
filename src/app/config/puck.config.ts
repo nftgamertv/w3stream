@@ -19,6 +19,7 @@ import { BackroomPanelConfig } from '@/components/livekit-puck/BackroomPanel';
 import { ChatDrawerConfig } from '@/components/livekit-puck/ChatDrawer';
 import { StageSubscriptionManagerConfig } from '@/components/livekit-puck/StageSubscriptionManager';
 import { SelfStageToggleConfig } from '@/components/livekit-puck/SelfStageToggle';
+import { FeatureListConfig } from './components/feature-list';
 
 export const livekitPuckConfig: Config = {
   components: {
@@ -42,6 +43,7 @@ export const livekitPuckConfig: Config = {
     ChatDrawer: ChatDrawerConfig,
     StageSubscriptionManager: StageSubscriptionManagerConfig,
     SelfStageToggle: SelfStageToggleConfig,
+    FeatureList: FeatureListConfig,
   },
   categories: {
     media: {
@@ -60,7 +62,7 @@ export const livekitPuckConfig: Config = {
       defaultExpanded: true,
     },
     layouts: {
-      components: ['RoomShell', 'GridLayout', 'VideoConferenceLayout'],
+      components: ['RoomShell', 'GridLayout', 'VideoConferenceLayout', 'FeatureList'],
       title: 'Layouts',
       defaultExpanded: true,
     },
