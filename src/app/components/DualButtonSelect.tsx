@@ -124,7 +124,7 @@ const DualButtonSelect = ({
           onClick={() => setIsOpen(false)}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
+          <div className="3 backdrop-blur-sm" aria-hidden="true" />
           
           {/* Modal Content */}
           <div

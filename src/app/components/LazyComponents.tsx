@@ -75,10 +75,4 @@ export const LazySolanaCursorEffect = dynamic(
   }
 );
 
-export const LazyCosmicModalWrapper = dynamic(
-  () => import("./CosmicModalWrapper").then((mod) => ({ default: mod.CosmicModalWrapper })),
-  {
-    ssr: false,
-    loading: () => null,
-  }
-);
+ 

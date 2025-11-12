@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Monitor, MonitorOff, Gamepad2 } from "lucide-react"
 import { createPortal } from 'react-dom';
-import { CosmicModal } from '../ui/cosmic-modal';
+ 
 import ShimmerButton from '../ui/shimmer-button';
+import { MultiPageModal } from '../ui/multi-page-modal';
 export interface ControlBarProps {
   showLeaveButton?: boolean;
   showScreenShare?: boolean;
@@ -110,10 +111,8 @@ export function ControlBar({ onToggleChat, isChatOpen, onToggleGame, isGameOpen 
   return (
     <div className="relative z-50 border-t border-white/10 bg-black/60 backdrop-blur-xl">
       <div className="mx-auto flex max-w-4xl items-center justify-center gap-3 p-4">
- 
-        <div id="cosmicModal"></div>
-    
-        {/* Microphone Toggle */}
+        <MultiPageModal />
+  {/* Microphone Toggle */}
         <Button
           onClick={toggleMicrophone}
           size="lg"

@@ -18,8 +18,8 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.65.0(react@19.2.0))
       '@legendapp/state':
-        specifier: 3.0.0-beta.31
-        version: 3.0.0-beta.31(react@19.2.0)
+        specifier: 3.0.0-beta.42
+        version: 3.0.0-beta.42(react@19.2.0)
       '@livekit/agents':
         specifier: ^0.7.9
         version: 0.7.9(@livekit/rtc-node@0.13.20)
@@ -809,8 +809,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@legendapp/state@3.0.0-beta.31':
-    resolution: {integrity: sha512-ejQHeBk3DEHOeF/j4/nX0W6uXiGQBOqQ5Ftfk10ReDpGzeC/GxF3Or31LG5qPcp3ZZweUBiVyqZqEtQefX4eKA==}
+  '@legendapp/state@3.0.0-beta.42':
+    resolution: {integrity: sha512-KoGZrBdbHG5gMzP4NjKRsGZgTyy6pG+HBSyKrniL6NLsjG8L+hbYC21tIfdMvt1Xks1kTRAaqevatc4C7Yn/Uw==}
     peerDependencies:
       expo-sqlite: ^15.0.0
     peerDependenciesMeta:
@@ -6652,7 +6652,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@legendapp/state@3.0.0-beta.31(react@19.2.0)':
+  '@legendapp/state@3.0.0-beta.42(react@19.2.0)':
     dependencies:
       use-sync-external-store: 1.6.0(react@19.2.0)
     transitivePeerDependencies:

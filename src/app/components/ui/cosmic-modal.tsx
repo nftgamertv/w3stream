@@ -1,5 +1,7 @@
 "use client"
 import { createPortal } from "react-dom"
+import type React from "react"
+
 import { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Button } from "@/components/ui/button"
@@ -9,10 +11,14 @@ import ShimmerButton from "./shimmer-button"
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'elevenlabs-convai': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & { 'agent-id'?: string }, HTMLElement>
+      "elevenlabs-convai": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { "agent-id"?: string },
+        HTMLElement
+      >
     }
   }
 }
+
 
 export function CosmicModal() {
   const [isOpen, setIsOpen] = useState(false)
@@ -28,84 +34,48 @@ export function CosmicModal() {
 
   useEffect(() => {
     setIsClient(true)
-    // Wait for the portal container to exist in the DOM
     const checkContainer = () => {
-      const container = document.getElementById('cosmicModal')
+      const container = document.getElementById("cosmicModal")
       if (container) {
         setPortalContainer(container)
       } else {
-        // If not found, check again on next frame
         requestAnimationFrame(checkContainer)
       }
     }
     checkContainer()
   }, [])
 
-  // Safety net: Force button to be visible when portal container mounts
-  useEffect(() => {
-    if (portalContainer && buttonRef.current && !isOpen) {
-      // Ensure button is visible and properly styled after portal mount
-      requestAnimationFrame(() => {
-        if (buttonRef.current) {
-          buttonRef.current.style.opacity = "1"
-          buttonRef.current.style.transform = "none"
-        }
-      })
-    }
-  }, [portalContainer, isOpen])    
-  // Aggressively ensure button is visible when modal is closed
   useEffect(() => {
     if (buttonRef.current && !isOpen) {
-      // NUCLEAR OPTION: Kill everything and reset completely
       gsap.killTweensOf(buttonRef.current)
-
-      // Clear ALL inline styles first
-      buttonRef.current.style.cssText = ""
-
-      // Force reset ALL transform properties explicitly
-      gsap.set(buttonRef.current, {
-        clearProps: "all"
-      })
-
-      // Now set the values we actually want
       gsap.set(buttonRef.current, {
         opacity: 1,
         scale: 1,
         rotation: 0,
         x: 0,
         y: 0,
+        clearProps: "transform,opacity",
       })
 
-      // Small delay to ensure reset happens before starting animations
-      const timeoutId = setTimeout(() => {
-        if (!buttonRef.current) return
+      const floatAnim = gsap.to(buttonRef.current, {
+        y: -10,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+      })
 
-        const floatAnim = gsap.to(buttonRef.current, {
-          y: -10,
-          duration: 2,
-          repeat: -1,
-          yoyo: true,
-          ease: "power1.inOut",
-        })
-
-        const glowAnim = gsap.to(buttonRef.current, {
-          boxShadow: "0 0 60px rgba(168, 85, 247, 0.8), 0 0 100px rgba(168, 85, 247, 0.4)",
-          duration: 1.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "power1.inOut",
-        })
-
-        // Store refs for cleanup
-        buttonRef.current.dataset.floatId = floatAnim.toString()
-        buttonRef.current.dataset.glowId = glowAnim.toString()
-      }, 50)
+      const glowAnim = gsap.to(buttonRef.current, {
+        boxShadow: "0 0 60px rgba(168, 85, 247, 0.8), 0 0 100px rgba(168, 85, 247, 0.4)",
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+      })
 
       return () => {
-        clearTimeout(timeoutId)
-        if (buttonRef.current) {
-          gsap.killTweensOf(buttonRef.current)
-        }
+        floatAnim.kill()
+        glowAnim.kill()
       }
     }
   }, [isOpen])
@@ -166,11 +136,10 @@ export function CosmicModal() {
 
     if (!modalRef.current || !overlayRef.current || !buttonRef.current || !contentRef.current) return
 
-    // Kill all button animations FIRST
-    gsap.killTweensOf(buttonRef.current)
-
     setIsOpen(true)
     createParticles()
+
+    gsap.killTweensOf(buttonRef.current)
 
     const tl = gsap.timeline()
 
@@ -249,27 +218,18 @@ export function CosmicModal() {
       gsap.killTweensOf(contentRef.current.children)
     }
 
-    // Kill any existing button animations immediately
-    gsap.killTweensOf(buttonRef.current)
-
     const tl = gsap.timeline({
       onComplete: () => {
-        // Triple-layer nuclear cleanup
         if (buttonRef.current) {
           gsap.killTweensOf(buttonRef.current)
-          buttonRef.current.style.cssText = ""
-          gsap.set(buttonRef.current, { clearProps: "all" })
-
-          // Force set correct values after clearing
           gsap.set(buttonRef.current, {
-            opacity: 1,
+            clearProps: "all",
             scale: 1,
+            opacity: 1,
             rotation: 0,
-            x: 0,
-            y: 0,
           })
+          buttonRef.current.style.cssText = ""
         }
-        // Update state after clearing
         setIsOpen(false)
       },
     })
@@ -291,16 +251,20 @@ export function CosmicModal() {
       "-=0.3",
     )
 
-    // Simpler button animation - less likely to leave artifacts
-    tl.to(
+    tl.fromTo(
       buttonRef.current,
       {
-        opacity: 1,
+        scale: 0,
+        rotation: 180,
+        opacity: 0,
+      },
+      {
         scale: 1,
         rotation: 0,
-        duration: 0.4,
-        ease: "power2.out",
-        overwrite: "auto", // GSAP will overwrite conflicting props
+        opacity: 1,
+        duration: 0.6,
+        ease: "elastic.out(1, 0.5)",
+        clearProps: "scale,rotation,opacity",
       },
       "-=0.2",
     )
@@ -327,7 +291,7 @@ export function CosmicModal() {
       <div className="fixed inset-0 flex items-center justify-center z-[80] pointer-events-none p-4">
         <div
           ref={glowRef}
-          className="absolute w-full h-full max-w-2xl max-h-[600px] "
+          className="absolute "
         />
 
         <div
@@ -350,19 +314,19 @@ export function CosmicModal() {
             </button>
 
             <div ref={contentRef} className="space-y-6">
-              {/* <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg shadow-violet-500/50">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold text-white text-balance">Absolutely Incredible Modal</h2>
-              </div> */}
+              </div>
 
-              {/* <p className="text-zinc-400 text-lg leading-relaxed">
+              <p className="text-zinc-400 text-lg leading-relaxed">
                 This modal features explosive particle effects, 3D transforms, magnetic cursor interactions, and
                 buttery-smooth GSAP animations that'll make your jaw drop.
-              </p> */}
+              </p>
 
-              {/* <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-500/5 border border-violet-500/20 backdrop-blur-sm group hover:scale-105 transition-transform duration-300">
                   <Zap className="w-8 h-8 text-violet-400 mb-2 group-hover:animate-pulse" />
                   <h3 className="text-white font-semibold mb-1">Lightning Fast</h3>
@@ -386,8 +350,8 @@ export function CosmicModal() {
                   <h3 className="text-white font-semibold mb-1">Smooth Easing</h3>
                   <p className="text-zinc-500 text-sm">Physics-based motion</p>
                 </div>
-              </div>*/}
-              <elevenlabs-convai agent-id="agent_5501k1z0sy9sevpr2wq6n95ndy7b"></elevenlabs-convai>
+              </div>
+
               <Button
                 onClick={closeModal}
                 className="w-full py-6 text-lg font-semibold bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-600 hover:from-violet-500 hover:via-fuchsia-500 hover:to-cyan-500 border-0 shadow-lg shadow-violet-500/50 hover:shadow-violet-500/70 hover:scale-105 transition-all duration-300"
@@ -405,25 +369,22 @@ export function CosmicModal() {
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-cyan-500/20 to-transparent blur-2xl" />
         </div>
       </div>
-{portalContainer && createPortal(
-        <ShimmerButton
-          ref={buttonRef}
-          onClick={openModal}
-          id="b"
-          disabled={isOpen}
-          className={`text-lg font-bold text-white bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-600 rounded-full shadow-lg border-2 border-white/20 hover:scale-110 hover:border-white/40 z-50 disabled:pointer-events-none ${
-            isOpen ? "pointer-events-none" : "pointer-events-auto"
-          }`}
-          style={{
-            boxShadow: "0 0 40px rgba(168, 85, 247, 0.6)",
-            // Force correct values when closed - GSAP can override these when animating
-            ...(isOpen ? {} : {
-              opacity: 1,
-            }),
-          }}
-        />,
-        portalContainer
-      )}
+
+      {portalContainer &&
+        createPortal(
+          <ShimmerButton
+            ref={buttonRef}
+            onClick={openModal}           
+            disabled={isOpen}
+            className={`text-lg font-bold text-white   ${
+              isOpen ? "opacity-0" : "opacity-100"
+            }`}
+            style={{
+              boxShadow: "0 0 40px rgba(168, 85, 247, 0.6)",
+            }}
+          />,
+          portalContainer,
+        )}
     </>
   )
 }

@@ -14,7 +14,7 @@ import {
   LazyThreeBackground,
   LazyVideoBackground,
   LazyLoginModalWrapper,
-  LazyCosmicModalWrapper,
+ 
 } from "./components/LazyComponents";
 import { SolanaProvider } from "./providers/SolanaProvider";
 
@@ -102,20 +102,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
         <Suspense fallback={null}>
           <ReactQueryProvider>
             {/* Lazy-loaded background components - render after initial page load */}
             <LazyThreeBackground />
             <LazyVideoBackground />
             <SolanaProvider>{children}</SolanaProvider> 
-    
+          <div id="modalRoot" className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2  z-50 isolate" />
           </ReactQueryProvider>
         </Suspense>
 
         {/* Lazy-loaded modal wrapper - only loads when needed */}
         <LazyLoginModalWrapper />
-        <LazyCosmicModalWrapper />
+ 
 
         {/* ElevenLabs ConvAI Widget Script - loads once for the entire app */}
         <Script
