@@ -11,36 +11,9 @@ import SectionSkeleton from "@/components/w3swap/SectionSkeleton"
 // Lazy load heavy components for better performance
 const DualPerspectiveTimeline = lazy(() => import("@/components/w3swap/DualPerspectiveTimeline"))
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "Service",
-  "name": "w3Swap",
-  "description": "Secure, transparent token migration service for Solana blockchain projects. Enables projects to migrate tokens, reclaim LP ownership, and rebuild momentum with instant liquidity.",
-  "provider": {
-    "@type": "Organization",
-    "name": "w3Swap",
-    "url": "https://w3stream.io/w3swap"
-  },
-  "areaServed": {
-    "@type": "Place",
-    "name": "Worldwide"
-  },
-  "serviceType": "Token Migration",
-  "category": "Blockchain Service",
-  "offers": {
-    "@type": "Offer",
-    "description": "Token migration solutions for Solana projects"
-  }
-}
-
 export default function W3SwapPage() {
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-      <main id="main-content">
+    <main id="main-content">
         <Breadcrumbs />
         <W3swapHero />
         <Suspense fallback={<SectionSkeleton />}>
