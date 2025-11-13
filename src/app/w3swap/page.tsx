@@ -15,21 +15,20 @@ export default function W3SwapPage() {
   return (
     <main id="main-content">
         <Breadcrumbs />
-        <W3swapHero />
+      <W3swapHero />
         <Suspense fallback={<SectionSkeleton />}>
-          <WhyMigrateSection />
+      <WhyMigrateSection />
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}>
-          <BenefitsSection />
+      <BenefitsSection />
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}>
-          <DualPerspectiveTimeline />
+      <DualPerspectiveTimeline />
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}>
-          <CTASection />
+      <CTASection />
         </Suspense>
-      </main>
-    </>
+    </main>
   )
 }
 
