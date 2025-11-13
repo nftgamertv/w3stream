@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowRight, Users, Building2, Shield, TrendingUp, Coins, Lock } from "lucide-react"
+import Link from "next/link"
+import { ArrowRight, Users, Building2, Shield, TrendingUp, Coins, Lock, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
@@ -434,10 +435,23 @@ export default function WhyMigrateSection() {
           viewport={{ once: true }}
           className="text-center"
         >
-          <Button className="btn-brand inline-flex items-center gap-2 text-lg px-8 py-6 group">
-            Learn How Migration Works
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link href="/w3swap/docs">
+              <Button className="btn-brand inline-flex items-center gap-2 text-lg px-8 py-6 group">
+                Learn How Migration Works
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link href="/w3swap/faq">
+              <Button 
+                variant="outline" 
+                className="border-cyan-500/50 text-cyan-400 hover:border-cyan-500/80 hover:bg-cyan-500/10 inline-flex items-center gap-2 text-lg px-8 py-6 group"
+              >
+                <HelpCircle className="w-5 h-5" />
+                FAQ
+              </Button>
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>
