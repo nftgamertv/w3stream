@@ -1,126 +1,111 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, Users, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { DotLottie } from "@lottiefiles/dotlottie-web"
 
 export default function W3swapHero() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
-    },
-  }
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const dotLottieRef = useRef<DotLottie | null>(null)
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] as const },
-    },
-  }
+  useEffect(() => {
+    if (!canvasRef.current) return
 
+    // Initialize DotLottie with the canvas
+    const dotLottie = new DotLottie({
+      canvas: canvasRef.current,
+      src: "/animations/crypto animation.lottie",
+      loop: true,
+      autoplay: true,
+    })
+
+    dotLottieRef.current = dotLottie
+
+    // Cleanup on unmount
+    return () => {
+      if (dotLottieRef.current) {
+        dotLottieRef.current.destroy()
+        dotLottieRef.current = null
+      }
+    }
+  }, [])
   return (
-    <section className="relative overflow-hidden py-12 px-4 bg-black">
+    <section className="relative overflow-hidden py-12 md:py-16 px-4 bg-black">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-500/10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
 
       {/* Floating orbs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div 
+        className="absolute top-20 right-10 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" 
+        style={{ willChange: "opacity", animation: "pulse 4s ease-in-out infinite", transform: "translateZ(0)" }} 
+      />
       <div
-        className="absolute bottom-10 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl pointer-events-none animate-pulse"
-        style={{ animationDelay: "1s" }}
+        className="absolute bottom-10 left-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"
+        style={{ willChange: "opacity", animation: "pulse 4s ease-in-out infinite 1s", transform: "translateZ(0)" }}
+      />
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-3xl pointer-events-none" 
+        style={{ willChange: "opacity", animation: "pulse 4s ease-in-out infinite 0.5s", transform: "translateZ(0)" }} 
       />
 
-      <motion.div
-        className="relative z-10 max-w-4xl mx-auto text-center pt-12 pb-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Badge */}
-        <motion.div variants={itemVariants}>
-          <Badge className="mb-8 glass-card border-slate-700 px-4 py-2">
-            <Sparkles className="w-4 h-4 text-cyan-500 mr-2" />
-            <span className="text-sm font-medium text-slate-400">Trusted by Web3 projects</span>
-          </Badge>
-        </motion.div>
+      <div className="relative z-10 max-w-[90rem] mx-auto">
+        <div className="grid lg:grid-cols-[1.2fr_0.8fr] xl:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 xl:gap-16 items-center">
+          
+          {/* Left: Text Content */}
+          <div className="text-center lg:text-left">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-tight mb-6 animate-fade-in-up">
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-teal-300 whitespace-nowrap">
+                Reclaim Control.
+              </span>
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-fuchsia-400 whitespace-nowrap">
+                Capture Fees.
+              </span>
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 whitespace-nowrap">
+                Relaunch Your Token.
+              </span>
+            </h1>
 
-        {/* Main heading */}
-        <motion.h1
-          variants={itemVariants}
-          className="text-5xl md:text-7xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 via-purple-500 to-teal-500 bg-clip-text text-transparent mb-6"
-        >
-          Token Migration Made Simple
-        </motion.h1>
+            <p className="text-lg md:text-xl text-slate-300 leading-relaxed mb-6 max-w-none mx-auto lg:mx-0 font-light animate-fade-in-up animation-delay-100">
+              w3Swap gives Solana communities the power to relaunch their tokens, reclaim LP ownership, and rebuild momentum.
+              <span className="block mt-2 text-cyan-400 whitespace-nowrap">
+                Migrate securely, recover liquidity, and bring your ecosystem back to life.
+              </span>
+            </p>
 
-        {/* Subtitle */}
-        <motion.p
-          variants={itemVariants}
-          className="text-lg md:text-xl text-slate-400 leading-relaxed mb-8 max-w-2xl mx-auto"
-        >
-          w3Swap provides secure, transparent, and efficient token migration solutions for blockchain projects. Move
-          your tokens with confidence.
-        </motion.p>
+            {/* Primary CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center animate-fade-in-up animation-delay-200">
+              <Link href="/w3swap/contact">
+                <Button className="btn-brand inline-flex items-center gap-2 group text-lg px-8 py-6 w-full sm:w-auto">
+                  <Users className="w-5 h-5" />
+                  Migrate Tokens
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link href="/w3swap/contact">
+                <Button variant="outline" className="border-purple-500/50 text-purple-400 hover:border-purple-500/80 hover:bg-purple-500/10 inline-flex items-center gap-2 group text-lg px-8 py-6 w-full sm:w-auto">
+                  <Settings className="w-5 h-5" />
+                  Start Migration
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+          </div>
 
-        {/* CTA Buttons */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link href="/w3swap/contact">
-            <Button className="btn-brand inline-flex items-center gap-2 group">
-              Start Your Migration
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-          <Link href="/w3swap/about">
-            <Button variant="outline" className="border-slate-700 text-cyan-500 hover:border-cyan-500/80">
-              Learn More
-            </Button>
-          </Link>
-        </motion.div>
-
-        {/* Stats - Commented out until we have real metrics */}
-        {/* 
-        <motion.div variants={itemVariants} className="mt-12 grid grid-cols-3 gap-8 pt-12 border-t border-slate-800">
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-cyan-500 mb-2">50+</div>
-            <p className="text-sm text-slate-400">Projects Migrated</p>
+          {/* Right: Visual Element */}
+          <div className="relative w-full flex items-center justify-center" style={{ opacity: 1 }}>
+            <div className="relative w-full aspect-square max-w-full">
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full"
+                style={{ filter: "drop-shadow(0 0 20px rgba(6, 182, 212, 0.3))" }}
+              />
+            </div>
           </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-purple-500 mb-2">$2B+</div>
-            <p className="text-sm text-slate-400">Tokens Migrated</p>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-teal-500 mb-2">100%</div>
-            <p className="text-sm text-slate-400">Security Record</p>
-          </div>
-        </motion.div>
-        */}
-
-        {/* Pre-launch value propositions */}
-        <motion.div variants={itemVariants} className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 pt-12 border-t border-slate-800">
-          <div className="text-center sm:text-left">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-500 mb-2">Secure</div>
-            <p className="text-xs sm:text-sm text-slate-400">Migration Process</p>
-          </div>
-          <div className="text-center sm:text-left">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-500 mb-2">Transparent</div>
-            <p className="text-xs sm:text-sm text-slate-400">Operations</p>
-          </div>
-          <div className="text-center sm:text-left">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-teal-500 mb-2">Decentralized</div>
-            <p className="text-xs sm:text-sm text-slate-400">Infrastructure</p>
-          </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   )
 }
-
-

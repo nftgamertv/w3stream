@@ -39,22 +39,19 @@ const phases: TimelinePhase[] = [
     icon: <Settings className="w-5 h-5" />,
     holderSteps: [
       "Discover migration project on main page",
-      "Review project details and migration terms",
+      "Review migration terms (ratio, eligibility lists, window timing)",
       "Check if wallet is eligible (allow, deny, or ratio list)",
-      "Verify exchange ratio and LP details",
-      "Receive project initialized notification",
-      "Wait for migration window to activate",
+      "View exchange ratio and initial LP information",
+      "Wait for the migration window to open",
     ],
     adminSteps: [
-      "Create token (new or import existing)",
+      "Create or import new token",
       "Define token parameters and authorities",
-      "Set minimum LP commitment and window span",
-      "Upload allow, deny, and ratio lists or provide snapshot",
-      "Set start time (limited future window)",
-      "Submit initialization and pay fees (2 SOL treasury, rent, accounts)",
-      "Create PDAs and initialize vaults",
-      "Seed vault with initial token supply",
-      "List project on main page with Initialized status",
+      "Choose LP commitment (minimum 5 SOL)",
+      "Set migration window (start time and duration)",
+      "Upload allow, deny, and ratio lists (or provide snapshot)",
+      "Submit initialization and pay required fees (2 SOL + rent)",
+      "Project appears as Initialized and not yet active",
     ],
   },
   {
@@ -62,24 +59,20 @@ const phases: TimelinePhase[] = [
     title: "Active Migration Window",
     icon: <Zap className="w-5 h-5" />,
     holderSteps: [
-      "Connect wallet and run eligibility check",
+      "Connect wallet and check eligibility",
       "Enter amount of old tokens to migrate",
-      "Sign transaction to swap tokens",
-      "Atomic swap: old tokens to new tokens",
-      "Receive new tokens instantly",
-      "Can participate multiple times while window is open",
-      "Receive window closing soon notice (optional)",
-      "View updated personal migration stats",
+      "Sign the migration transaction",
+      "Swap executes instantly (old tokens for new tokens)",
+      "May repeat migrations while the window is open",
+      "View migration progress and personal stats",
+      "May trade tokens immediately *** Thin liquidity until migration is completed ***"
     ],
     adminSteps: [
-      "Wait for declared start time to pass",
-      "Activate migration and fund new LP",
-      "Create or link LP with SOL commitment",
-      "Status updates to Active",
-      "Monitor migration progress and vault balance",
-      "Pause migration if vault runs low on supply",
-      "Send window closing soon notification",
-      "Window closes automatically at end time",
+      "Activate migration once the start time arrives",
+      "Fund the new LP with the chosen commitment",
+      "Monitor vault and LP balances during the window",
+      "Pause migration if token supply runs low",
+      "Migration window closes at the scheduled end time",
     ],
   },
   {
@@ -88,22 +81,17 @@ const phases: TimelinePhase[] = [
     icon: <TrendingUp className="w-5 h-5" />,
     holderSteps: [
       "Migration window is closed",
-      "Migrate button disabled on project page",
+      "Migration is disabled on the project page",
       "Waiting for settlement jobs to complete",
-      "Can view final migration stats after processing",
       "Settlement typically completes in 24 to 48 hours",
-      "Settlement complete notification incoming",
+      "Final migration stats become visible after processing",
+      "Trade with deeper liquidity in new LP",
     ],
     adminSteps: [
-      "Status changes to Closed",
-      "Create settlement batches from collected tokens",
-      "Sell old tokens through Jupiter in DCA chunks",
-      "Transfer 1 percent of captured SOL to Treasury",
-      "Add 99 percent of SOL proceeds to new LP",
-      "Add remaining new tokens or vault balances",
-      "Escrow LP tokens inside project vault",
-      "Status updates to Completed",
-      "Notify users and admin that settlement is completed",
+      "Review settlement progress as the system processes batches",
+      "Confirm old token sales and final SOL amounts",
+      "Review updated LP position and treasury distribution",
+      "Settlement completes and project status updates accordingly",
     ],
   },
   {
@@ -111,23 +99,11 @@ const phases: TimelinePhase[] = [
     title: "Lockup and Completion",
     icon: <Lock className="w-5 h-5" />,
     holderSteps: [
-      "Lockup period in progress (minimum 30 days)",
-      "LP tokens are escrowed and earning fees",
-      "New tokens in circulation on DEX",
-      "Can trade new tokens freely",
-      "Receive claim ready notification when lockup expires",
-      "Claim LP or rewards if allowed by project",
+      "New tokens freely tradable on DEX",
     ],
     adminSteps: [
-      "Lockup period begins based on Closed timestamp",
-      "After lockup, enable Claim window",
-      "Notify admin and users that Claim window is open",
-      "Admin claims LP tokens and remaining new tokens from vault",
-      "Transfer LP tokens to admin wallet",
-      "Transfer remaining new tokens to admin",
-      "Close empty token accounts to reclaim rent to Treasury",
-      "Optional: Archive project",
-      "Migration complete",
+      "Wait for lockup period to expire (minimum 30 days)",
+      "Claim LP tokens and remaining token balances",
     ],
   },
 ]
@@ -335,7 +311,7 @@ export default function DualPerspectiveTimeline() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <div className="max-w-3xl mx-auto" style={{ marginLeft: '30px' }}>
-              <div ref={contentRef} className="relative px-4 md:px-0 overflow-hidden">
+              <div ref={contentRef} className="relative px-4 md:px-0 overflow-visible">
             {/* dual spine - cyan for holders (left), purple for admin (right) */}
             {/* Cyan line for Token Holders (left boxes) */}
             <motion.div 
@@ -443,7 +419,9 @@ export default function DualPerspectiveTimeline() {
                   className={`relative mb-10 z-20 md:z-auto ${
                     isFirstCardOfPhase 
                       ? item.role === "admin" 
-                        ? "mt-28 pt-2" 
+                        ? item.phaseId === "setup"
+                          ? "mt-32 pt-8"
+                          : "mt-28 pt-2"
                         : "mt-16 pt-2"
                       : ""
                   }`}
@@ -452,7 +430,9 @@ export default function DualPerspectiveTimeline() {
                   {isFirstCardOfPhase ? (
                     <div 
                       ref={bubbleRef}
-                      className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none"
+                      className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none ${
+                        item.phaseId === "setup" ? "z-30" : "z-20"
+                      }`}
                       style={{
                         minWidth: "200px",
                         top: item.role === "admin" ? "-7rem" : "-4rem",
@@ -620,14 +600,25 @@ function ConnectorWithPulse({
   hasReached: any // MotionValue<boolean>
   role: "admin" | "holder"
 }) {
-  const [energized, setEnergized] = React.useState(false)
+  // Initialize state from current value to avoid render-phase updates
+  const [energized, setEnergized] = React.useState(() => {
+    try {
+      return hasReached?.get?.() ?? false
+    } catch {
+      return false
+    }
+  })
   const connectorColor = role === "admin" ? "#a855f7" : "#06b6d4" // purple for admin, cyan for holder
   const connectorColorRgb = role === "admin" ? "rgba(168,85,247," : "rgba(6,182,212,"
 
   React.useEffect(() => {
+    // Subscribe to changes after component has mounted
     const unsubscribe = hasReached.on("change", (latest) => {
       // Update energized state reactively - true when reached, false when not
-      setEnergized(latest)
+      // Use setTimeout to ensure this happens after the current render cycle
+      setTimeout(() => {
+        setEnergized(latest)
+      }, 0)
     })
     return () => unsubscribe()
   }, [hasReached])
@@ -958,27 +949,47 @@ function GlowCard({
         </div>
 
         <ul className="space-y-3">
-          {steps.map((step, stepIndex) => (
-            <motion.li
-              key={stepIndex}
-              initial={{ opacity: 0, x: isRight ? 8 : -8 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.25, delay: stepIndex * 0.04 }}
-              className="flex gap-3 text-sm text-slate-300"
-            >
-              <span
-                className={[
-                  "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5",
-                  role === "admin"
-                    ? "bg-purple-500/20 text-purple-200"
-                    : "bg-cyan-500/20 text-cyan-200",
-                ].join(" ")}
+          {steps.map((step, stepIndex) => {
+            // Check if step contains emphasized note with *** markers
+            const hasEmphasis = step.includes("***")
+            let mainText = step
+            let warningText = ""
+            
+            if (hasEmphasis) {
+              const parts = step.split("***")
+              mainText = parts[0].trim()
+              warningText = parts[1]?.trim() || ""
+            }
+            
+            return (
+              <motion.li
+                key={stepIndex}
+                initial={{ opacity: 0, x: isRight ? 8 : -8 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25, delay: stepIndex * 0.04 }}
+                className={`flex gap-3 text-sm ${hasEmphasis ? "items-start" : ""}`}
               >
-                {stepIndex + 1}
-              </span>
-              <span>{step}</span>
-            </motion.li>
-          ))}
+                <span
+                  className={[
+                    "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5",
+                    role === "admin"
+                      ? "bg-purple-500/20 text-purple-200"
+                      : "bg-cyan-500/20 text-cyan-200",
+                  ].join(" ")}
+                >
+                  {stepIndex + 1}
+                </span>
+                <span className={hasEmphasis ? "flex flex-col gap-1" : ""}>
+                  <span className="text-slate-300">{mainText}</span>
+                  {warningText && (
+                    <span className="text-yellow-400 font-semibold text-xs bg-yellow-500/10 px-2 py-1 rounded border border-yellow-500/30">
+                      ⚠️ {warningText}
+                    </span>
+                  )}
+                </span>
+              </motion.li>
+            )
+          })}
         </ul>
       </div>
     </motion.div>

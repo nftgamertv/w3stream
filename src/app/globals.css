@@ -1057,6 +1057,42 @@ input[type="file"]::file-selector-button:active {
     transform: translate(-5px, 5px);
   }
 }
+
+/* ============================================
+   HERO FADE-IN ANIMATIONS (CSS-only, instant load)
+   ============================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0; /* Start invisible, CSS animation makes it visible */
+}
+
+.animation-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* ============================================
    RESPONSIVE MEDIA QUERIES
    ============================================ */
@@ -1072,4 +1108,64 @@ input[type="file"]::file-selector-button:active {
   .video-element {
     /* Adjust video positioning for mobile if needed */
   }
+}
+
+/* Migration Animation Keyframes */
+@keyframes flowParticle {
+  0% { left: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 110%; opacity: 0; }
+}
+
+@keyframes flowWave {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+@keyframes flowWaveCurved {
+  0% { transform: translate(0%, -50%); }
+  20% { transform: translate(20%, -70%); }
+  50% { transform: translate(50%, -50%); }
+  80% { transform: translate(80%, -30%); }
+  100% { transform: translate(100%, -50%); }
+}
+
+@keyframes moveDot {
+  0% { transform: translate(0%, -50%); }
+  20% { transform: translate(20%, -70%); }
+  50% { transform: translate(50%, -50%); }
+  80% { transform: translate(80%, -30%); }
+  100% { transform: translate(100%, -50%); }
+}
+
+@keyframes flowToken {
+  0% { left: -5%; opacity: 0; transform: translateY(-50%) scale(0.8); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 105%; opacity: 0; transform: translateY(-50%) scale(1.2); }
+}
+
+@keyframes energyPulse {
+  0% { left: -60%; opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { left: 100%; opacity: 0.5; }
+}
+
+@keyframes pulseCenter {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+}
+
+@keyframes flowHighlight {
+  0% { left: -30%; opacity: 0; }
+  50% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes flowStack {
+  0% { left: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 110%; opacity: 0; }
 }

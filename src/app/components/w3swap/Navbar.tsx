@@ -21,7 +21,7 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800/40 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+    <header className="sticky top-0 z-[100] w-full border-b border-slate-800/40 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -36,7 +36,7 @@ export default function Navbar() {
             >
               Beta
             </Badge>
-          </div>
+            </div>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -64,13 +64,13 @@ export default function Navbar() {
           {/* Mobile Menu Button and Wallet */}
           <div className="md:hidden flex items-center gap-2">
             <WalletButton />
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-white"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
           </div>
         </div>
 
