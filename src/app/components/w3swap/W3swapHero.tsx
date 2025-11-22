@@ -87,7 +87,7 @@ export default function W3swapHero() {
               <Link href="/w3swap/contact" className="w-full sm:w-auto">
                 <Button variant="outline" className="border-purple-500/50 text-purple-400 hover:border-purple-500/80 hover:bg-purple-500/10 inline-flex items-center justify-center gap-2 group text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto">
                   <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Start Migration
+                  Plan Your Migration
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
@@ -96,7 +96,7 @@ export default function W3swapHero() {
 
           {/* Right: Visual Element */}
           <div className="relative w-full flex items-center justify-center order-1 lg:order-2 mb-6 lg:mb-0" style={{ opacity: 1 }}>
-            <div className="relative w-full max-w-[280px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-full aspect-square">
+            <div className="relative w-full max-w-[320px] sm:max-w-[460px] md:max-w-[560px] lg:max-w-full aspect-square">
               <canvas
                 ref={canvasRef}
                 className="w-full h-full"

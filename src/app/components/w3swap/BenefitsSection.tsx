@@ -53,7 +53,7 @@ const benefits = [
 
 export default function BenefitsSection() {
   return (
-    <section className="py-24 px-4 bg-gradient-to-b from-black via-slate-950/50 to-black relative">
+    <section className="py-12 px-4 bg-gradient-to-b from-black via-slate-950/50 to-black relative">
       <div className="max-w-6xl mx-auto">
         {/* Section heading */}
         <div className="text-center mb-16">

@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 export default function CTASection() {
   return (
-    <section className="py-24 px-4 relative overflow-hidden bg-black">
+    <section className="py-12 px-4 relative overflow-hidden bg-black">
       {/* Background elements */}
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-teal-500/10 pointer-events-none" />
 

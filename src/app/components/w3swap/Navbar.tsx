@@ -8,16 +8,21 @@ import { cn } from "@/lib/utils"
 import WalletButton from "./WalletButton"
 import { LogoGraphical } from "./Logo"
 import { Badge } from "@/components/ui/badge"
+import { useIsPlatformAdmin } from "@/lib/w3swap/roles"
 
 export default function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { isAdmin } = useIsPlatformAdmin()
 
   const navItems = [
     { href: "/w3swap", label: "Home" },
+    { href: "/w3swap/migrate", label: "Migrate" },
+    { href: "/w3swap/docs", label: "Docs" },
     { href: "/w3swap/faq", label: "FAQ" },
     { href: "/w3swap/about", label: "About" },
     { href: "/w3swap/contact", label: "Apply" },
+    ...(isAdmin ? [{ href: "/w3swap/admin", label: "Admin" }] : []),
   ]
 
   return (

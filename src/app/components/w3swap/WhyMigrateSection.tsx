@@ -126,7 +126,7 @@ export default function WhyMigrateSection() {
   }, [])
 
   return (
-    <section className="py-24 px-4 bg-gradient-to-b from-black via-slate-950/50 to-black relative overflow-hidden">
+    <section className="py-12 px-4 bg-gradient-to-b from-black via-slate-950/50 to-black relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-500/10 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
