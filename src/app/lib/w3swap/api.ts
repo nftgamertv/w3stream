@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { useQuery } from '@tanstack/react-query';
-import { getConnection, Project } from './anchor';
+import { getConnection, Project, UserMigration } from './anchor';
 import { W3SWAP_PROGRAM_ID } from './constants';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';

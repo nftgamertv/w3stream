@@ -18,11 +18,11 @@ export function createAnchorProviderFromWalletUi(
     signTransaction: async (tx: Transaction | VersionedTransaction): Promise<Transaction | VersionedTransaction> => {
       if (tx instanceof VersionedTransaction) {
         // For versioned transactions, use the wallet's sign method
-        const signed = await wallet.signTransaction(tx);
+        const signed = await (wallet as any).signTransaction(tx);
         return signed;
       } else {
         // For legacy transactions, convert and sign
-        const signed = await wallet.signTransaction(tx);
+        const signed = await (wallet as any).signTransaction(tx);
         return signed;
       }
     },

@@ -1,6 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { AnchorProvider, Program } from '@coral-xyz/anchor';
 import { W3SWAP_PROGRAM_ID, SOLANA_RPC_URL } from './constants';
+import type { W3swap } from '../../types/w3swap';
 
 // Types for our program
 // UI-facing types used throughout the app
@@ -38,13 +39,13 @@ export const getConnection = () => {
 // Get program instance - needs to be called with a provider
 // Note: This requires the IDL to be available. If IDL is not set up, this will throw.
 // To set up: Copy w3swap.json IDL to src/app/lib/w3swap/idl/w3swap.json
-export const getProgram = (provider: AnchorProvider): Program<any> => {
+export const getProgram = (provider: AnchorProvider): Program<W3swap> => {
   try {
     // Try to import IDL if available
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const idl = require('./idl/w3swap.json');
-    return new Program(idl, provider);
+    return new Program<W3swap>(idl as W3swap, provider);
   } catch (error) {
     // If IDL is not available, throw a helpful error
     throw new Error('Program initialization requires IDL. Please copy w3swap.json to src/app/lib/w3swap/idl/w3swap.json. Error: ' + (error instanceof Error ? error.message : String(error)));

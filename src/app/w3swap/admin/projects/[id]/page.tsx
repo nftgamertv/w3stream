@@ -46,7 +46,7 @@ export default function ProjectDetailPage() {
             </div>
             <div>
               <div className="text-slate-400">Events</div>
-              <div className="font-semibold text-teal-400">{analytics ? Object.values(analytics.event_counts || {}).reduce((a: any,b: any)=> (a as number) + (b as number), 0) : 0}</div>
+              <div className="font-semibold text-teal-400">{analytics ? (Object.values(analytics.event_counts || {}).reduce((a: any,b: any)=> (a as number) + (b as number), 0) as number) : 0}</div>
             </div>
           </CardContent>
         </Card>
