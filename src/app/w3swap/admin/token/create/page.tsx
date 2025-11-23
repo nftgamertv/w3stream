@@ -452,8 +452,8 @@ export default function CreateToken2022Page() {
       pushLog(`Metadata init: name='${name}', symbol='${symbol}', uri='${uri}'`);
 
       const initialUi = tokenConfig.initialSupply ? Number(tokenConfig.initialSupply) : 0;
-      const initialRaw = initialUi > 0 ? BigInt(Math.trunc(initialUi)) * pow10(decimals) : 0n;
-      if (initialRaw > 0n) {
+      const initialRaw = initialUi > 0 ? BigInt(Math.trunc(initialUi)) * pow10(decimals) : BigInt(0);
+      if (initialRaw > BigInt(0)) {
         const ata = await getAssociatedTokenAddress(
           mintKeypair.publicKey,
           mintAuthority,
@@ -487,7 +487,7 @@ export default function CreateToken2022Page() {
       pushLog('Submitting single transaction for mint + metadata...');
       
       // Sign transaction with wallet
-      const signedTx = await wallet.signTransaction(fullTx);
+      const signedTx = await (wallet as any).signTransaction(fullTx);
       const txSig = await connection.sendRawTransaction(signedTx.serialize());
       await connection.confirmTransaction(txSig, 'confirmed');
       
